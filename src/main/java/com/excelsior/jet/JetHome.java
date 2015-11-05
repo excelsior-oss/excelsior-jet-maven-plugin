@@ -18,7 +18,7 @@
  *  along with Excelsior JET Maven Plugin.
  *  If not, see <http://www.gnu.org/licenses/>.
  *
-*/
+ */
 package com.excelsior.jet;
 
 import java.io.File;
@@ -30,13 +30,13 @@ import java.io.File;
  */
 public class JetHome {
 
-	private static final int MIN_SUPPORTED_JET_VERSION = 1100;
+    private static final int MIN_SUPPORTED_JET_VERSION = 1100;
 
     private static String MARKER_FILE_PREFIX = "jet";
     private static String MARKER_FILE_SUFFIX = ".home";
 
     public static final String BIN_DIR = "bin";
-	private String jetHome;
+    private String jetHome;
 
     /**
      * @param jetHome jet home directory
@@ -64,51 +64,54 @@ public class JetHome {
         return getJetVersion(jetHome) >= MIN_SUPPORTED_JET_VERSION;
     }
 
-	private static void checkJetHome(String jetHome, String errorPrefix) throws JetHomeException {
-		if (!isJetDir(jetHome)) {
-			throw new JetHomeException(Txt.s("JetHome.BadJETHomeDir.Error", errorPrefix, jetHome));
-		}
-		if (!isSupportedJetVersion(jetHome)) {
-			throw new JetHomeException(Txt.s("JetHome.UnsupportedJETHomeDir.Error", errorPrefix, jetHome));
-		}
-	}
+    private static void checkJetHome(String jetHome, String errorPrefix) throws JetHomeException {
+        if (!isJetDir(jetHome)) {
+            throw new JetHomeException(Txt.s("JetHome.BadJETHomeDir.Error", errorPrefix, jetHome));
+        }
+        if (!isSupportedJetVersion(jetHome)) {
+            throw new JetHomeException(Txt.s("JetHome.UnsupportedJETHomeDir.Error", errorPrefix, jetHome));
+        }
+    }
 
-	/**
-	 * Constructs jet home object by given JET home directory.
-	 * 
-	 * @param jetHome jet home directory
-	 * @throws JetHomeException if supplied directory is not JET Directory or is not supported
-	 */
+    /**
+     * Constructs jet home object by given JET home directory.
+     * 
+     * @param jetHome jet home directory
+     * @throws JetHomeException if supplied directory is not JET Directory or is not supported
+     */
     public JetHome(String jetHome) throws JetHomeException {
-		checkJetHome(jetHome, "");
+        if (Utils.isUnix() && jetHome.startsWith("~/")) {
+            // expand "~/" on Unixes
+            jetHome = System.getProperty("user.home") + jetHome.substring(1);
+        }
+        checkJetHome(jetHome, "");
         this.jetHome = jetHome;
     }
 
-	private boolean trySetJetHome(String jetHome, String errorPrefix) throws JetHomeException {
-		if (!Utils.isEmpty(jetHome)) {
+    private boolean trySetJetHome(String jetHome, String errorPrefix) throws JetHomeException {
+        if (!Utils.isEmpty(jetHome)) {
             checkJetHome(jetHome, errorPrefix);
-			this.jetHome = jetHome;
-			return true;
-		}
-		return false;
-	}
+            this.jetHome = jetHome;
+            return true;
+        }
+        return false;
+    }
 
-	/**
-	 * Detects jet home directory by the following algorithm:
-	 *   - first it checks -Djet.home system property, if it is set, it takes jet home from it
-	 *   - then it checks JET_HOME environment variable, if it is set, it takes jet home from it
-	 *   - finally it scans PATH environment variable for appropriate jet home.
-	 *
-	 * @throws JetHomeException if -Djet.home or JET_HOME does not contain jet home,
-	 *                          or there no jet home in PATH
-	 */
+    /**
+     * Detects jet home directory by the following algorithm:
+     *   - first it checks -Djet.home system property, if it is set, it takes jet home from it
+     *   - then it checks JET_HOME environment variable, if it is set, it takes jet home from it 
+     *   - finally it scans PATH environment variable for appropriate jet home.
+     *
+     * @throws JetHomeException if -Djet.home or JET_HOME does not contain jet home, 
+     *                          or there no jet home in PATH
+     */
     public JetHome() throws JetHomeException {
-   		//try to detect jet home
-   		if (!trySetJetHome(System.getProperty("jet.home"), Txt.s("JetHome.ViaVMProp.Error.Prefix")) &&
-			!trySetJetHome(System.getenv("JET_HOME"), Txt.s("JetHome.ViaEnvVar.Error.Prefix")))
-		{
-			//try to detect jetHome via path
-			String path = System.getenv("PATH");
+        // try to detect jet home
+        if (!trySetJetHome(System.getProperty("jet.home"), Txt.s("JetHome.ViaVMProp.Error.Prefix"))
+                && !trySetJetHome(System.getenv("JET_HOME"), Txt.s("JetHome.ViaEnvVar.Error.Prefix"))) {
+            // try to detect jetHome via path
+            String path = System.getenv("PATH");
             for (String p : path.split(File.pathSeparator)) {
                 if (isJetBinDir(p)) {
                     String jetPath = new File(p).getParentFile().getAbsolutePath();
@@ -118,30 +121,28 @@ public class JetHome {
                     }
                 }
             }
-			throw new JetHomeException(Txt.s("JetHome.JetNotFound.Error"));
-		}
-	}
+            throw new JetHomeException(Txt.s("JetHome.JetNotFound.Error"));
+        }
+    }
 
     public String getJetHome() {
         return jetHome;
     }
 
     public String getJETBinDirectory() {
-   		return getJETBinDirectory(getJetHome());
-   	}
+        return getJETBinDirectory(getJetHome());
+    }
 
     private static boolean isJetBinDir(String jetBin) {
-    	return new File(jetBin, "jet.config").exists();
+        return new File(jetBin, "jet.config").exists();
     }
 
-	private static String getJETBinDirectory(String jetHome) {
-		return jetHome + File.separator + BIN_DIR;
-	}
+    private static String getJETBinDirectory(String jetHome) {
+        return jetHome + File.separator + BIN_DIR;
+    }
 
     private static boolean isJetDir(String jetHome) {
-    	return isJetBinDir(getJETBinDirectory(jetHome));
+        return isJetBinDir(getJETBinDirectory(jetHome));
     }
-
-
 
 }

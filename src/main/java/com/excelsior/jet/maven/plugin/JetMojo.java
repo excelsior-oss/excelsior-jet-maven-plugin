@@ -22,6 +22,9 @@
 package com.excelsior.jet.maven.plugin;
 
 import com.excelsior.jet.*;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.AbstractMojo;
@@ -33,8 +36,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
@@ -112,6 +114,30 @@ public class JetMojo extends AbstractMojo {
     private static final String LIB_DIR = "lib";
     private static final String PACKAGE_DIR = "app";
 
+    private static void compressZipfile(File sourceDir, File outputFile) throws IOException, FileNotFoundException {
+        ZipArchiveOutputStream zipFile = new ZipArchiveOutputStream(new FileOutputStream(outputFile));
+        compressDirectoryToZipfile(sourceDir.getAbsolutePath(), sourceDir.getAbsolutePath(), zipFile);
+        IOUtils.closeQuietly(zipFile);
+    }
+
+    private static void compressDirectoryToZipfile(String rootDir, String sourceDir, ZipArchiveOutputStream out) throws IOException, FileNotFoundException {
+        for (File file : new File(sourceDir).listFiles()) {
+            if (file.isDirectory()) {
+                compressDirectoryToZipfile(rootDir, sourceDir + File.separator + file.getName(), out);
+            } else {
+                ZipArchiveEntry entry = new ZipArchiveEntry(sourceDir.replace(rootDir, "")  + File.separator + file.getName());
+                if (Utils.isUnix() && file.canExecute()) {
+                    entry.setUnixMode(0777);
+                }
+                out.putArchiveEntry(entry);
+                FileInputStream in = new FileInputStream(sourceDir + File.separator +  file.getName());
+                IOUtils.copy(in, out);
+                IOUtils.closeQuietly(in);
+                out.closeArchiveEntry();
+            }
+        }
+    }
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         Txt.log = getLog();
 
@@ -138,13 +164,15 @@ public class JetMojo extends AbstractMojo {
             throw new MojoFailureException(e.getMessage());
         }
 
+        //always cleanup jet build directory
+        Utils.cleanDirectory(jetOutputDir);
+
         // creating output dirs
         File buildDir = new File(jetOutputDir, BUILD_DIR);
         buildDir.mkdirs();
         File libDir = new File(buildDir, LIB_DIR);
         libDir.mkdirs();
         File packageDir = new File(jetOutputDir, PACKAGE_DIR);
-        Utils.cleanDirectory(packageDir);
 
         // copying project dependencies
         ArrayList<String> compilerArgs = new ArrayList<>();
@@ -203,7 +231,7 @@ public class JetMojo extends AbstractMojo {
             if (zipOutput) {
                 getLog().info(s("JetMojo.ZipApp.Info"));
                 File targetZip = new File(jetOutputDir, build.getFinalName() + ".zip");
-                Utils.compressZipfile(packageDir, targetZip);
+                compressZipfile(packageDir, targetZip);
                 getLog().info(s("JetMojo.Build.Success"));
                 getLog().info(s("JetMojo.GetZip.Info", targetZip.getAbsolutePath()));
             } else {

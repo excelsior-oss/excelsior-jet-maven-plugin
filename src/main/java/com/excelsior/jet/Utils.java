@@ -18,27 +18,27 @@
  *  along with Excelsior JET Maven Plugin.
  *  If not, see <http://www.gnu.org/licenses/>.
  *
-*/
+ */
 package com.excelsior.jet;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class Utils {
 
     public static boolean isWindows() {
-    	return System.getProperty("os.name").contains("Windows");
+        return System.getProperty("os.name").contains("Windows");
     }
 
     public static boolean isLinux() {
-    	return System.getProperty("os.name").contains("Linux");
+        return System.getProperty("os.name").contains("Linux");
     }
 
     public static boolean isOSX() {
-    	return System.getProperty("os.name").contains("OS X");
+        return System.getProperty("os.name").contains("OS X");
+    }
+
+    public static boolean isUnix() {
+        return isLinux() || isOSX();
     }
 
     public static String getExeFileExtension() {
@@ -49,37 +49,18 @@ public class Utils {
         return exe + getExeFileExtension();
     }
 
-    public static void cleanDirectory(File f){
+    public static void cleanDirectory(File f) {
         if (f.isDirectory()) {
             File farr[] = f.listFiles();
-            if (farr == null) return;
-            for (int i=farr.length-1; i>=0; i--) cleanDirectory(farr[i]);
+            if (farr == null)
+                return;
+            for (int i = farr.length - 1; i >= 0; i--)
+                cleanDirectory(farr[i]);
         }
         f.delete();
     }
 
-    public static void compressZipfile(File sourceDir, File outputFile) throws IOException, FileNotFoundException {
-        ZipOutputStream zipFile = new ZipOutputStream(new FileOutputStream(outputFile));
-        compressDirectoryToZipfile(sourceDir.getAbsolutePath(), sourceDir.getAbsolutePath(), zipFile);
-        IOUtils.closeQuietly(zipFile);
-    }
-
-    private static void compressDirectoryToZipfile(String rootDir, String sourceDir, ZipOutputStream out) throws IOException, FileNotFoundException {
-        for (File file : new File(sourceDir).listFiles()) {
-            if (file.isDirectory()) {
-                compressDirectoryToZipfile(rootDir, sourceDir + File.separator + file.getName(), out);
-            } else {
-                ZipEntry entry = new ZipEntry(sourceDir.replace(rootDir, "")  + File.separator + file.getName());
-                out.putNextEntry(entry);
-
-                FileInputStream in = new FileInputStream(sourceDir + File.separator +  file.getName());
-                IOUtils.copy(in, out);
-                IOUtils.closeQuietly(in);
-            }
-        }
-    }
-
     public static boolean isEmpty(String s) {
-   		return (s == null) || s.isEmpty();
-   	}
+        return (s == null) || s.isEmpty();
+    }
 }
