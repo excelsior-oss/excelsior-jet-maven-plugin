@@ -31,7 +31,7 @@ public class JetPackager extends JetTool {
     static final String JET_PACKAGER = "xpack";
 
     public JetPackager(JetHome jetHome, String... args) {
-        super(jetHome, "xpack", args);
+        super(jetHome, JET_PACKAGER, args);
     }
 
     public JetPackager(String... args) throws JetHomeException {

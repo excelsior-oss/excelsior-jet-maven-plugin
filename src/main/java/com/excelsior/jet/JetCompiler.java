@@ -35,6 +35,6 @@ public class JetCompiler extends JetTool {
     }
 
     public JetCompiler(JetHome jetHome, String... args) {
-        super(jetHome, "jc", args);
+        super(jetHome, JET_COMPILER, args);
     }
 }
