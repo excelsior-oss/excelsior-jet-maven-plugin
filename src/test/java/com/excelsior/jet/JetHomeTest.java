@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -50,7 +51,7 @@ public class JetHomeTest {
     }
 
     @After
-    public void cleanup() {
+    public void cleanup() throws IOException {
         TestUtils.cleanFakeJetDir();
     }
 }

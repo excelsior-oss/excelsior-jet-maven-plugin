@@ -22,6 +22,11 @@
 package com.excelsior.jet;
 
 import java.io.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class Utils {
 
@@ -49,15 +54,41 @@ public class Utils {
         return exe + getExeFileExtension();
     }
 
-    public static void cleanDirectory(File f) {
-        if (f.isDirectory()) {
-            File farr[] = f.listFiles();
-            if (farr == null)
-                return;
-            for (int i = farr.length - 1; i >= 0; i--)
-                cleanDirectory(farr[i]);
-        }
-        f.delete();
+    public static void cleanDirectory(File f) throws IOException {
+        Files.walkFileTree(f.toPath(), new FileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                return FileVisitResult.CONTINUE;
+            }
+
+            private void deleteFile(File f) throws IOException {
+                if (!f.delete()) {
+                    if (f.exists()) {
+                        throw new IOException(Txt.s("Utils.CleanDirectory.Failed", f.getAbsolutePath()));
+                    }
+                }
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                deleteFile(file.toFile());
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                if (file.toFile().exists()) {
+                    throw new IOException(Txt.s("Utils.CleanDirectory.Failed", f.getAbsolutePath()));
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                deleteFile(dir.toFile());
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     public static boolean isEmpty(String s) {

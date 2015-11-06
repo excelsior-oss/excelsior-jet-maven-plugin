@@ -30,19 +30,19 @@ import java.io.File;
  */
 public class JetTool extends CmdLineTool {
 
-    private static String[] getNewArgs(JetHome jetHome, String exeName, String[] args) {
+    private static String[] prependCommand(JetHome jetHome, String tool, String[] args) {
         String newArgs[] = new String[args.length + 1];
         System.arraycopy(args, 0, newArgs, 1, args.length);
-        newArgs[0] = Utils.mangleExeName(jetHome.getJETBinDirectory() + File.separator + exeName);
+        newArgs[0] = Utils.mangleExeName(jetHome.getJetBinDirectory() + File.separator + tool);
         return newArgs;
     }
 
-    public JetTool(JetHome jetHome, String exeName, String... args) {
-        super(getNewArgs(jetHome, exeName, args));
+    public JetTool(JetHome jetHome, String tool, String... args) {
+        super(prependCommand(jetHome, tool, args));
         String path = System.getenv("PATH");
         //place itself to the start of path
-        path = jetHome.getJETBinDirectory() + File.pathSeparator + path;
-        withEnvironment("PATH=" + path);
+        path = jetHome.getJetBinDirectory() + File.pathSeparator + path;
+        withEnvironment("PATH", path);
     }
 
     public JetTool(String exeName, String... args) throws JetHomeException {

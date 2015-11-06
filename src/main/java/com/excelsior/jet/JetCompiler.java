@@ -28,8 +28,10 @@ package com.excelsior.jet;
  */
 public class JetCompiler extends JetTool {
 
+    static final String JET_COMPILER = "jc";
+
     public JetCompiler(String... args) throws JetHomeException {
-        super("jc", args);
+        super(JET_COMPILER, args);
     }
 
     public JetCompiler(JetHome jetHome, String... args) {

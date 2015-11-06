@@ -5,6 +5,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -19,7 +20,7 @@ public class JetPackagerTest {
     private Log log = mock(Log.class);
 
     @Test
-    public void testPackHelloWorld() throws CmdLineToolException, JetHomeException {
+    public void testPackHelloWorld() throws CmdLineToolException, JetHomeException, IOException {
         assertEquals(0,
                 new JetCompiler("testClasses/HelloWorld")
                 .workingDirectory(TestUtils.workDir())
@@ -39,7 +40,7 @@ public class JetPackagerTest {
     }
 
     @Test
-    public void createAndTestFakeJC() throws CmdLineToolException, JetHomeException {
+    public void createAndTestFakeJC() throws CmdLineToolException, JetHomeException, IOException {
         try {
             File classesDir = TestUtils.classesDir();
             assertEquals(0,
@@ -60,7 +61,7 @@ public class JetPackagerTest {
 
 
             new JetCompiler(new JetHome(TestUtils.getOrCreateFakeJetHome().getAbsolutePath()))
-                    .withEnvironment("JET_HOME=")
+                    .withEnvironment("JET_HOME", "")
                     .withLog(log).execute();
             verify(log).info("Ok");
         } finally {

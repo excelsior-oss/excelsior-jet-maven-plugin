@@ -114,14 +114,120 @@ public class JetMojo extends AbstractMojo {
     private static final String LIB_DIR = "lib";
     private static final String PACKAGE_DIR = "app";
 
-    private static void compressZipfile(File sourceDir, File outputFile) throws IOException, FileNotFoundException {
+    private JetHome checkPrerequisites(File mainJar) throws MojoFailureException {
+        // first check that main jar were built
+        if (!mainJar.exists()) {
+            getLog().error(s("JetMojo.MainJarNotFound.Error", mainJar.getAbsolutePath()));
+            throw new MojoFailureException(s("JetMojo.MainJarNotFound.Failure"));
+        }
+
+        // check main class
+        if (Utils.isEmpty(mainClass)) {
+            throw new MojoFailureException(s("JetMojo.MainNotSpecified.Failure"));
+        }
+
+        //normalize main and set outputName
+        mainClass = mainClass.replace('.', '/');
+        if (outputName == null) {
+            int lastSlash = mainClass.lastIndexOf('/');
+            outputName = lastSlash < 0 ? mainClass : mainClass.substring(lastSlash + 1);
+        }
+
+        // check and return jet home
+        try {
+            return Utils.isEmpty(jetHome)? new JetHome() : new JetHome(jetHome);
+        } catch (JetHomeException e) {
+            throw new MojoFailureException(e.getMessage());
+        }
+    }
+
+    private void mkdir(File dir) throws MojoExecutionException {
+        if (!dir.exists() && !dir.mkdirs()) {
+            if (!dir.exists()) {
+                throw new MojoExecutionException(s("JetMojo.DirCreate.Error", dir.getAbsolutePath()));
+            }
+            getLog().warn(s("JetMojo.DirCreate.Warning", dir.getAbsolutePath()));
+        }
+
+    }
+
+    private void copyDependency(File from, File to, File buildDir, ArrayList<String> dependencies) {
+        try {
+            if (!to.exists()) {
+                Files.copy(from.toPath(), to.toPath());
+            }
+            dependencies.add(buildDir.toPath().relativize(to.toPath()).toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Copies project dependencies.
+     *
+     * @return list of dependencies relative to buildDir
+     */
+    private ArrayList<String> copyDependencies(File buildDir, File mainJar) throws MojoExecutionException {
+        File libDir = new File(buildDir, LIB_DIR);
+        mkdir(libDir);
+        ArrayList<String> dependencies = new ArrayList<>();
+        try {
+            copyDependency(mainJar, new File(buildDir, mainJar.getName()), buildDir, dependencies);
+            project.getArtifacts().stream()
+                    .map(Artifact::getFile)
+                    .filter(File::isFile)
+                    .forEach(f -> copyDependency(f, new File(libDir, f.getName()), buildDir, dependencies))
+            ;
+            return dependencies;
+        } catch (Exception e) {
+            throw new MojoExecutionException(s("JetMojo.ErrorCopyingDependency.Exception"), e);
+        }
+    }
+
+    /**
+     * Compiles application with AOT compiler.
+     */
+    private void compile(JetHome jetHome, File buildDir, ArrayList<String> compilerArgs) throws MojoFailureException, CmdLineToolException {
+        if (Utils.isWindows()) {
+            if (icon.isFile()) {
+                compilerArgs.add(icon.getAbsolutePath());
+            }
+            if (hideConsole) {
+                compilerArgs.add("-gui+");
+            }
+        }
+        compilerArgs.add("-main=" + mainClass);
+        compilerArgs.add("-outputname=" + outputName);
+        compilerArgs.add("-decor=ht");
+        if (new JetCompiler(jetHome, compilerArgs.toArray(new String[compilerArgs.size()]))
+                .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
+            throw new MojoFailureException(s("JetMojo.Build.Failure"));
+        }
+    }
+
+    /**
+     * Package built executable with required Excelsior JET runtime files
+     * into a self-contained directory
+     */
+    private void pack(JetHome jetHome, File buildDir, File packageDir) throws CmdLineToolException, MojoFailureException {
+        if (new JetPackager(jetHome,
+                 "-add-file", Utils.mangleExeName(outputName), "/",
+                 "-target", packageDir.getAbsolutePath())
+                .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
+            throw new MojoFailureException(s("JetMojo.Package.Failure"));
+        }
+    }
+
+    private static void compressZipfile(File sourceDir, File outputFile) throws IOException {
         ZipArchiveOutputStream zipFile = new ZipArchiveOutputStream(new FileOutputStream(outputFile));
         compressDirectoryToZipfile(sourceDir.getAbsolutePath(), sourceDir.getAbsolutePath(), zipFile);
         IOUtils.closeQuietly(zipFile);
     }
 
-    private static void compressDirectoryToZipfile(String rootDir, String sourceDir, ZipArchiveOutputStream out) throws IOException, FileNotFoundException {
-        for (File file : new File(sourceDir).listFiles()) {
+    private static void compressDirectoryToZipfile(String rootDir, String sourceDir, ZipArchiveOutputStream out) throws IOException {
+        File[] files = new File(sourceDir).listFiles();
+        assert files != null;
+        for (File file : files) {
             if (file.isDirectory()) {
                 compressDirectoryToZipfile(rootDir, sourceDir + File.separator + file.getName(), out);
             } else {
@@ -138,109 +244,48 @@ public class JetMojo extends AbstractMojo {
         }
     }
 
+    private void finishBuild(File packageDir) throws IOException {
+        if (zipOutput) {
+            getLog().info(s("JetMojo.ZipApp.Info"));
+            File targetZip = new File(jetOutputDir, project.getBuild().getFinalName() + ".zip");
+            compressZipfile(packageDir, targetZip);
+            getLog().info(s("JetMojo.Build.Success"));
+            getLog().info(s("JetMojo.GetZip.Info", targetZip.getAbsolutePath()));
+        } else {
+            getLog().info(s("JetMojo.Build.Success"));
+            getLog().info(s("JetMojo.GetDir.Info", packageDir.getAbsolutePath()));
+        }
+    }
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         Txt.log = getLog();
 
-        // checking prerequisites
-
-        // first check that main jar were built
         Build build = project.getBuild();
-        File jar = new File(build.getDirectory(), build.getFinalName() + ".jar");
-        if (!jar.exists()) {
-            getLog().error(s("JetMojo.MainJarNotFound.Error", jar.getAbsolutePath()));
-            throw new MojoFailureException(s("JetMojo.MainJarNotFound.Failure"));
-        }
+        File mainJar = new File(build.getDirectory(), build.getFinalName() + ".jar");
 
-        // check main class
-        if (Utils.isEmpty(mainClass)) {
-            throw new MojoFailureException(s("JetMojo.MainNotSpecified.Failure"));
-        }
-
-        // check jet home
-        JetHome jetHomeObj;
-        try {
-            jetHomeObj = Utils.isEmpty(jetHome)? new JetHome() : new JetHome(jetHome);
-        } catch (JetHomeException e) {
-            throw new MojoFailureException(e.getMessage());
-        }
-
-        //always cleanup jet build directory
-        Utils.cleanDirectory(jetOutputDir);
+        JetHome jetHome = checkPrerequisites(mainJar);
 
         // creating output dirs
         File buildDir = new File(jetOutputDir, BUILD_DIR);
-        buildDir.mkdirs();
-        File libDir = new File(buildDir, LIB_DIR);
-        libDir.mkdirs();
+        mkdir(buildDir);
         File packageDir = new File(jetOutputDir, PACKAGE_DIR);
-
-        // copying project dependencies
-        ArrayList<String> compilerArgs = new ArrayList<>();
+        //cleanup packageDir
         try {
-            Files.copy(jar.toPath(), new File(buildDir, jar.getName()).toPath());
-            compilerArgs.add(jar.getName());
-            for (Artifact artifact: project.getArtifacts()) {
-                File file = artifact.getFile();
-                if (file.isFile()) {
-                    File dest = new File(libDir, file.getName());
-                    if (!dest.exists()) {
-                        Files.copy(file.toPath(), dest.toPath());
-                    }
-                    compilerArgs.add(LIB_DIR + "/" + file.getName());
-                }
-            }
+            Utils.cleanDirectory(packageDir);
         } catch (IOException e) {
-            throw new MojoExecutionException(s("JetMojo.ErrorCopyingDependency.Exception"), e);
+            throw new MojoFailureException(e.getMessage(), e);
         }
 
-        mainClass = mainClass.replace('.', '/');
-        if (outputName == null) {
-            int lastSlash = mainClass.lastIndexOf('/');
-            outputName = lastSlash < 0 ? mainClass : mainClass.substring(lastSlash + 1);
-        }
+        ArrayList<String> compilerArgs = copyDependencies(buildDir, mainJar);
 
         try {
-            // compiling application with AOT compiler
-            if (Utils.isWindows()) {
-                if (icon.isFile()) {
-                    compilerArgs.add(icon.getAbsolutePath());
-                }
-                if (hideConsole) {
-                    compilerArgs.add("-gui+");
-                }
-            }
-            compilerArgs.add("-main=" + mainClass);
-            compilerArgs.add("-outputname=" + outputName);
-            compilerArgs.add("-decor=ht");
-            if (new JetCompiler(jetHomeObj, compilerArgs.toArray(new String[compilerArgs.size()]))
-                    .workingDirectory(buildDir).withLog(getLog()).execute() != 0)
-            {
-                throw new MojoFailureException(s("JetMojo.Build.Failure"));
-            }
+            compile(jetHome, buildDir, compilerArgs);
 
-            // packaging built executable with required Excelsior JET runtime files
-            // into a self-contained directory
-            if (new JetPackager(jetHomeObj,
-                    "-add-file", Utils.mangleExeName(outputName), "/",
-                    "-target", packageDir.getAbsolutePath())
-                    .workingDirectory(buildDir).withLog(getLog()).execute() != 0)
-            {
-                throw new MojoFailureException(s("JetMojo.Package.Failure"));
-            }
+            pack(jetHome, buildDir, packageDir);
 
-            if (zipOutput) {
-                getLog().info(s("JetMojo.ZipApp.Info"));
-                File targetZip = new File(jetOutputDir, build.getFinalName() + ".zip");
-                compressZipfile(packageDir, targetZip);
-                getLog().info(s("JetMojo.Build.Success"));
-                getLog().info(s("JetMojo.GetZip.Info", targetZip.getAbsolutePath()));
-            } else {
-                getLog().info(s("JetMojo.Build.Success"));
-                getLog().info(s("JetMojo.GetDir.Info", packageDir.getAbsolutePath()));
-            }
+            finishBuild(packageDir);
 
-
-        } catch (CmdLineToolException | IOException e) {
+        } catch (Exception e) {
             getLog().error(e.getMessage());
             throw new MojoExecutionException(s("JetMojo.Unexpected.Error"), e);
         }

@@ -51,7 +51,7 @@ public class CmdLineToolTest {
         assertEquals(0,
                 new CmdLineTool(getJavaExe(), "testClasses/PrintEnv", "PATH")
                 .withLog(log)
-                .withEnvironment("PATH=EmptyPath")
+                .withEnvironment("PATH", "EmptyPath")
                 .workingDirectory(TestUtils.workDir())
                 .execute());
         verify(log).info("EmptyPath");

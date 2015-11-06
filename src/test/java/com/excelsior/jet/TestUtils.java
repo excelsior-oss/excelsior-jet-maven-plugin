@@ -48,6 +48,14 @@ public class TestUtils {
         try {
             new File(fakeJetHomeBin, "jet.config").createNewFile();
             new File(fakeJetHomeBin, "jet" + version + ".home").createNewFile();
+            File jc = new File(fakeJetHomeBin, Utils.mangleExeName(JetCompiler.JET_COMPILER));
+            if (!jc.exists()) {
+                jc.createNewFile();
+            }
+            File xpack = new File(fakeJetHomeBin, Utils.mangleExeName(JetPackager.JET_PACKAGER));
+            if (!xpack.exists()) {
+                xpack.createNewFile();
+            }
         } catch (IOException ignore) {
         }
         return fakeJetHome;
@@ -57,7 +65,7 @@ public class TestUtils {
         return getOrCreateFakeJetHome("1100");
     }
 
-    public static void cleanFakeJetDir() {
+    public static void cleanFakeJetDir() throws IOException {
         Utils.cleanDirectory(new File(workDir(), FAKE_JET_HOME));
     }
 }

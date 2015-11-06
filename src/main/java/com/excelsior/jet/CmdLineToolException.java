@@ -24,7 +24,7 @@ package com.excelsior.jet;
 /**
  * @author Nikita Lipsky
  */
-public class CmdLineToolException extends Throwable {
+public class CmdLineToolException extends Exception {
 
     public CmdLineToolException(Exception e) {
         super(e);

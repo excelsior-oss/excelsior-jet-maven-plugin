@@ -51,6 +51,7 @@ public class JetHome {
             String fname = f.getName();
             if (fname.startsWith(MARKER_FILE_PREFIX) && fname.endsWith(MARKER_FILE_SUFFIX)) {
                 try {
+                     // expected file name: jet<version>.home
                     return Integer.parseInt(fname.substring(MARKER_FILE_PREFIX.length(), fname.length() - MARKER_FILE_SUFFIX.length()));
                 } catch (NumberFormatException e) {
                     return -1;
@@ -129,20 +130,21 @@ public class JetHome {
         return jetHome;
     }
 
-    public String getJETBinDirectory() {
-        return getJETBinDirectory(getJetHome());
+    public String getJetBinDirectory() {
+        return getJetBinDirectory(getJetHome());
     }
 
     private static boolean isJetBinDir(String jetBin) {
-        return new File(jetBin, "jet.config").exists();
+        return new File(jetBin, "jet.config").exists() &&
+               new File(jetBin, Utils.mangleExeName(JetCompiler.JET_COMPILER)).exists() &&
+               new File(jetBin, Utils.mangleExeName(JetPackager.JET_PACKAGER)).exists() ;
     }
 
-    private static String getJETBinDirectory(String jetHome) {
+    private static String getJetBinDirectory(String jetHome) {
         return jetHome + File.separator + BIN_DIR;
     }
 
     private static boolean isJetDir(String jetHome) {
-        return isJetBinDir(getJETBinDirectory(jetHome));
+        return isJetBinDir(getJetBinDirectory(jetHome));
     }
-
 }

@@ -1,6 +1,5 @@
 package com.excelsior.jet;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Test;
 
@@ -33,7 +32,7 @@ public class JetCompilerTest {
                         .execute());
         File exe = new File(TestUtils.workDir(), Utils.mangleExeName("HelloWorld"));
         assertTrue(exe.exists());
-        new CmdLineTool(exe.getAbsolutePath()).withEnvironment("PATH=" + jetHome.getJETBinDirectory())
+        new CmdLineTool(exe.getAbsolutePath()).withEnvironment("PATH", jetHome.getJetBinDirectory())
                 .withLog(log).workingDirectory(TestUtils.workDir()).execute();
         verify(log).info("Hello world!");
         exe.delete();

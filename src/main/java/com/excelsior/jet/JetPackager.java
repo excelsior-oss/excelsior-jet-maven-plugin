@@ -28,11 +28,13 @@ package com.excelsior.jet;
  */
 public class JetPackager extends JetTool {
 
+    static final String JET_PACKAGER = "xpack";
+
     public JetPackager(JetHome jetHome, String... args) {
         super(jetHome, "xpack", args);
     }
 
     public JetPackager(String... args) throws JetHomeException {
-        super("xpack", args);
+        super(JET_PACKAGER, args);
     }
 }

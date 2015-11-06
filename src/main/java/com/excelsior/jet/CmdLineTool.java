@@ -53,20 +53,17 @@ public class CmdLineTool {
         return this;
     }
 
-    public CmdLineTool withEnvironment(String env) {
-        int pos = env.indexOf('=');
-        if (pos < 0) throw new IllegalArgumentException();
-        String key = env.substring(0, pos);
-        this.env.put(Utils.isWindows() ? key.toUpperCase() : key, env.substring(pos+1));
+    public CmdLineTool withEnvironment(String var, String val) {
+        this.env.put(Utils.isWindows() ? var.toUpperCase() : var, val);
         return this;
     }
 
-    private class OutputReader extends Thread{
+    private class OutputReader extends Thread {
 
         BufferedReader reader;
         boolean err;
 
-        OutputReader(InputStream stream, boolean err){
+        OutputReader(InputStream stream, boolean err) {
             this.reader = new BufferedReader(new InputStreamReader(stream));
             this.err = err;
         }
@@ -75,6 +72,7 @@ public class CmdLineTool {
             try {
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    if (isInterrupted()) return;
                     if (log != null) {
                         if (err) {
                             log.error(line);
@@ -83,7 +81,7 @@ public class CmdLineTool {
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException ignore) {
             }
         }
     }
