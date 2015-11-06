@@ -63,6 +63,13 @@ public class JetMojo extends AbstractMojo {
     private String mainClass;
 
     /**
+     * The main application jar.
+     * By default main project artifact is taken that should be jar file.
+     */
+    @Parameter(property = "mainJar", defaultValue = "${project.build.directory}/${project.build.finalName}.jar")
+    private File mainJar;
+
+    /**
      * Excelsior JET installation directory.
      * If it is not specified, it is detected by the following algorithm:
      * <ul>
@@ -114,7 +121,7 @@ public class JetMojo extends AbstractMojo {
     private static final String LIB_DIR = "lib";
     private static final String PACKAGE_DIR = "app";
 
-    private JetHome checkPrerequisites(File mainJar) throws MojoFailureException {
+    private JetHome checkPrerequisites() throws MojoFailureException {
         // first check that main jar were built
         if (!mainJar.exists()) {
             getLog().error(s("JetMojo.MainJarNotFound.Error", mainJar.getAbsolutePath()));
@@ -260,10 +267,7 @@ public class JetMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         Txt.log = getLog();
 
-        Build build = project.getBuild();
-        File mainJar = new File(build.getDirectory(), build.getFinalName() + ".jar");
-
-        JetHome jetHome = checkPrerequisites(mainJar);
+        JetHome jetHome = checkPrerequisites();
 
         // creating output dirs
         File buildDir = new File(jetOutputDir, BUILD_DIR);
