@@ -100,10 +100,11 @@ public class JetHome {
 
     /**
      * Detects jet home directory by the following algorithm:
-     *   - first it checks -Djet.home system property, if it is set, it takes jet home from it
-     *   - then it checks JET_HOME environment variable, if it is set, it takes jet home from it 
-     *   - finally it scans PATH environment variable for appropriate jet home.
-     *
+     * <ul>
+     *   <li> first it checks -Djet.home system property, if it is set, it takes jet home from it </li>
+     *   <li> then it checks JET_HOME environment variable, if it is set, it takes jet home from it </li>
+     *   <li> finally it scans PATH environment variable for appropriate jet home</li>
+     * </ul>
      * @throws JetHomeException if -Djet.home or JET_HOME does not contain jet home, 
      *                          or there no jet home in PATH
      */

@@ -26,7 +26,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.model.Build;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -60,14 +59,14 @@ public class JetMojo extends AbstractMojo {
      * The main application class.
      */
     @Parameter(property = "mainClass", required = true)
-    private String mainClass;
+    protected String mainClass;
 
     /**
      * The main application jar.
      * By default main project artifact is taken that should be jar file.
      */
     @Parameter(property = "mainJar", defaultValue = "${project.build.directory}/${project.build.finalName}.jar")
-    private File mainJar;
+    protected File mainJar;
 
     /**
      * Excelsior JET installation directory.
@@ -79,43 +78,44 @@ public class JetMojo extends AbstractMojo {
      * </ul>
      */
     @Parameter(property = "jetHome", defaultValue = "${jet.home}")
-    private String jetHome;
+    protected String jetHome;
 
     /**
      * Directory for Excelsior JET temporary files build process
      * and the target directory for resulting package.
-     * <p/>
+     * <p>
      * "app" subdirectory of jetOutputDir will contain the final self-contained package
      * that you may deploy to another PCs by simple copy operation.
-     * For convenience, "${project.build.finalName}.zip" is also created that is ZIP archive
-     * of "app" directory, if 'zipOutput' property is set to {@code true}.
+     * For convenience, {@code ${project.build.finalName}.zip} is also created that is ZIP archive
+     * of "app" directory, if {@code zipOutput} property is set to {@code true}.
      */
     @Parameter(property = "jetOutputDir", defaultValue = "${project.build.directory}/jet")
-    private File jetOutputDir;
+    protected File jetOutputDir;
 
     /**
      * Target executable name. If not set, the main class name is used for executable name.
      */
     @Parameter(property = "outputName")
-    private String outputName;
+    protected String outputName;
 
     /**
      * Windows .ico file to associate with resulting executable file.
      */
     @Parameter(property = "icon", defaultValue = "${project.basedir}/src/main/jetresources/icon.ico")
-    private File icon;
+    protected File icon;
 
     /**
      * If set to {@code true} the resulting executable file will not show console on Windows.
      */
     @Parameter(property = "hideConsole")
-    boolean hideConsole;
+    protected boolean hideConsole;
 
     /**
-     * Controls creating zip archive containing self-contained package as the final step of build process.
+     * If set to {@code true}, zip archive containing self-contained package will be created
+     * as the final step of build process.
      */
     @Parameter(property = "zipOutput", defaultValue = "true")
-    private boolean zipOutput;
+    protected boolean zipOutput;
 
     private static final String BUILD_DIR = "build";
     private static final String LIB_DIR = "lib";

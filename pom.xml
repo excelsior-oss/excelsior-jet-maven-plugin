@@ -7,15 +7,62 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
-  <name>excelsior-jet-maven-plugin Maven Plugin</name>
+  <name>Excelsior JET Maven Plugin</name>
 
-  <!-- FIXME change it to the project's website -->
-  <url>http://maven.apache.org</url>
+  <!--<url>http://www.excelsiorjet.com/maven-plugin</url>-->
+  <url>https://github.com/${github-repo-owner}/${github-repo}</url>
+  <description>
+    Excelsior JET Maven Plugin provides a way of building Java (JVM-based) applications
+    with Excelsior JET Java-To-Native-Code AOT compiler from within Maven
+  </description>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License</name>
+      <url>http://www.gnu.org/licenses/gpl.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>pjBooms</id>
+      <name>Nikita Lipsky</name>
+    </developer>
+    <developer>
+      <id>aleksey-zhidkov</id>
+      <name>Alexey Zhidkov</name>
+    </developer>
+    <developer>
+      <id>dleskov</id>
+      <name>Dmitry Leskov</name>
+    </developer>
+  </developers>
+
+  <scm>
+      <connection>scm:git:https://github.com/${github-repo-owner}/${github-repo}.git</connection>
+      <developerConnection>scm:git:https://github.com/${github-repo-owner}/${github-repo}.git</developerConnection>
+      <url>https://github.com/${github-repo-owner}/${github-repo}</url>
+      <tag>HEAD</tag>
+  </scm>
+
+  <issueManagement>
+      <system>GitHub</system>
+      <url>https://github.com/${github-repo-owner}/${github-repo}/issues</url>
+  </issueManagement>
+
+  <distributionManagement>
+      <snapshotRepository>
+          <id>ossrh</id>
+          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      </snapshotRepository>
+  </distributionManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.source>1.8</maven.compiler.source>
+    <github-repo-owner>excelsior-oss</github-repo-owner>
+    <github-repo>excelsior-jet-maven-plugin</github-repo>
   </properties>
 
   <dependencies>
@@ -123,4 +170,78 @@
           </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+
+          <!-- Produces sources -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>2.2.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- Produces docs -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.9.1</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- Signs resulting artifacts -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- Deploys results -->
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.3</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

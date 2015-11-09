@@ -9,13 +9,7 @@ import java.util.*;
  * {@code 
  * <id> = <value>
  * }
- * or
- * {@code
- * <id>.<os> = <value>
- * }
- * <br/>
- * 
- * Values are either plain strings or format strings eligible for {@code pattern} argument 
+ * Values are either plain strings or format strings eligible for {@code pattern} argument
  * of {@link MessageFormat#format(String, Object...)}
  *
  */
@@ -24,7 +18,8 @@ public class Messages {
     private final ResourceBundle messageRB;
 
     /**
-     * Constructs an instance for {@code Strings.properties} resource with given name
+     * Constructs an instance for {@code Strings.properties} resource with given name.
+     * @param resourceName Strings.properties resource
      */
     public Messages(String resourceName) {
         messageRB = ResourceBundle.getBundle(resourceName);
@@ -37,7 +32,10 @@ public class Messages {
 
     /**
      * Obtains string with given {@code id} and formats it using given {@code params}.
-     * Returns null if there is no such string.
+     * @param id key value in Strings.properties
+     * @param params optional parameters to be expanded
+     *
+     * @return formatted resources string or {@code null} if there is no such string.
      */
     public String format(String id, Object ... params) {
         String str = getStringIfExists(id);
@@ -51,7 +49,7 @@ public class Messages {
     /**
      * @return string with given {@code id}, or {@code null} if it does not exist
      */
-    public String getStringIfExists(String id) {
+    private String getStringIfExists(String id) {
         String s;
         try {
             s = messageRB.getString(id);
