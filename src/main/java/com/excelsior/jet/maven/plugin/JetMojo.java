@@ -225,8 +225,9 @@ public class JetMojo extends AbstractMojo {
         }
     }
 
-    private static void compressZipfile(File sourceDir, File outputFile) throws IOException {
-        ZipArchiveOutputStream zipFile = new ZipArchiveOutputStream(new FileOutputStream(outputFile));
+    static void compressZipfile(File sourceDir, File outputFile) throws IOException {
+        ZipArchiveOutputStream zipFile = new ZipArchiveOutputStream(
+                new BufferedOutputStream(new FileOutputStream(outputFile)));
         compressDirectoryToZipfile(sourceDir.getAbsolutePath(), sourceDir.getAbsolutePath(), zipFile);
         IOUtils.closeQuietly(zipFile);
     }
@@ -238,12 +239,12 @@ public class JetMojo extends AbstractMojo {
             if (file.isDirectory()) {
                 compressDirectoryToZipfile(rootDir, sourceDir + File.separator + file.getName(), out);
             } else {
-                ZipArchiveEntry entry = new ZipArchiveEntry(sourceDir.replace(rootDir, "")  + File.separator + file.getName());
+                ZipArchiveEntry entry = new ZipArchiveEntry(file.getAbsolutePath().substring(rootDir.length()+1));
                 if (Utils.isUnix() && file.canExecute()) {
-                    entry.setUnixMode(0777);
+                    entry.setUnixMode(0100777);
                 }
                 out.putArchiveEntry(entry);
-                FileInputStream in = new FileInputStream(sourceDir + File.separator +  file.getName());
+                InputStream in = new BufferedInputStream(new FileInputStream(sourceDir + File.separator +  file.getName()));
                 IOUtils.copy(in, out);
                 IOUtils.closeQuietly(in);
                 out.closeArchiveEntry();
