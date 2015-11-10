@@ -12,8 +12,8 @@
   <!--<url>http://www.excelsiorjet.com/maven-plugin</url>-->
   <url>https://github.com/${github-repo-owner}/${github-repo}</url>
   <description>
-    Excelsior JET Maven Plugin provides a way of building Java (JVM-based) applications
-    with Excelsior JET Java-To-Native-Code AOT compiler from within Maven
+    Excelsior JET Maven Plugin provides Maven users with an easy way to compile their applications
+    down to optimized native Windows, OS X, or Linux executables with Excelsior JET.
   </description>
 
   <licenses>
