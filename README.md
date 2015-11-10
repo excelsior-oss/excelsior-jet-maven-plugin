@@ -27,7 +27,7 @@ of the following form:
 ```
 java -cp [dependencies-list] [main class]
 ```
-and loads classes only from jars or directories that are present
+and loads classes only from jars that are present
 in the `dependencies-list`, then you can use this plugin.
 
 This plugin will tranform your application into an optimized native executable for the platform
