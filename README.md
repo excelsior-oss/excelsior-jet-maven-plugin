@@ -57,11 +57,8 @@ your `pom.xml` file:
 and use the following command line to build the application:
 
 ```
-mvn package jet:build
+mvn jet:build
 ```
-
-You need to supply the `package` argument to build your main jar.
-
 
 ### Excelsior JET Installation Directory Lookup
 
@@ -71,7 +68,7 @@ You have three ways to specify the Excelsior JET installation directory explicit
 - add the `<jetHome>` property to the `<configuration>` section of the plugin
 - pass the `jet.home` VM property on the Maven command line as follows:
 ```
-mvn package jet:build -Djet.home=[JET-Home]
+mvn jet:build -Djet.home=[JET-Home]
 ```
 - or set the `JET_HOME` O/S environment variable
 
