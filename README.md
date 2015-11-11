@@ -87,10 +87,10 @@ Upon success, it copies that executable and the required Excelsior JET Runtime f
 into the `jet/app` directory, and binds the executable to that copy of the Runtime.
 
 > Your natively compiled application is ready for distribution at this point: you may copy
-> contents of the `jet\app` directory to another computer that has neither Excelsior JET nor
+> contents of the `jet/app` directory to another computer that has neither Excelsior JET nor
 > the Oracle JRE installed, and the executable should work as expected.
 
-Finally, the plugin packs the contents of the `jet\app` directory into
+Finally, the plugin packs the contents of the `jet/app` directory into
 a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
 
 In the future, the plugin will also support the creation of Windows installers
