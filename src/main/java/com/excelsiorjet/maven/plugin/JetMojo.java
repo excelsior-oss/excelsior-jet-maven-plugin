@@ -122,7 +122,12 @@ public class JetMojo extends AbstractMojo {
     private JetHome checkPrerequisites() throws MojoFailureException {
         // first check that main jar were built
         if (!mainJar.exists()) {
-            String error = s("JetMojo.MainJarNotFound.Failure", mainJar.getAbsolutePath());
+            String error;
+            if (!"jar".equalsIgnoreCase(project.getPackaging())) {
+                error = s("JetMojo.BadPackaging.Failure", project.getPackaging());
+            } else {
+                error = s("JetMojo.MainJarNotFound.Failure", mainJar.getAbsolutePath());
+            }
             getLog().error(error);
             throw new MojoFailureException(error);
         }
