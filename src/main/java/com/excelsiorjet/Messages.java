@@ -4,8 +4,8 @@ import java.text.*;
 import java.util.*;
 
 /**
- * This class helps to get strings from JET's {@code Strings.properties} file.
- * Such files consist of properties
+ * Utility class for retrieving strings from Excelsior JET {@code Strings.properties} files.
+ * Those files consist of lines of the form
  * {@code 
  * <id> = <value>
  * }
@@ -18,7 +18,7 @@ public class Messages {
     private final ResourceBundle messageRB;
 
     /**
-     * Constructs an instance for {@code Strings.properties} resource with given name.
+     * Constructs an instance for a {@code Strings.properties} resource with the given name.
      * @param resourceName Strings.properties resource
      */
     public Messages(String resourceName) {
@@ -31,7 +31,7 @@ public class Messages {
     }
 
     /**
-     * Obtains string with given {@code id} and formats it using given {@code params}.
+     * Obtains a string with the given {@code id} and formats it using the given {@code params}.
      * @param id key value in Strings.properties
      * @param params optional parameters to be expanded
      *
@@ -47,7 +47,7 @@ public class Messages {
     }
 
     /**
-     * @return string with given {@code id}, or {@code null} if it does not exist
+     * @return string with the given {@code id}, or {@code null} if it does not exist
      */
     private String getStringIfExists(String id) {
         String s;

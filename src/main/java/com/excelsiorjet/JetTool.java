@@ -24,7 +24,7 @@ package com.excelsiorjet;
 import java.io.File;
 
 /**
- *  A parent of Excelsior JET tools executors that are reside in [JET]/bin directory.
+ * Common code for executors of Excelsior JET tools that reside in the [JET-Home]/bin directory.
  *
  * @author Nikita Lipsky
  */

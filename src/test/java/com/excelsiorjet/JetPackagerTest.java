@@ -12,7 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author kit
+ * @author Nikita Lipsky
  */
 public class JetPackagerTest {
 
