@@ -27,10 +27,10 @@ of the following form:
 ```
 java -cp [dependencies-list] [main class]
 ```
-and loads classes only from jars that are present
+and loads classes mostly from jars that are present
 in the `dependencies-list`, then you can use this plugin.
 
-This plugin will tranform your application into an optimized native executable for the platform
+This plugin will transform your application into an optimized native executable for the platform
 on which you run Maven, and place it into a separate directory together with all required
 Excelsior JET runtime files.
     
@@ -65,8 +65,8 @@ mvn jet:build
 In order to do its job, the plugin needs to locate an Excelsior JET installation.
 You have three ways to specify the Excelsior JET installation directory explicitly:
 
-- add the `<jetHome>` property to the `<configuration>` section of the plugin
-- pass the `jet.home` VM property on the Maven command line as follows:
+- add the `<jetHome>` parameter to the `<configuration>` section of the plugin
+- pass the `jet.home` system property on the Maven command line as follows:
 ```
 mvn jet:build -Djet.home=[JET-Home]
 ```

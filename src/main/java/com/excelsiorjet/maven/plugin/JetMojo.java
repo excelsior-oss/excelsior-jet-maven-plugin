@@ -154,7 +154,6 @@ public class JetMojo extends AbstractMojo {
             }
             getLog().warn(s("JetMojo.DirCreate.Warning", dir.getAbsolutePath()));
         }
-
     }
 
     private void copyDependency(File from, File to, File buildDir, ArrayList<String> dependencies) {

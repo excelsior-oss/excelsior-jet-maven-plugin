@@ -85,7 +85,7 @@ public class JetHome {
             // expand "~/" on Unixes
             jetHome = System.getProperty("user.home") + jetHome.substring(1);
         }
-        checkJetHome(jetHome, "");
+        checkJetHome(jetHome, Txt.s("JetHome.PluginParameter.Error.Prefix"));
         this.jetHome = jetHome;
     }
 
