@@ -19,30 +19,22 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-package com.excelsior.jet;
-
-import com.excelsior.common.Messages;
-import org.apache.maven.plugin.logging.Log;
+package com.excelsiorjet;
 
 /**
+ * Excelsior JET "xpack" tool executor utility class.
+ *
  * @author Nikita Lipsky
  */
-public class Txt {
+public class JetPackager extends JetTool {
 
-    private static Messages messages = new Messages("Strings");
-    public static Log log;
+    static final String JET_PACKAGER = "xpack";
 
-    public static String s(String id, Object... params) {
-        String str = messages.format(id, params);
-        if (str != null) {
-            return str;
-        } else {
-            if (log != null) {
-                log.error("JET message file broken: key = " + id);
-            } else {
-                throw new IllegalStateException("No log to issue error. JET message file broken: key = " + id);
-            }
-            return id;
-        }
+    public JetPackager(JetHome jetHome, String... args) {
+        super(jetHome, JET_PACKAGER, args);
+    }
+
+    public JetPackager(String... args) throws JetHomeException {
+        super(JET_PACKAGER, args);
     }
 }

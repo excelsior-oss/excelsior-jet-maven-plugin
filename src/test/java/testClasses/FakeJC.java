@@ -1,7 +1,7 @@
 package testClasses;
 
-import com.excelsior.jet.JetHome;
-import com.excelsior.jet.JetHomeException;
+import com.excelsiorjet.JetHome;
+import com.excelsiorjet.JetHomeException;
 
 import java.io.File;
 

@@ -1,4 +1,4 @@
-package com.excelsior.jet;
+package com.excelsiorjet;
 
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Test;

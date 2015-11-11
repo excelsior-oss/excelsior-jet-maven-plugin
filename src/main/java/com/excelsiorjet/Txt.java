@@ -19,13 +19,29 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-package com.excelsior.jet;
+package com.excelsiorjet;
+
+import org.apache.maven.plugin.logging.Log;
 
 /**
  * @author Nikita Lipsky
  */
-public class JetHomeException extends Exception {
-    public JetHomeException(String message) {
-        super(message);
+public class Txt {
+
+    private static Messages messages = new Messages("Strings");
+    public static Log log;
+
+    public static String s(String id, Object... params) {
+        String str = messages.format(id, params);
+        if (str != null) {
+            return str;
+        } else {
+            if (log != null) {
+                log.error("JET message file broken: key = " + id);
+            } else {
+                throw new IllegalStateException("No log to issue error. JET message file broken: key = " + id);
+            }
+            return id;
+        }
     }
 }

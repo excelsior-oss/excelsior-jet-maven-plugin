@@ -19,7 +19,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-package com.excelsior.jet;
+package com.excelsiorjet;
 
 import org.apache.maven.plugin.logging.Log;
 

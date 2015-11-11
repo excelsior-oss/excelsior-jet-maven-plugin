@@ -19,22 +19,14 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-package com.excelsior.jet;
+package com.excelsiorjet;
 
 /**
- * Excelsior JET "xpack" tool executor utility class.
- *
  * @author Nikita Lipsky
  */
-public class JetPackager extends JetTool {
+public class CmdLineToolException extends Exception {
 
-    static final String JET_PACKAGER = "xpack";
-
-    public JetPackager(JetHome jetHome, String... args) {
-        super(jetHome, JET_PACKAGER, args);
-    }
-
-    public JetPackager(String... args) throws JetHomeException {
-        super(JET_PACKAGER, args);
+    public CmdLineToolException(Exception e) {
+        super(e);
     }
 }

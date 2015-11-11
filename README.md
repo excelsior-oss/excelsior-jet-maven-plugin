@@ -45,7 +45,7 @@ your `pom.xml` file:
 
 ```xml
 <plugin>
-	<groupId>com.excelsior</groupId>
+	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
 	<version>0.1.0</version>
 	<configuration>

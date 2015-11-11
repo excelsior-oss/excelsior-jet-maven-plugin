@@ -1,4 +1,4 @@
-package com.excelsior.common;
+package com.excelsiorjet;
 
 import java.text.*;
 import java.util.*;

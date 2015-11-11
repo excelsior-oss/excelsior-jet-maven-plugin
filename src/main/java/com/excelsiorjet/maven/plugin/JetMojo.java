@@ -19,9 +19,9 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-package com.excelsior.jet.maven.plugin;
+package com.excelsiorjet.maven.plugin;
 
-import com.excelsior.jet.*;
+import com.excelsiorjet.*;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
@@ -36,7 +36,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
-import static com.excelsior.jet.Txt.s;
+import static com.excelsiorjet.Txt.s;
 
 /**
  *  Main Mojo for building Java (JVM) applications with Excelsior JET.

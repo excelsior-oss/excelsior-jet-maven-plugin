@@ -1,6 +1,5 @@
-package com.excelsior.jet;
+package com.excelsiorjet;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Test;
 

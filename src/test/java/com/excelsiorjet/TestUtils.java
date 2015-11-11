@@ -1,6 +1,4 @@
-package com.excelsior.jet;
-
-import org.junit.AfterClass;
+package com.excelsiorjet;
 
 import java.io.File;
 import java.io.IOException;

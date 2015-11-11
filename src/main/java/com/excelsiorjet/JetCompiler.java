@@ -19,14 +19,22 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-package com.excelsior.jet;
+package com.excelsiorjet;
 
 /**
+ * Excelsior JET "jc" tool executor (Java AOT compiler) utility class.
+ *
  * @author Nikita Lipsky
  */
-public class CmdLineToolException extends Exception {
+public class JetCompiler extends JetTool {
 
-    public CmdLineToolException(Exception e) {
-        super(e);
+    static final String JET_COMPILER = "jc";
+
+    public JetCompiler(String... args) throws JetHomeException {
+        super(JET_COMPILER, args);
+    }
+
+    public JetCompiler(JetHome jetHome, String... args) {
+        super(jetHome, JET_COMPILER, args);
     }
 }

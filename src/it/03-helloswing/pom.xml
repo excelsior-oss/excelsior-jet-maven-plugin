@@ -17,7 +17,7 @@
   <build>
       <plugins>
           <plugin>
-              <groupId>com.excelsior</groupId>
+              <groupId>com.excelsiorjet</groupId>
               <artifactId>excelsior-jet-maven-plugin</artifactId>
               <version>@project.version@</version>
               <configuration>
