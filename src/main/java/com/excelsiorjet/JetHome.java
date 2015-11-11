@@ -24,7 +24,7 @@ package com.excelsiorjet;
 import java.io.File;
 
 /**
- * Encapsulates JET home directory.
+ * Encapsulates the Excelsior JET home directory.
  * 
  * @author Nikita Lipsky
  */
@@ -39,9 +39,9 @@ public class JetHome {
     private String jetHome;
 
     /**
-     * @param jetHome jet home directory
-     * @return version of JET in 4 figures like "1100", "1050".
-	 *         If it is not JET returns -1
+     * @param jetHome Excelsior JET home directory
+     * @return Excelsior JET version "multiplied by 100" (i.e. 1150 means version 11.5),
+     *         or -1 if {@code jetHome} does not point to an Excelsior JET home directory
      */
     private static int getJetVersion(String jetHome) {
         File[] files = new File(jetHome, BIN_DIR).listFiles();
@@ -75,10 +75,10 @@ public class JetHome {
     }
 
     /**
-     * Constructs jet home object by given JET home directory.
+     * Constructs a JetHome object given a filesystem location supposedly containing a copy of Excelsior JET
      * 
-     * @param jetHome jet home directory
-     * @throws JetHomeException if supplied directory is not JET Directory or is not supported
+     * @param jetHome Excelsior JET home directory pathname
+     * @throws JetHomeException if {@code jetHome} does not point to a supported version of Excelsior JET
      */
     public JetHome(String jetHome) throws JetHomeException {
         if (Utils.isUnix() && jetHome.startsWith("~/")) {
@@ -99,14 +99,14 @@ public class JetHome {
     }
 
     /**
-     * Detects jet home directory by the following algorithm:
+     * Attempts to locate an Excelsior JET home directory using the following algorithm:
      * <ul>
-     *   <li> first it checks -Djet.home system property, if it is set, it takes jet home from it </li>
-     *   <li> then it checks JET_HOME environment variable, if it is set, it takes jet home from it </li>
-     *   <li> finally it scans PATH environment variable for appropriate jet home</li>
+     *   <li> If the jet.home system property is set, use its value</li>
+     *   <li> Otherwise, if the JET_HOME environment variable is set, use its value</li>
+     *   <li> Otherwise scan the PATH environment variable for a suitable Excelsior JET installation</li>
      * </ul>
-     * @throws JetHomeException if -Djet.home or JET_HOME does not contain jet home, 
-     *                          or there no jet home in PATH
+     * @throws JetHomeException if either jet.home or JET_HOME is set, but does not point to a suitable
+     *                          Excelsior JET installation, or if no such installation could be found in PATH
      */
     public JetHome() throws JetHomeException {
         // try to detect jet home

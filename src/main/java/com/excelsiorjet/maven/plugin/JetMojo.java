@@ -61,56 +61,57 @@ public class JetMojo extends AbstractMojo {
 
     /**
      * The main application jar.
-     * By default main project artifact is taken that should be jar file.
+     * The default is the main project artifact, which must be a jar file.
      */
     @Parameter(property = "mainJar", defaultValue = "${project.build.directory}/${project.build.finalName}.jar")
     protected File mainJar;
 
     /**
      * Excelsior JET installation directory.
-     * If it is not specified, it is detected by the following algorithm:
+     * If unspecified, the plugin uses the following algorithm to set the value of this property:
      * <ul>
-     *   <li> first -Djet.home system property is checked, if it is set, jet home is set from it</li>
-   	 *   <li> then JET_HOME environment variable is checked, if it is set, jet home is set from it </li>
-   	 *   <li> finally PATH environment variable is scanned for appropriate jet home </li>
+     *   <li> If the jet.home system property is set, use its value</li>
+     *   <li> Otherwise, if the JET_HOME environment variable is set, use its value</li>
+     *   <li> Otherwise scan the PATH environment variable for a suitable Excelsior JET installation</li>
      * </ul>
      */
     @Parameter(property = "jetHome", defaultValue = "${jet.home}")
     protected String jetHome;
 
     /**
-     * Directory for Excelsior JET temporary files build process
-     * and the target directory for resulting package.
+     * Directory for temporary files generated during the build process
+     * and the target directory for the resulting package.
      * <p>
-     * "app" subdirectory of jetOutputDir will contain the final self-contained package
-     * that you may deploy to another PCs by simple copy operation.
-     * For convenience, {@code ${project.build.finalName}.zip} is also created that is ZIP archive
-     * of "app" directory, if {@code zipOutput} property is set to {@code true}.
+     * The plugin will place the final self-contained package in the "app" subdirectory 
+     * of {@code jetOutputDir}. You may deploy it to other systems using a simple copy operation.
+     * For convenience, the plugin will also create a ZIP archive {@code ${project.build.finalName}.zip} 
+     * with the same content, if the {@code zipOutput} property is set to {@code true}.
+     * </p>
      */
     @Parameter(property = "jetOutputDir", defaultValue = "${project.build.directory}/jet")
     protected File jetOutputDir;
 
     /**
-     * Target executable name. If not set, the main class name is used for executable name.
+     * Target executable name. If not set, the main class name is used.
      */
     @Parameter(property = "outputName")
     protected String outputName;
 
     /**
-     * Windows .ico file to associate with resulting executable file.
+     * Windows .ico file to associate with the resulting executable file.
      */
     @Parameter(property = "icon", defaultValue = "${project.basedir}/src/main/jetresources/icon.ico")
     protected File icon;
 
     /**
-     * If set to {@code true} the resulting executable file will not show console on Windows.
+     * If set to {@code true}, the resulting executable file will not show a console on Windows.
      */
     @Parameter(property = "hideConsole")
     protected boolean hideConsole;
 
     /**
-     * If set to {@code true}, zip archive containing self-contained package will be created
-     * as the final step of build process.
+     * If set to {@code true}, the plugin will create a zip archive with the self-contained 
+     * application package as the final step of build process.
      */
     @Parameter(property = "zipOutput", defaultValue = "true")
     protected boolean zipOutput;
@@ -190,7 +191,7 @@ public class JetMojo extends AbstractMojo {
     }
 
     /**
-     * Compiles application with AOT compiler.
+     * Invokes the Excelsior JET AOT compiler.
      */
     private void compile(JetHome jetHome, File buildDir, ArrayList<String> compilerArgs) throws MojoFailureException, CmdLineToolException {
         if (Utils.isWindows()) {
@@ -211,8 +212,8 @@ public class JetMojo extends AbstractMojo {
     }
 
     /**
-     * Package built executable with required Excelsior JET runtime files
-     * into a self-contained directory
+     * Packages the generated executable and required Excelsior JET runtime files
+     * as a self-contained directory
      */
     private void pack(JetHome jetHome, File buildDir, File packageDir) throws CmdLineToolException, MojoFailureException {
         if (new JetPackager(jetHome,
