@@ -34,7 +34,7 @@
               <artifactId>excelsior-jet-maven-plugin</artifactId>
               <version>@project.version@</version>
               <configuration>
-                  <zipOutput>false</zipOutput>
+                  <packaging>none</packaging>
                   <mainClass>AppWithDep</mainClass>
               </configuration>
           </plugin>

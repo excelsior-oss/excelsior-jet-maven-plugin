@@ -110,15 +110,18 @@ public class JetMojo extends AbstractMojo {
     protected boolean hideConsole;
 
     /**
-     * If set to {@code true}, the plugin will create a zip archive with the self-contained 
-     * application package as the final step of build process.
+     * Packaging type of resulting bundle. Permitted values are
+     * <ul>
+     *     <li>zip  - a zip archive with the self-contained application package</li>
+     *     <li>none - skip packaging</li>
+     * </ul>
      */
-    @Parameter(property = "zipOutput", defaultValue = "true")
-    protected boolean zipOutput;
+    @Parameter(property = "packaging", defaultValue = "zip")
+    protected String packaging;
 
     private static final String BUILD_DIR = "build";
     private static final String LIB_DIR = "lib";
-    private static final String PACKAGE_DIR = "app";
+    private static final String APP_DIR = "app";
 
     private JetHome checkPrerequisites() throws MojoFailureException {
         // first check that main jar were built
@@ -143,6 +146,12 @@ public class JetMojo extends AbstractMojo {
         if (outputName == null) {
             int lastSlash = mainClass.lastIndexOf('/');
             outputName = lastSlash < 0 ? mainClass : mainClass.substring(lastSlash + 1);
+        }
+
+        //check packaging type
+        switch (packaging) {
+             case "zip": case "none": break;
+             default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
         }
 
         // check and return jet home
@@ -220,10 +229,10 @@ public class JetMojo extends AbstractMojo {
      * Packages the generated executable and required Excelsior JET runtime files
      * as a self-contained directory
      */
-    private void pack(JetHome jetHome, File buildDir, File packageDir) throws CmdLineToolException, MojoFailureException {
+    private void createAppDir(JetHome jetHome, File buildDir, File appDir) throws CmdLineToolException, MojoFailureException {
         if (new JetPackager(jetHome,
                  "-add-file", Utils.mangleExeName(outputName), "/",
-                 "-target", packageDir.getAbsolutePath())
+                 "-target", appDir.getAbsolutePath())
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
         }
@@ -256,8 +265,8 @@ public class JetMojo extends AbstractMojo {
         }
     }
 
-    private void finishBuild(File packageDir) throws IOException {
-        if (zipOutput) {
+    private void packageBuild(File packageDir) throws IOException {
+        if ("zip".equals(packaging)) {
             getLog().info(s("JetMojo.ZipApp.Info"));
             File targetZip = new File(jetOutputDir, project.getBuild().getFinalName() + ".zip");
             compressZipfile(packageDir, targetZip);
@@ -277,10 +286,10 @@ public class JetMojo extends AbstractMojo {
         // creating output dirs
         File buildDir = new File(jetOutputDir, BUILD_DIR);
         mkdir(buildDir);
-        File packageDir = new File(jetOutputDir, PACKAGE_DIR);
+        File appDir = new File(jetOutputDir, APP_DIR);
         //cleanup packageDir
         try {
-            Utils.cleanDirectory(packageDir);
+            Utils.cleanDirectory(appDir);
         } catch (IOException e) {
             throw new MojoFailureException(e.getMessage(), e);
         }
@@ -290,9 +299,9 @@ public class JetMojo extends AbstractMojo {
         try {
             compile(jetHome, buildDir, compilerArgs);
 
-            pack(jetHome, buildDir, packageDir);
+            createAppDir(jetHome, buildDir, appDir);
 
-            finishBuild(packageDir);
+            packageBuild(appDir);
 
         } catch (Exception e) {
             getLog().error(e.getMessage());
