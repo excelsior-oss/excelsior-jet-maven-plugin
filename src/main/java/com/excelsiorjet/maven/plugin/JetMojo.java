@@ -109,6 +109,10 @@ public class JetMojo extends AbstractMojo {
     @Parameter(property = "hideConsole")
     protected boolean hideConsole;
 
+    //packaging types
+    private static final String ZIP = "zip";
+    private static final String NONE = "none";
+
     /**
      * Packaging type of resulting bundle. Permitted values are
      * <ul>
@@ -116,7 +120,7 @@ public class JetMojo extends AbstractMojo {
      *     <li>none - skip packaging</li>
      * </ul>
      */
-    @Parameter(property = "packaging", defaultValue = "zip")
+    @Parameter(property = "packaging", defaultValue = ZIP)
     protected String packaging;
 
     private static final String BUILD_DIR = "build";
@@ -150,7 +154,7 @@ public class JetMojo extends AbstractMojo {
 
         //check packaging type
         switch (packaging) {
-             case "zip": case "none": break;
+             case ZIP: case NONE: break;
              default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
         }
 
@@ -266,15 +270,17 @@ public class JetMojo extends AbstractMojo {
     }
 
     private void packageBuild(File packageDir) throws IOException {
-        if ("zip".equals(packaging)) {
-            getLog().info(s("JetMojo.ZipApp.Info"));
-            File targetZip = new File(jetOutputDir, project.getBuild().getFinalName() + ".zip");
-            compressZipfile(packageDir, targetZip);
-            getLog().info(s("JetMojo.Build.Success"));
-            getLog().info(s("JetMojo.GetZip.Info", targetZip.getAbsolutePath()));
-        } else {
-            getLog().info(s("JetMojo.Build.Success"));
-            getLog().info(s("JetMojo.GetDir.Info", packageDir.getAbsolutePath()));
+        switch (packaging){
+            case ZIP:
+                getLog().info(s("JetMojo.ZipApp.Info"));
+                File targetZip = new File(jetOutputDir, project.getBuild().getFinalName() + ".zip");
+                compressZipfile(packageDir, targetZip);
+                getLog().info(s("JetMojo.Build.Success"));
+                getLog().info(s("JetMojo.GetZip.Info", targetZip.getAbsolutePath()));
+                break;
+            default:
+                getLog().info(s("JetMojo.Build.Success"));
+                getLog().info(s("JetMojo.GetDir.Info", packageDir.getAbsolutePath()));
         }
     }
 
