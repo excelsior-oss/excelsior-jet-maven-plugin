@@ -149,7 +149,7 @@ public class JetMojo extends AbstractMojo {
     @Parameter(property = "windowsExeCopyright")
     protected String windowsExeCopyright;
 
-    @Parameter(property = "windowsExeDescription", defaultValue = "${project.description}")
+    @Parameter(property = "windowsExeDescription", defaultValue = "${project.name}")
     protected String windowsExeDescription;
 
     @Parameter(property = "eula", defaultValue = "${project.basedir}/src/main/jetresources/eula.txt")
