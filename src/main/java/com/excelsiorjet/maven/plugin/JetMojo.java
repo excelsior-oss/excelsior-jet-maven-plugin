@@ -34,7 +34,10 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 
 import static com.excelsiorjet.Txt.s;
 
@@ -112,20 +115,111 @@ public class JetMojo extends AbstractMojo {
     //packaging types
     private static final String ZIP = "zip";
     private static final String NONE = "none";
+    private static final String EXCELSIOR_INSTALLER = "excelsior-installer";
 
     /**
      * Packaging type of the resulting bundle. Permitted values are
      * <ul>
      *     <li>zip  - a zip archive with the self-contained application package</li>
+     *     <li>
+     *         excelsior-installer - self-extracting installer with standard GUI for Windows
+     *         and command-line interface for Linux
+     *     </li>
      *     <li>none - skip packaging</li>
      * </ul>
      */
     @Parameter(property = "packaging", defaultValue = ZIP)
     protected String packaging;
 
+    @Parameter(property = "vendor", defaultValue = "${project.organization.name}")
+    protected String vendor;
+
+    @Parameter(property = "product", defaultValue = "${project.name}")
+    protected String product;
+
+    @Parameter(property = "version", defaultValue = "${project.version}")
+    protected String version;
+
+    @Parameter(property = "addWindowsVersionInfo", defaultValue = "true")
+    protected boolean addWindowsVersionInfo;
+
+    @Parameter(property = "windowsExeVersion", defaultValue = "${project.version}")
+    protected String windowsExeVersion;
+
+    @Parameter(property = "windowsExeCopyright")
+    protected String windowsExeCopyright;
+
+    @Parameter(property = "windowsExeDescription", defaultValue = "${project.description}")
+    protected String windowsExeDescription;
+
+    @Parameter(property = "eula", defaultValue = "${project.basedir}/src/main/jetresources/eula.txt")
+    protected File eula;
+
+    @Parameter(property = "unicodeEula", defaultValue = "${project.basedir}/src/main/jetresources/unicodeEula.txt")
+    protected File unicodeEula;
+
+    @Parameter(property = "installerSplash", defaultValue = "${project.basedir}/src/main/jetresources/installerSplash.bmp")
+    protected File installerSplash;
+
+
     private static final String BUILD_DIR = "build";
     private static final String LIB_DIR = "lib";
     private static final String APP_DIR = "app";
+
+    private void checkVersionInfo() {
+        if (!Utils.isWindows()) {
+            addWindowsVersionInfo = false;
+        }
+        if (addWindowsVersionInfo || EXCELSIOR_INSTALLER.equals(packaging)) {
+            if (Utils.isEmpty(vendor)) {
+                //no organization name. Get it from groupId that cannot be empty.
+                String[] groupId = project.getGroupId().split("\\.");
+                if (groupId.length >= 2) {
+                    vendor = groupId[1];
+                } else {
+                    vendor = groupId[0];
+                }
+                vendor = Character.toUpperCase(vendor.charAt(0)) + vendor.substring(1);
+            }
+            if (Utils.isEmpty(product)) {
+                // no project name get it from artifactId.
+                product = project.getArtifactId();
+            }
+        }
+        if (addWindowsVersionInfo) {
+            String[] versions = windowsExeVersion.split("\\.");
+            String[] finalVersions = new String[]{"0", "0", "0", "0"};
+            for (int i = 0; i < Math.min(versions.length, 4); ++i) {
+                try {
+                    finalVersions[i] = Integer.decode(versions[i]).toString();
+                } catch (NumberFormatException e) {
+                    int minusPos = versions[i].indexOf('-');
+                    if (minusPos > 0) {
+                        String v = versions[i].substring(0, minusPos);
+                        try {
+                            finalVersions[i] = Integer.decode(v).toString();
+                        } catch (NumberFormatException ignore) {
+                        }
+                    }
+                }
+            }
+            String finalVersion = String.join(".", finalVersions);
+            if (!windowsExeVersion.equals(finalVersion)) {
+                getLog().warn(s("JetMojo.NotCompatibleExeVersion.Warning", windowsExeVersion, finalVersion));
+                windowsExeVersion = finalVersion;
+            }
+
+            if (windowsExeCopyright == null) {
+                String inceptionYear = project.getInceptionYear();
+                String curYear = new SimpleDateFormat("yyyy").format(new Date());
+                String years = Utils.isEmpty(inceptionYear)? curYear : inceptionYear + "," + curYear;
+                windowsExeCopyright = "Copyright \\x00a9 " + years + " " + vendor;
+            }
+            if (windowsExeDescription == null) {
+                windowsExeDescription = product;
+            }
+        }
+    }
 
     private JetHome checkPrerequisites() throws MojoFailureException {
         // first check that main jar were built
@@ -154,8 +248,14 @@ public class JetMojo extends AbstractMojo {
 
         //check packaging type
         switch (packaging) {
-             case ZIP: case NONE: break;
+             case ZIP: case NONE: case EXCELSIOR_INSTALLER: break;
              default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
+        }
+
+        checkVersionInfo();
+
+        if (eula.exists() && unicodeEula.exists()) {
+            throw new MojoFailureException(s("JetMojo.BothEulaParameters.Failure"));
         }
 
         // check and return jet home
@@ -223,6 +323,15 @@ public class JetMojo extends AbstractMojo {
         compilerArgs.add("-main=" + mainClass);
         compilerArgs.add("-outputname=" + outputName);
         compilerArgs.add("-decor=ht");
+
+        if (addWindowsVersionInfo) {
+            compilerArgs.add("-versioninfocompanyname=" + vendor);
+            compilerArgs.add("-versioninfoproductname=" + product);
+            compilerArgs.add("-versioninfoproductversion=" + windowsExeVersion);
+            compilerArgs.add("-versioninfolegalcopyright=" + windowsExeCopyright);
+            compilerArgs.add("-versioninfofiledescription=" + windowsExeDescription);
+        }
+
         if (new JetCompiler(jetHome, compilerArgs.toArray(new String[compilerArgs.size()]))
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Build.Failure"));
@@ -240,6 +349,36 @@ public class JetMojo extends AbstractMojo {
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
         }
+    }
+
+    /**
+     * Packages the generated executable and required Excelsior JET runtime files
+     * as a excelsior installer file.
+     */
+    private File packWithEI(JetHome jetHome, File buildDir) throws CmdLineToolException, MojoFailureException {
+        File target = new File(jetOutputDir, Utils.mangleExeName(project.getBuild().getFinalName()));
+        ArrayList<String> xpackArgs = new ArrayList<>();
+        if (eula.exists()) {
+            xpackArgs.add("-eula"); xpackArgs.add(eula.getAbsolutePath());
+        } else if (unicodeEula.exists()) {
+            xpackArgs.add("-unicode-eula"); xpackArgs.add(unicodeEula.getAbsolutePath());
+        }
+        if (installerSplash.exists()) {
+            xpackArgs.add("-splash"); xpackArgs.add(installerSplash.getAbsolutePath());
+        }
+        xpackArgs.addAll(Arrays.asList(
+                        "-add-file", Utils.mangleExeName(outputName), "/",
+                        "-backend", "excelsior-installer",
+                        "-company", vendor,
+                        "-product", product,
+                        "-version", version,
+                        "-target", target.getAbsolutePath())
+        );
+        if (new JetPackager(jetHome, xpackArgs.toArray(new String[xpackArgs.size()]))
+                .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
+            throw new MojoFailureException(s("JetMojo.Package.Failure"));
+        }
+        return target;
     }
 
     static void compressZipfile(File sourceDir, File outputFile) throws IOException {
@@ -269,7 +408,7 @@ public class JetMojo extends AbstractMojo {
         }
     }
 
-    private void packageBuild(File packageDir) throws IOException {
+    private void packageBuild(JetHome jetHome, File buildDir, File packageDir) throws IOException, MojoFailureException, CmdLineToolException {
         switch (packaging){
             case ZIP:
                 getLog().info(s("JetMojo.ZipApp.Info"));
@@ -277,6 +416,11 @@ public class JetMojo extends AbstractMojo {
                 compressZipfile(packageDir, targetZip);
                 getLog().info(s("JetMojo.Build.Success"));
                 getLog().info(s("JetMojo.GetZip.Info", targetZip.getAbsolutePath()));
+                break;
+            case EXCELSIOR_INSTALLER :
+                File target = packWithEI(jetHome, buildDir);
+                getLog().info(s("JetMojo.Build.Success"));
+                getLog().info(s("JetMojo.GetEI.Info", target.getAbsolutePath()));
                 break;
             default:
                 getLog().info(s("JetMojo.Build.Success"));
@@ -307,7 +451,7 @@ public class JetMojo extends AbstractMojo {
 
             createAppDir(jetHome, buildDir, appDir);
 
-            packageBuild(appDir);
+            packageBuild(jetHome, buildDir, appDir);
 
         } catch (Exception e) {
             getLog().error(e.getMessage());
