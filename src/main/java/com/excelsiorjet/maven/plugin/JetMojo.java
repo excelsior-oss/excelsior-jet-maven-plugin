@@ -224,7 +224,7 @@ public class JetMojo extends AbstractMojo {
                 vendor = Character.toUpperCase(vendor.charAt(0)) + vendor.substring(1);
             }
             if (Utils.isEmpty(product)) {
-                // no project name get it from artifactId.
+                // no project name, get it from artifactId.
                 product = project.getArtifactId();
             }
         }
@@ -291,7 +291,13 @@ public class JetMojo extends AbstractMojo {
 
         //check packaging type
         switch (packaging) {
-             case ZIP: case NONE: case EXCELSIOR_INSTALLER: break;
+             case ZIP: case NONE: break;
+             case EXCELSIOR_INSTALLER:
+                 if (Utils.isOSX()) {
+                     getLog().warn(s("JetMojo.NoExcelsiorInstallerOnOSX.Warning"));
+                     packaging = ZIP;
+                 }
+                 break;
              default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
         }
 
@@ -409,7 +415,7 @@ public class JetMojo extends AbstractMojo {
         } else if (unicodeEula.exists()) {
             xpackArgs.add("-unicode-eula"); xpackArgs.add(unicodeEula.getAbsolutePath());
         }
-        if (installerSplash.exists()) {
+        if (Utils.isWindows() && installerSplash.exists()) {
             xpackArgs.add("-splash"); xpackArgs.add(installerSplash.getAbsolutePath());
         }
         xpackArgs.addAll(Arrays.asList(
