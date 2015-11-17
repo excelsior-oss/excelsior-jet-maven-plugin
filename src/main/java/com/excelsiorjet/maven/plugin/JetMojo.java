@@ -131,33 +131,71 @@ public class JetMojo extends AbstractMojo {
     @Parameter(property = "packaging", defaultValue = ZIP)
     protected String packaging;
 
+    /**
+     * The vendor of the application. Required for Windows version information and Excelsior Installer.
+     * By default, {@code ${project.organization.name}} is used.
+     * If it is not set, the second part of POM's groupId identifier is used with first letter capitalized.
+     */
     @Parameter(property = "vendor", defaultValue = "${project.organization.name}")
     protected String vendor;
 
+    /**
+     * The product name. Required for Windows version information and Excelsior Installer.
+     * By default, {@code ${project.oname}} is used.
+     * If it is not set, the POM's artifactId identifier is used.
+     */
     @Parameter(property = "product", defaultValue = "${project.name}")
     protected String product;
 
+    /**
+     * The product version. Required for Excelsior Installer.
+     * For Windows version information {@link #windowsExeVersion} Mojo parameter is used.
+     */
     @Parameter(property = "version", defaultValue = "${project.version}")
     protected String version;
 
+    /**
+     * If set to {@code true}, Windows version information will be assigned to the final executable.
+     */
     @Parameter(property = "addWindowsVersionInfo", defaultValue = "true")
     protected boolean addWindowsVersionInfo;
 
+    /**
+     * The Windows executable version. Must have {@code v1.v2.v3.v4} format where vi is a digit.
+     * By default, {@code ${project.version}} is used. If it does not meet required format, it is coerced to it.
+     * Thus version "1.2.3-SNAPSHOT" becomes "1.2.3.0"
+     */
     @Parameter(property = "windowsExeVersion", defaultValue = "${project.version}")
     protected String windowsExeVersion;
 
+    /**
+     * The Windows executable version info legal copyright.
+     * By default, {@code Copyright �{$project.inceptionYear},[curYear] [vendor]} is used.
+     */
     @Parameter(property = "windowsExeCopyright")
     protected String windowsExeCopyright;
 
+    /**
+     * The Windows executable description.
+     */
     @Parameter(property = "windowsExeDescription", defaultValue = "${project.name}")
     protected String windowsExeDescription;
 
+    /**
+     * The license agreement file in ANSI format. Used for Excelsior Installer.
+     */
     @Parameter(property = "eula", defaultValue = "${project.basedir}/src/main/jetresources/eula.txt")
     protected File eula;
 
+    /**
+     * The license agreement file in UTF-16LE format. Used for Excelsior Installer.
+     */
     @Parameter(property = "unicodeEula", defaultValue = "${project.basedir}/src/main/jetresources/unicodeEula.txt")
     protected File unicodeEula;
 
+    /**
+     * The splash for Excelsior Installer in BMP format.
+     */
     @Parameter(property = "installerSplash", defaultValue = "${project.basedir}/src/main/jetresources/installerSplash.bmp")
     protected File installerSplash;
 
@@ -187,6 +225,7 @@ public class JetMojo extends AbstractMojo {
             }
         }
         if (addWindowsVersionInfo) {
+            //Coerce windowsExeVersion to v1.v2.v3.v4 format.
             String[] versions = windowsExeVersion.split("\\.");
             String[] finalVersions = new String[]{"0", "0", "0", "0"};
             for (int i = 0; i < Math.min(versions.length, 4); ++i) {
