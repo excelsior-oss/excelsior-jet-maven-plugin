@@ -130,6 +130,21 @@ public class JetMojo extends AbstractMojo {
     @Parameter(property = "multiApp", defaultValue = "false")
     protected boolean multiApp;
 
+    /**
+     * Enable/disable startup accelerator.
+     * If it is enabled, the compiled application will run after build
+     * for {@link #profileStartupTimeout} seconds for collecting startup profile.
+     */
+    @Parameter(property = "profileStartup", defaultValue = "true")
+    protected boolean profileStartup;
+
+    /**
+     * The duration of the after build profiling session in seconds after which the application
+     * will be automatically terminated.
+     */
+    @Parameter(property = "profileStartupTimeout", defaultValue = "20")
+    protected int profileStartupTimeout;
+
     //packaging types
     private static final String ZIP = "zip";
     private static final String NONE = "none";
@@ -434,6 +449,11 @@ public class JetMojo extends AbstractMojo {
         compilerArgs.add("-main=" + mainClass);
         compilerArgs.add("-outputname=" + outputName);
         compilerArgs.add("-decor=ht");
+
+        if (profileStartup) {
+            compilerArgs.add("-saprofmode=ALWAYS");
+            compilerArgs.add("-saproftimeout=" + profileStartupTimeout);
+        }
 
         if (addWindowsVersionInfo) {
             compilerArgs.add("-versioninfocompanyname=" + vendor);

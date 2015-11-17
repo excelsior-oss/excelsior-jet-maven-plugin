@@ -24,6 +24,7 @@
                   <packaging>none</packaging>
                   <mainClass>HelloSwing</mainClass>
                   <hideConsole>true</hideConsole>
+                  <profileStartup>false</profileStartup>
               </configuration>
           </plugin>
       </plugins>
