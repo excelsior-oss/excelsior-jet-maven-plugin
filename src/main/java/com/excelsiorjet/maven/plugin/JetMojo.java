@@ -85,7 +85,7 @@ public class JetMojo extends AbstractMojo {
      * The plugin will place the final self-contained package in the "app" subdirectory 
      * of {@code jetOutputDir}. You may deploy it to other systems using a simple copy operation.
      * For convenience, the plugin will also create a ZIP archive {@code ${project.build.finalName}.zip} 
-     * with the same content, if the {@code zipOutput} property is set to {@code true}.
+     * with the same content, if the {@code packaging} parameter is set to {@code zip}.
      * </p>
      */
     @Parameter(property = "jetOutputDir", defaultValue = "${project.build.directory}/jet")
@@ -114,7 +114,7 @@ public class JetMojo extends AbstractMojo {
     private static final String NONE = "none";
 
     /**
-     * Packaging type of resulting bundle. Permitted values are
+     * Packaging type of the resulting bundle. Permitted values are
      * <ul>
      *     <li>zip  - a zip archive with the self-contained application package</li>
      *     <li>none - skip packaging</li>
