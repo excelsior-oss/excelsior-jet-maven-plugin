@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -46,6 +47,11 @@ public class JetHomeTest {
     @Test(expected = JetHomeException.class)
     public void unsupportedJetHome() throws JetHomeException {
         new JetHome(TestUtils.getOrCreateFakeJetHome("1050").getAbsolutePath());
+    }
+
+    @Test
+    public void checkEdition() throws JetHomeException {
+        assertNotNull(new JetHome().getEdition());
     }
 
     @After

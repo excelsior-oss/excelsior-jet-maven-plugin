@@ -204,8 +204,12 @@ public class JetMojo extends AbstractMojo {
     private static final String LIB_DIR = "lib";
     private static final String APP_DIR = "app";
 
-    private void checkVersionInfo() {
+    private void checkVersionInfo(JetHome jetHome) throws JetHomeException {
         if (!Utils.isWindows()) {
+            addWindowsVersionInfo = false;
+        }
+        if (addWindowsVersionInfo && (jetHome.getEdition() == JetEdition.STANDARD)) {
+            getLog().warn(s("JetMojo.NoVersionInfoInStandard.Warning"));
             addWindowsVersionInfo = false;
         }
         if (addWindowsVersionInfo || EXCELSIOR_INSTALLER.equals(packaging)) {
@@ -291,18 +295,21 @@ public class JetMojo extends AbstractMojo {
              default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
         }
 
-        checkVersionInfo();
-
         if (eula.exists() && unicodeEula.exists()) {
             throw new MojoFailureException(s("JetMojo.BothEulaParameters.Failure"));
         }
 
-        // check and return jet home
+        // check jet home && version info
+        JetHome jetHomeObj;
         try {
-            return Utils.isEmpty(jetHome)? new JetHome() : new JetHome(jetHome);
+            jetHomeObj = Utils.isEmpty(jetHome)? new JetHome() : new JetHome(jetHome);
+
+            checkVersionInfo(jetHomeObj);
         } catch (JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
         }
+
+        return jetHomeObj;
     }
 
     private void mkdir(File dir) throws MojoExecutionException {
