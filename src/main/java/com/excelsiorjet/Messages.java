@@ -13,7 +13,7 @@ import java.util.*;
  * of {@link MessageFormat#format(String, Object...)}
  *
  */
-public class Messages {
+class Messages {
 
     private final ResourceBundle messageRB;
 

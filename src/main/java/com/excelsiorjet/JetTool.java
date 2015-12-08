@@ -28,7 +28,7 @@ import java.io.File;
  *
  * @author Nikita Lipsky
  */
-public class JetTool extends CmdLineTool {
+class JetTool extends CmdLineTool {
 
     private static String[] prependCommand(JetHome jetHome, String tool, String[] args) {
         String newArgs[] = new String[args.length + 1];

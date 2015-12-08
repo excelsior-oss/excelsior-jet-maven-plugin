@@ -32,10 +32,10 @@ public class JetHome {
 
     private static final int MIN_SUPPORTED_JET_VERSION = 1100;
 
-    private static String MARKER_FILE_PREFIX = "jet";
-    private static String MARKER_FILE_SUFFIX = ".home";
+    private static final String MARKER_FILE_PREFIX = "jet";
+    private static final String MARKER_FILE_SUFFIX = ".home";
 
-    public static final String BIN_DIR = "bin";
+    private static final String BIN_DIR = "bin";
     private String jetHome;
 
     /**
@@ -45,8 +45,9 @@ public class JetHome {
      */
     private static int getJetVersion(String jetHome) {
         File[] files = new File(jetHome, BIN_DIR).listFiles();
-        if (files == null)
+        if (files == null) {
             return -1;
+        }
         for (File f : files) {
             String fname = f.getName();
             if (fname.startsWith(MARKER_FILE_PREFIX) && fname.endsWith(MARKER_FILE_SUFFIX)) {
