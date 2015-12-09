@@ -77,6 +77,23 @@ If none of above is set, the plugin searches for an Excelsior JET installation a
 So if you only have one copy of Excelsior JET installed, the plugin should be able to find it on Windows right away,
 and on Linux and OS X - if you have run the Excelsior JET `setenv` script prior to launching Maven.
 
+### Configurations other than `<mainСlass>`
+For a complete list of parameters look into JavaDoc of `@Parameter` field declarations
+of [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
+class. Most of them have default value derived from your pom.xml project
+such as `<outputName>` parameter specifying resulting executable name.
+
+There are also two useful Windows-specific configuration parameters:
+
+`<hideConsole>true</hideConsole>` – hide console
+
+`<icon>icon-file</icon>` – set executable icon (in Windows .ico format)
+
+It is recommended to place the executable icon into VCS, and if you place it to
+`${project.basedir}/src/main/jetresources/icon.ico` you do not need to explicitly specify it
+in the configuration. In the future, we will use the location
+`${project.basedir}/src/main/jetresources` for other JET specific resource files
+(such as EULA for Excelsior Installer setup).
 
 ### Build process
 
@@ -96,3 +113,37 @@ a zip archive named `${project.build.finalName}.zip` so as to aid single file re
 
 In the future, the plugin will also support the creation of Windows installers
 and OS X app bundles.
+
+## Sample Project
+
+To demonstrate the process and result of plugin usage, we have forked the [JavaFX VNC Client](https://github.com/comtel2000/jfxvnc) project on GitHub, added the Excelsior JET plugin to its `pom.xml` file, and run it through Maven to build native binaries for three platforms.
+
+You can download the binaries from here:
+
+* [Windows (32-bit, 46MB)](http://www.excelsior-usa.com/download/jet/maven/jfxvnc-ui-1.0.0-windows-x86.zip)
+* [OS X (64-bit, 45MB)](http://www.excelsior-usa.com/download/jet/maven/jfxvnc-ui-1.0.0-osx-amd64.zip)
+* [Linux (64-bit, 45MB)](http://www.excelsior-usa.com/download/jet/maven/jfxvnc-ui-1.0.0-linux-amd64.zip)
+
+or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
+
+```
+    git clone https://github.com/pjBooms/jfxvnc
+    cd jfxvnc/ui
+    mvn jet:build
+```
+
+## Roadmap
+
+Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
+So the next few releases will add the following features:
+
+* Packaging the natively compiled application with Excelsior Installer for Windows and Linux. Adding version information to Windows executables will also be also supported.
+* Startup time optimizations. These optimizations are only possible in the presence of a startup execution profile, so the plugin will have the ability to gather that profile.
+* [Java Runtime Slim-Down](http://www.excelsiorjet.com/solutions/java-download-size).
+* Mapping of compiler and packager options to plugin configuration parameters.
+* Creation of Mac OS X application bundles.
+* Code signing.
+* Tomcat Web Applications support.
+
+Note that the order of appearance of these features is not fixed and can be adjusted based on your feedback.
+
