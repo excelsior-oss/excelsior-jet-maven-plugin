@@ -439,9 +439,11 @@ public class JetMojo extends AbstractMojo {
         File target = new File(jetOutputDir, Utils.mangleExeName(project.getBuild().getFinalName()));
         ArrayList<String> xpackArgs = new ArrayList<>();
         if (eula.exists()) {
-            xpackArgs.add("-eula"); xpackArgs.add(eula.getAbsolutePath());
+            xpackArgs.add("-eula");
+            xpackArgs.add(eula.getAbsolutePath());
         } else if (unicodeEula.exists()) {
-            xpackArgs.add("-unicode-eula"); xpackArgs.add(unicodeEula.getAbsolutePath());
+            xpackArgs.add("-unicode-eula");
+            xpackArgs.add(unicodeEula.getAbsolutePath());
         }
         if (Utils.isWindows() && installerSplash.exists()) {
             xpackArgs.add("-splash"); xpackArgs.add(installerSplash.getAbsolutePath());
