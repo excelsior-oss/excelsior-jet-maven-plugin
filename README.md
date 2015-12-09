@@ -33,7 +33,8 @@ in the `dependencies-list`, then you can use this plugin.
 
 This plugin will transform your application into an optimized native executable for the platform
 on which you run Maven, and place it into a separate directory together with all required
-Excelsior JET runtime files.
+Excelsior JET runtime files. In addition, it either packs the directory into a zip archive or into
+Excelsior Installer setup for Windows and Linux.
     
 Excelsior JET supports many more features than this plugin.
 We plan to cover all those features in the future.
@@ -91,9 +92,48 @@ There are also two useful Windows-specific configuration parameters:
 
 It is recommended to place the executable icon into VCS, and if you place it to
 `${project.basedir}/src/main/jetresources/icon.ico` you do not need to explicitly specify it
-in the configuration. In the future, we will use the location
-`${project.basedir}/src/main/jetresources` for other JET specific resource files
-(such as EULA for Excelsior Installer setup).
+in the configuration. We use the location `${project.basedir}/src/main/jetresources`
+for other JET specific resource files (such as EULA for Excelsior Installer setup).
+
+**NEW in 0.2.0 release:**
+##### Excelsior Installer configurations
+
+Starting from 0.2.0 release the plugin supports creation of Excelsior Installer setups -
+conventional Windows installer GUI or self-extracting archive with command-line interface
+supporting EULA accepting for Linux.
+
+To create Excelsior Installer setup, add the following configuration into the plugin
+`<configuration>` section:
+
+`<packaging>excelsior-installer</packaging>`
+
+Excelsior Installer setup in turn has the following configurations:
+
+* `<product>product name</product>` - default is `${project.name}`
+
+* `<vendor>product name</vendor>` -  default is `${project.organization.name}`
+
+* `<version>product version</version>` - default is `${project.version}`
+
+* `<eula>end-user license agreement</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
+
+* `<eulaEncoding>eula encoding</eulaEncoding>` - default is `autodetect`. Supported encodings are ANSI (plain text), UTF16-LE
+
+* `<installerSplash>installer splash</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
+
+##### Windows Version Information configurations
+
+The `<product>` and `<vendor>` configurations are also used for assigning
+Windows Version Information into executable on Windows.
+There also additional parameters for it:
+
+* `<winVIVersion>version</winVIVersion>` - Windows Version Information version that unlike
+to Maven `${project.version}` must be of format `v1.v2.v3.v4` where vi is a digit.
+The plugin tries to derive Windows Version Information version from `${project.version}` though using heuristics
+
+* `<winVICopyright>legal copyright</winVICopyright>` - has default value derived from other parameters
+
+* `<winVIDescription>executable description</winVIDescription>` - default is `${project.name}`
 
 ### Build process
 
@@ -110,9 +150,10 @@ into the `jet/app` directory, and binds the executable to that copy of the Runti
 
 Finally, the plugin packs the contents of the `jet/app` directory into
 a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
+If you set `<packaging>excelsior-installer</packaging>` configuration parameter the plugin creates
+Excelsior Installer setup instead.
 
-In the future, the plugin will also support the creation of Windows installers
-and OS X app bundles.
+In the future, the plugin will also support the creation of OS X app bundles.
 
 ## Sample Project
 
@@ -132,12 +173,22 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
     mvn jet:build
 ```
 
+## Release Notes
+upcoming Version 0.2.0 (??-2015)
+
+* Support of Excelsior Installer setup generation
+* Windows Version Information generation
+
+
+Version 0.1.0 (08-Dec-2015)
+* Initial release supporting compilation of the Maven Project with all dependencies into native executable
+and placing it into a separate directory with required Excelsior JET runtime files.
+
 ## Roadmap
 
 Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
 So the next few releases will add the following features:
 
-* Packaging the natively compiled application with Excelsior Installer for Windows and Linux. Adding version information to Windows executables will also be also supported.
 * Startup time optimizations. These optimizations are only possible in the presence of a startup execution profile, so the plugin will have the ability to gather that profile.
 * [Java Runtime Slim-Down](http://www.excelsiorjet.com/solutions/java-download-size).
 * Mapping of compiler and packager options to plugin configuration parameters.
@@ -146,4 +197,3 @@ So the next few releases will add the following features:
 * Tomcat Web Applications support.
 
 Note that the order of appearance of these features is not fixed and can be adjusted based on your feedback.
-
