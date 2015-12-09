@@ -40,7 +40,9 @@ public class TestUtils {
     static File getOrCreateFakeJetHome(String version){
         File fakeJetHome = getFakeJetHomeNoCreate();
         File fakeJetHomeBin = new File(fakeJetHome, "bin");
-        if (new File(fakeJetHomeBin, "jet.config").exists()) return fakeJetHome;
+        if (new File(fakeJetHomeBin, "jet.config").exists()) {
+            return fakeJetHome;
+        }
         fakeJetHome.mkdir();
         fakeJetHomeBin.mkdir();
         try {

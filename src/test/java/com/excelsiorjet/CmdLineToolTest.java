@@ -37,7 +37,7 @@ public class CmdLineToolTest {
 
 
     @Test
-    public void executeHelloWorldOnJava() throws CmdLineToolException, URISyntaxException {
+    public void executeHelloWorldOnJava() throws CmdLineToolException {
         assertEquals(0,
                 new CmdLineTool(getJavaExe(), "testClasses/HelloWorld")
                 .withLog(log)

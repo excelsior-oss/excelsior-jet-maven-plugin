@@ -72,7 +72,9 @@ public class CmdLineTool {
             try {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    if (isInterrupted()) return;
+                    if (isInterrupted()) {
+                        return;
+                    }
                     if (log != null) {
                         if (err) {
                             log.error(line);
