@@ -21,6 +21,8 @@
  */
 package com.excelsiorjet;
 
+import org.apache.maven.plugin.logging.SystemStreamLog;
+
 import java.io.File;
 
 /**
@@ -40,6 +42,8 @@ public class JetHome {
     private String jetHome;
 
     private JetEdition edition;
+
+    private boolean is64;
 
     /**
      * @param jetHome Excelsior JET home directory
@@ -152,10 +156,47 @@ public class JetHome {
         return isJetBinDir(getJetBinDirectory(jetHome));
     }
 
-    public JetEdition getEdition() throws JetHomeException {
-        if (edition == null) {
-            edition = JetEdition.detectEdition(this);
+    private String obtainVersionString() throws JetHomeException {
+        try {
+            String[] result = {null};
+            if ((new JetCompiler(this).withLog(new SystemStreamLog() {
+                public void info(CharSequence info) {
+                    if (result[0] == null) {
+                        String line = info.toString();
+                        if (line.contains("Excelsior JET ")) {
+                            result[0] = line;
+                        }
+                    }
+                }
+                public void error(CharSequence charSequence) {
+                }
+            }).execute() != 0) || result[0] == null)  {
+                throw new JetHomeException(Txt.s("JetHome.UnableToDetectEdition.Error"));
+            }
+            return result[0];
+        } catch (CmdLineToolException e) {
+            throw new JetHomeException(e.getMessage());
         }
+    }
+
+    private void detectEditionAndCpuArch() throws JetHomeException {
+        if (edition == null) {
+            String version = obtainVersionString();
+            edition = JetEdition.retrieveEdition(version);
+            if (edition == null) {
+                throw new JetHomeException(Txt.s("JetHome.UnableToDetectEdition.Error"));
+            }
+            is64 = version.contains("64-bit");
+        }
+    }
+
+    public JetEdition getEdition() throws JetHomeException {
+        detectEditionAndCpuArch();
         return edition;
+    }
+
+    public boolean is64bit() throws JetHomeException {
+        detectEditionAndCpuArch();
+        return is64;
     }
 }

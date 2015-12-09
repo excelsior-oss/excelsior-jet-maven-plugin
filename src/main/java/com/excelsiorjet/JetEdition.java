@@ -52,31 +52,12 @@ public enum JetEdition {
         return fullName;
     }
 
-    static JetEdition detectEdition(JetHome jetHome) throws JetHomeException {
-        try {
-            JetEdition[] edition = {null};
-            CmdLineTool jetCompiler = new JetCompiler(jetHome).withLog(new SystemStreamLog() {
-                public void info(CharSequence info) {
-                    if (edition[0] == null) {
-                        Arrays.stream(JetEdition.values())
-                                .filter(e -> info.toString().contains(e.fullEditionName()))
-                                .findFirst()
-                                .ifPresent(e -> edition[0] = e);
-                    }
-                }
-
-                public void error(CharSequence charSequence) {
-                }
-
-            });
-            if ((jetCompiler.execute() != 0) || edition[0] == null)  {
-                throw new JetHomeException(Txt.s("JetHome.UnableToDetectEdition.Error"));
-            }
-            return edition[0];
-        } catch (CmdLineToolException e) {
-            throw new JetHomeException(e.getMessage());
-        }
+    static JetEdition retrieveEdition(String version) {
+        JetEdition result[] = {null};
+        Arrays.stream(JetEdition.values())
+                .filter(e -> version.contains(e.fullEditionName()))
+                .findFirst()
+                .ifPresent(e -> result[0] = e);
+        return result[0];
     }
-
-
 }

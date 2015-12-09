@@ -25,16 +25,12 @@ import com.excelsiorjet.*;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
-import org.apache.maven.project.MavenProject;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -48,7 +44,7 @@ import static com.excelsiorjet.EncodingDetector.detectEncoding;
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo( name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class JetMojo extends AbstractMojo {
+public class JetMojo extends AbstractJetMojo {
 
     public static final String AUTO_DETECT_EULA_ENCODING = "autodetect";
     public static final String UNICODE_EULA_FLAG = "-unicode-eula";
@@ -59,51 +55,6 @@ public class JetMojo extends AbstractMojo {
         add(StandardCharsets.UTF_16LE.name());
         add(AUTO_DETECT_EULA_ENCODING);
     }};
-
-
-    /**
-     * The Maven Project Object.
-     */
-    @Parameter(defaultValue="${project}", readonly=true, required=true)
-    private MavenProject project;
-
-    /**
-     * The main application class.
-     */
-    @Parameter(property = "mainClass", required = true)
-    protected String mainClass;
-
-    /**
-     * The main application jar.
-     * The default is the main project artifact, which must be a jar file.
-     */
-    @Parameter(property = "mainJar", defaultValue = "${project.build.directory}/${project.build.finalName}.jar")
-    protected File mainJar;
-
-    /**
-     * Excelsior JET installation directory.
-     * If unspecified, the plugin uses the following algorithm to set the value of this property:
-     * <ul>
-     *   <li> If the jet.home system property is set, use its value</li>
-     *   <li> Otherwise, if the JET_HOME environment variable is set, use its value</li>
-     *   <li> Otherwise scan the PATH environment variable for a suitable Excelsior JET installation</li>
-     * </ul>
-     */
-    @Parameter(property = "jetHome", defaultValue = "${jet.home}")
-    protected String jetHome;
-
-    /**
-     * Directory for temporary files generated during the build process
-     * and the target directory for the resulting package.
-     * <p>
-     * The plugin will place the final self-contained package in the "app" subdirectory 
-     * of {@code jetOutputDir}. You may deploy it to other systems using a simple copy operation.
-     * For convenience, the plugin will also create a ZIP archive {@code ${project.build.finalName}.zip} 
-     * with the same content, if the {@code packaging} parameter is set to {@code zip}.
-     * </p>
-     */
-    @Parameter(property = "jetOutputDir", defaultValue = "${project.build.directory}/jet")
-    protected File jetOutputDir;
 
     /**
      * Target executable name. If not set, the main class name is used.
@@ -265,9 +216,6 @@ public class JetMojo extends AbstractMojo {
     @Parameter(property = "installerSplash", defaultValue = "${project.basedir}/src/main/jetresources/installerSplash.bmp")
     protected File installerSplash;
 
-
-    private static final String BUILD_DIR = "build";
-    private static final String LIB_DIR = "lib";
     private static final String APP_DIR = "app";
 
     private void checkVersionInfo(JetHome jetHome) throws JetHomeException {
@@ -330,23 +278,9 @@ public class JetMojo extends AbstractMojo {
         }
     }
 
-    private JetHome checkPrerequisites() throws MojoFailureException {
-        // first check that main jar were built
-        if (!mainJar.exists()) {
-            String error;
-            if (!"jar".equalsIgnoreCase(project.getPackaging())) {
-                error = s("JetMojo.BadPackaging.Failure", project.getPackaging());
-            } else {
-                error = s("JetMojo.MainJarNotFound.Failure", mainJar.getAbsolutePath());
-            }
-            getLog().error(error);
-            throw new MojoFailureException(error);
-        }
-
-        // check main class
-        if (Utils.isEmpty(mainClass)) {
-            throw new MojoFailureException(s("JetMojo.MainNotSpecified.Failure"));
-        }
+    @Override
+    protected JetHome checkPrerequisites() throws MojoFailureException {
+        JetHome jetHomeObj = super.checkPrerequisites();
 
         //normalize main and set outputName
         mainClass = mainClass.replace('.', '/');
@@ -373,11 +307,8 @@ public class JetMojo extends AbstractMojo {
              default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
         }
 
-        // check jet home && version info
-        JetHome jetHomeObj;
+        // check version info
         try {
-            jetHomeObj = Utils.isEmpty(jetHome)? new JetHome() : new JetHome(jetHome);
-
             checkVersionInfo(jetHomeObj);
 
             if (multiApp && (jetHomeObj.getEdition() == JetEdition.STANDARD)) {
@@ -390,48 +321,6 @@ public class JetMojo extends AbstractMojo {
         }
 
         return jetHomeObj;
-    }
-
-    private void mkdir(File dir) throws MojoExecutionException {
-        if (!dir.exists() && !dir.mkdirs()) {
-            if (!dir.exists()) {
-                throw new MojoExecutionException(s("JetMojo.DirCreate.Error", dir.getAbsolutePath()));
-            }
-            getLog().warn(s("JetMojo.DirCreate.Warning", dir.getAbsolutePath()));
-        }
-    }
-
-    private void copyDependency(File from, File to, File buildDir, ArrayList<String> dependencies) {
-        try {
-            if (!to.exists()) {
-                Files.copy(from.toPath(), to.toPath());
-            }
-            dependencies.add(buildDir.toPath().relativize(to.toPath()).toString());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Copies project dependencies.
-     *
-     * @return list of dependencies relative to buildDir
-     */
-    private ArrayList<String> copyDependencies(File buildDir, File mainJar) throws MojoExecutionException {
-        File libDir = new File(buildDir, LIB_DIR);
-        mkdir(libDir);
-        ArrayList<String> dependencies = new ArrayList<>();
-        try {
-            copyDependency(mainJar, new File(buildDir, mainJar.getName()), buildDir, dependencies);
-            project.getArtifacts().stream()
-                    .map(Artifact::getFile)
-                    .filter(File::isFile)
-                    .forEach(f -> copyDependency(f, new File(libDir, f.getName()), buildDir, dependencies))
-            ;
-            return dependencies;
-        } catch (Exception e) {
-            throw new MojoExecutionException(s("JetMojo.ErrorCopyingDependency.Exception"), e);
-        }
     }
 
     /**
@@ -465,6 +354,14 @@ public class JetMojo extends AbstractMojo {
 
         if (multiApp) {
             compilerArgs.add("-multiapp+");
+        }
+
+        TestRunExecProfiles execProfiles = new TestRunExecProfiles(execProfilesDir, execProfilesName);
+        if (execProfiles.getStartup().exists()) {
+            compilerArgs.add("-startupprofile=" + execProfiles.getStartup().getAbsolutePath());
+        }
+        if (execProfiles.getUsg().exists()) {
+            compilerArgs.add(execProfiles.getUsg().getAbsolutePath());
         }
 
         if (new JetCompiler(jetHome, compilerArgs.toArray(new String[compilerArgs.size()]))
@@ -591,13 +488,11 @@ public class JetMojo extends AbstractMojo {
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        Txt.log = getLog();
-
         JetHome jetHome = checkPrerequisites();
 
         // creating output dirs
-        File buildDir = new File(jetOutputDir, BUILD_DIR);
-        mkdir(buildDir);
+        File buildDir = createBuildDir();
+
         File appDir = new File(jetOutputDir, APP_DIR);
         //cleanup packageDir
         try {
