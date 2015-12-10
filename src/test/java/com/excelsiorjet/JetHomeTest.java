@@ -35,12 +35,13 @@ public class JetHomeTest {
 
     @Test
     public void jetHomeViaVMProp() throws JetHomeException {
+        String originalJetHome = System.getProperty("jet.home");
         try {
             String fakeJet = TestUtils.getOrCreateFakeJetHome().getAbsolutePath();
             System.setProperty("jet.home", fakeJet);
             assertEquals(fakeJet, new JetHome().getJetHome());
         } finally {
-            System.setProperty("jet.home", "");
+            System.setProperty("jet.home", originalJetHome != null ? originalJetHome : "");
         }
     }
 
