@@ -33,8 +33,8 @@ in the `dependencies-list`, then you can use this plugin.
 
 This plugin will transform your application into an optimized native executable for the platform
 on which you run Maven, and place it into a separate directory together with all required
-Excelsior JET runtime files. In addition, it either packs the directory into a zip archive or into
-Excelsior Installer setup for Windows and Linux.
+Excelsior JET runtime files. In addition, it can either pack that directory into a zip archive
+(all platforms) or create an Excelsior Installer setup (Windows and Linux only).
     
 Excelsior JET supports many more features than this plugin.
 We plan to cover all those features in the future.
@@ -81,14 +81,14 @@ and on Linux and OS X - if you have run the Excelsior JET `setenv` script prior 
 ### Configurations other than `<mainСlass>`
 For a complete list of parameters look into JavaDoc of `@Parameter` field declarations
 of [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
-class. Most of them have default value derived from your pom.xml project
+class. Most of them have default values derived from your pom.xml project
 such as `<outputName>` parameter specifying resulting executable name.
 
 There are also two useful Windows-specific configuration parameters:
 
 `<hideConsole>true</hideConsole>` – hide console
 
-`<icon>icon-file</icon>` – set executable icon (in Windows .ico format)
+`<icon>`*icon-file*`</icon>` – set executable icon (in Windows .ico format)
 
 It is recommended to place the executable icon into VCS, and if you place it to
 `${project.basedir}/src/main/jetresources/icon.ico` you do not need to explicitly specify it
@@ -96,44 +96,55 @@ in the configuration. We use the location `${project.basedir}/src/main/jetresour
 for other JET specific resource files (such as EULA for Excelsior Installer setup).
 
 **NEW in 0.2.0 release:**
-##### Excelsior Installer configurations
+##### Excelsior Installer Configurations
 
-Starting from 0.2.0 release the plugin supports creation of Excelsior Installer setups -
-conventional Windows installer GUI or self-extracting archive with command-line interface
-supporting EULA accepting for Linux.
+Starting from 0.2.0 release, the plugin supports creation of Excelsior Installer setups -
+conventional installer GUIs for Windows or self-extracting archives with command-line interface
+for Linux.
 
-To create Excelsior Installer setup, add the following configuration into the plugin
+To create an Excelsior Installer setup, add the following configuration into the plugin
 `<configuration>` section:
 
 `<packaging>excelsior-installer</packaging>`
 
 Excelsior Installer setup in turn has the following configurations:
 
-* `<product>product name</product>` - default is `${project.name}`
+* `<product>`*product-name*`</product>` - default is `${project.name}`
 
-* `<vendor>product name</vendor>` -  default is `${project.organization.name}`
+* `<vendor>`*vendor-name*`</vendor>` -  default is `${project.organization.name}`
 
-* `<version>product version</version>` - default is `${project.version}`
+* `<version>`*product-version*`</version>` - default is `${project.version}`
 
-* `<eula>end-user license agreement</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
+* `<eula>`*end-user-license-agreement-file`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
 
-* `<eulaEncoding>eula encoding</eulaEncoding>` - default is `autodetect`. Supported encodings are ANSI (plain text), UTF16-LE
+* `<eulaEncoding>`*eula-file-encoding*`</eulaEncoding>` - default is `autodetect`. Supported encodings are ANSI (plain text), UTF16-LE
 
-* `<installerSplash>installer splash</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
+* `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
 
-##### Windows Version Information configurations
+##### Windows Version-Information Resource Configurations
 
-The `<product>` and `<vendor>` configurations are also used for assigning
-Windows Version Information into executable on Windows.
-There also additional parameters for it:
+On Windows, the plugin automatically adds a
+[version-information resource](https://msdn.microsoft.com/en-us/library/windows/desktop/ms646981%28v=vs.85%29.aspx)
+to the resulting executable. This can be disabled by specifying the following
+configuration:
 
-* `<winVIVersion>version</winVIVersion>` - Windows Version Information version that unlike
-to Maven `${project.version}` must be of format `v1.v2.v3.v4` where vi is a digit.
-The plugin tries to derive Windows Version Information version from `${project.version}` though using heuristics
+    <addWindowsVersionInfo>false</addWindowsVersionInfo>
 
-* `<winVICopyright>legal copyright</winVICopyright>` - has default value derived from other parameters
+By default, the values of version-information resource strings are derived from project settings.
+The values of `<product>` and `<vendor>` configurations are used verbatim as
+`ProductName` and `CompanyName` respectively;
+other defaults can be changed using the following configuration parameters:
 
-* `<winVIDescription>executable description</winVIDescription>` - default is `${project.name}`
+* `<winVIVersion>`*version-string*`</winVIVersion>` - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
+
+    **Notice:** unlike Maven `${project.version}`, this string must have format `v1.v2.v3.v4`, where vi is a number.
+    The plugin would use heuristics to derive a correct version string from the specified value if the latter
+    does not meet this requirement, or from `${project.version}` if this configuration is not present.
+
+* `<winVICopyright>`*legal-copyright*`</winVICopyright>` - `LegalCopyright` string, with default value derived from other parameters
+
+* `<winVIDescription>`*executable-description*`</winVIDescription>` - `FileDescription` string, default is `${project.name}`
+
 
 ### Build process
 
@@ -150,8 +161,8 @@ into the `jet/app` directory, and binds the executable to that copy of the Runti
 
 Finally, the plugin packs the contents of the `jet/app` directory into
 a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
-If you set `<packaging>excelsior-installer</packaging>` configuration parameter the plugin creates
-Excelsior Installer setup instead.
+**New in 0.2.0:** On Windows and Linux, you can set the `<packaging>excelsior-installer</packaging>`
+configuration parameter to have the plugin create an Excelsior Installer setup instead.
 
 In the future, the plugin will also support the creation of OS X app bundles.
 
