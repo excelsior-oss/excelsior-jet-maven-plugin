@@ -52,25 +52,13 @@ public enum JetEdition {
         return fullName;
     }
 
-    /**
-     * Collection of editions that are really used in current JET.
-     */
-    private static final Collection<JetEdition> AVAILABLE_EDITIONS = Arrays.asList(
-            EVALUATION,
-            STANDARD,
-            PROFESSIONAL,
-            ENTERPRISE,
-            EMBEDDED,
-            EMBEDDED_EVALUATION
-    );
-
     static JetEdition detectEdition(JetHome jetHome) throws JetHomeException {
         try {
             JetEdition[] edition = {null};
-            if ((new JetCompiler(jetHome).withLog(new SystemStreamLog() {
+            CmdLineTool jetCompiler = new JetCompiler(jetHome).withLog(new SystemStreamLog() {
                 public void info(CharSequence info) {
                     if (edition[0] == null) {
-                        JetEdition.AVAILABLE_EDITIONS.stream()
+                        Arrays.stream(JetEdition.values())
                                 .filter(e -> info.toString().contains(e.fullEditionName()))
                                 .findFirst()
                                 .ifPresent(e -> edition[0] = e);
@@ -80,7 +68,8 @@ public enum JetEdition {
                 public void error(CharSequence charSequence) {
                 }
 
-            }).execute() != 0) || edition[0] == null)  {
+            });
+            if ((jetCompiler.execute() != 0) || edition[0] == null)  {
                 throw new JetHomeException(Txt.s("JetHome.UnableToDetectEdition.Error"));
             }
             return edition[0];
