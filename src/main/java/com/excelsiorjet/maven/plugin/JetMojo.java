@@ -101,13 +101,13 @@ public class JetMojo extends AbstractMojo {
     protected String outputName;
 
     /**
-     * Windows .ico file to associate with the resulting executable file.
+     * (Windows) .ico file to associate with the resulting executable file.
      */
     @Parameter(property = "icon", defaultValue = "${project.basedir}/src/main/jetresources/icon.ico")
     protected File icon;
 
     /**
-     * If set to {@code true}, the resulting executable file will not show a console on Windows.
+     * (Windows) If set to {@code true}, the resulting executable file will not have a console upon startup.
      */
     @Parameter(property = "hideConsole")
     protected boolean hideConsole;
@@ -118,29 +118,30 @@ public class JetMojo extends AbstractMojo {
     private static final String EXCELSIOR_INSTALLER = "excelsior-installer";
 
     /**
-     * Packaging type of the resulting bundle. Permitted values are
-     * <ul>
-     *     <li>zip  - a zip archive with the self-contained application package</li>
-     *     <li>
-     *         excelsior-installer - self-extracting installer with standard GUI for Windows
-     *         and command-line interface for Linux
-     *     </li>
-     *     <li>none - skip packaging</li>
-     * </ul>
+     * Application packaging mode. Permitted values are:
+     * <dl>
+     *   <dt>zip</dt>
+     *   <dd>zip archive with a self-contained application package (default)</dd>
+     *   <dt>excelsior-installer</dt>
+     *   <dd>self-extracting installer with standard GUI for Windows
+     *     and command-line interface for Linux</dd>
+     *   <dt>none</dt>
+     *   <dd>skip packaging altogether</dd>
+     * </dl>
      */
     @Parameter(property = "packaging", defaultValue = ZIP)
     protected String packaging;
 
     /**
-     * The vendor of the application. Required for Windows version information and Excelsior Installer.
+     * Application vendor name. Required for Windows version-information resource and Excelsior Installer.
      * By default, {@code ${project.organization.name}} is used.
-     * If it is not set, the second part of POM's groupId identifier is used with first letter capitalized.
+     * If it is not set, the second part of the POM {@code groupId} identifier is used, with first letter capitalized.
      */
     @Parameter(property = "vendor", defaultValue = "${project.organization.name}")
     protected String vendor;
 
     /**
-     * The product name. Required for Windows version information and Excelsior Installer.
+     * Product name. Required for Windows version-information resource and Excelsior Installer.
      * By default, {@code ${project.oname}} is used.
      * If it is not set, the POM's artifactId identifier is used.
      */
@@ -148,53 +149,80 @@ public class JetMojo extends AbstractMojo {
     protected String product;
 
     /**
-     * The product version. Required for Excelsior Installer.
-     * For Windows version information {@link #windowsExeVersion} Mojo parameter is used.
+     * Product version. Required for Excelsior Installer.
+     * Note: To specify a different (more precise) version number for the Windows executable version-information resource,
+     * use the {@link #winVIVersion} Mojo parameter.
      */
     @Parameter(property = "version", defaultValue = "${project.version}")
     protected String version;
 
     /**
-     * If set to {@code true}, Windows version information will be assigned to the final executable.
+     * (Windows) If set to {@code true}, a version-information resource will be added to the final executable.
+     *
+     * @see #vendor vendor
+     * @see #product product
+     * @see #winVIVersion winVIVersion
+     * @see #winVICopyright winVICopyright
+     * @see #winVIDescription winVIDescription
      */
     @Parameter(property = "addWindowsVersionInfo", defaultValue = "true")
     protected boolean addWindowsVersionInfo;
 
     /**
-     * The Windows executable version. Must have {@code v1.v2.v3.v4} format where vi is a digit.
-     * By default, {@code ${project.version}} is used. If it does not meet required format, it is coerced to it.
-     * Thus version "1.2.3-SNAPSHOT" becomes "1.2.3.0"
+     * (Windows) Version number string for the version-information resource.
+     * (Both {@code ProductVersion} and {@code FileVersion} resource strings are set to the same value.)
+     * Must have {@code v1.v2.v3.v4} format where {@code vi} is a number.
+     * If not set, {@code ${project.version}} is used. If the value does not meet the required format,
+     * it is coerced. For instance, "1.2.3-SNAPSHOT" becomes "1.2.3.0"
+     *
+     * @see #version version
      */
-    @Parameter(property = "windowsExeVersion", defaultValue = "${project.version}")
-    protected String windowsExeVersion;
+    @Parameter(property = "winVIVersion", defaultValue = "${project.version}")
+    protected String winVIVersion;
 
     /**
-     * The Windows executable version info legal copyright.
-     * By default, {@code Copyright �{$project.inceptionYear},[curYear] [vendor]} is used.
+     * (Windows) Legal copyright notice string for the version-information resource.
+     * By default, {@code "Copyright © {$project.inceptionYear},[curYear] [vendor]"} is used.
      */
-    @Parameter(property = "windowsExeCopyright")
-    protected String windowsExeCopyright;
+    @Parameter(property = "winVICopyright")
+    protected String winVICopyright;
 
     /**
-     * The Windows executable description.
+     * (Windows) File description string for the version-information resource.
      */
-    @Parameter(property = "windowsExeDescription", defaultValue = "${project.name}")
-    protected String windowsExeDescription;
+    @Parameter(property = "winVIDescription", defaultValue = "${project.name}")
+    protected String winVIDescription;
 
     /**
-     * The license agreement file in ANSI format. Used for Excelsior Installer.
+     * File containing the end-user license agreement, for Excelsior Installer to display during installation.
+     * The file must be a plain text file in ANSI encoding.
+     * If not set, and the file {@code ${project.basedir}/src/main/jetresources/eula.txt} exists,
+     * that file is used by convention.
+     * 
+     * Either one or none of {@code eula} and {@link #unicodeEula} can be specified.
+     *
+     * @see #unicodeEula unicodeEula
      */
     @Parameter(property = "eula", defaultValue = "${project.basedir}/src/main/jetresources/eula.txt")
     protected File eula;
 
     /**
-     * The license agreement file in UTF-16LE format. Used for Excelsior Installer.
+     * File containing the end-user license agreement, for Excelsior Installer to display during installation.
+     * The file must be a plain text file in UTF-16LE encoding.
+     * If not set, and the file {@code ${project.basedir}/src/main/jetresources/unicodeEula.txt} exists,
+     * that file is used by convention.
+     *
+     * Either one or none of {@link #eula} and {@code unicodeEula} can be specified.
+     *
+     * @see #eula eula
      */
     @Parameter(property = "unicodeEula", defaultValue = "${project.basedir}/src/main/jetresources/unicodeEula.txt")
     protected File unicodeEula;
 
     /**
-     * The splash for Excelsior Installer in BMP format.
+     * (Windows) Excelsior Installer splash screen image in BMP format.
+     * If not set, and the file {@code ${project.basedir}/src/main/jetresources/installerSplash.bmp} exists,
+     * that file is used by convention.
      */
     @Parameter(property = "installerSplash", defaultValue = "${project.basedir}/src/main/jetresources/installerSplash.bmp")
     protected File installerSplash;
@@ -229,8 +257,8 @@ public class JetMojo extends AbstractMojo {
             }
         }
         if (addWindowsVersionInfo) {
-            //Coerce windowsExeVersion to v1.v2.v3.v4 format.
-            String[] versions = windowsExeVersion.split("\\.");
+            //Coerce winVIVersion to v1.v2.v3.v4 format.
+            String[] versions = winVIVersion.split("\\.");
             String[] finalVersions = new String[]{"0", "0", "0", "0"};
             for (int i = 0; i < Math.min(versions.length, 4); ++i) {
                 try {
@@ -247,19 +275,19 @@ public class JetMojo extends AbstractMojo {
                 }
             }
             String finalVersion = String.join(".", finalVersions);
-            if (!windowsExeVersion.equals(finalVersion)) {
-                getLog().warn(s("JetMojo.NotCompatibleExeVersion.Warning", windowsExeVersion, finalVersion));
-                windowsExeVersion = finalVersion;
+            if (!winVIVersion.equals(finalVersion)) {
+                getLog().warn(s("JetMojo.NotCompatibleExeVersion.Warning", winVIVersion, finalVersion));
+                winVIVersion = finalVersion;
             }
 
-            if (windowsExeCopyright == null) {
+            if (winVICopyright == null) {
                 String inceptionYear = project.getInceptionYear();
                 String curYear = new SimpleDateFormat("yyyy").format(new Date());
                 String years = Utils.isEmpty(inceptionYear)? curYear : inceptionYear + "," + curYear;
-                windowsExeCopyright = "Copyright \\x00a9 " + years + " " + vendor;
+                winVICopyright = "Copyright \\x00a9 " + years + " " + vendor;
             }
-            if (windowsExeDescription == null) {
-                windowsExeDescription = product;
+            if (winVIDescription == null) {
+                winVIDescription = product;
             }
         }
     }
@@ -379,9 +407,9 @@ public class JetMojo extends AbstractMojo {
         if (addWindowsVersionInfo) {
             compilerArgs.add("-versioninfocompanyname=" + vendor);
             compilerArgs.add("-versioninfoproductname=" + product);
-            compilerArgs.add("-versioninfoproductversion=" + windowsExeVersion);
-            compilerArgs.add("-versioninfolegalcopyright=" + windowsExeCopyright);
-            compilerArgs.add("-versioninfofiledescription=" + windowsExeDescription);
+            compilerArgs.add("-versioninfoproductversion=" + winVIVersion);
+            compilerArgs.add("-versioninfolegalcopyright=" + winVICopyright);
+            compilerArgs.add("-versioninfofiledescription=" + winVIDescription);
         }
 
         if (new JetCompiler(jetHome, compilerArgs.toArray(new String[compilerArgs.size()]))
