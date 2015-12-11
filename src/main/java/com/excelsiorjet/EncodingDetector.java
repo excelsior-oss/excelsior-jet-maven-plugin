@@ -1,16 +1,10 @@
-package com.excelsiorjet.maven.plugin;
+package com.excelsiorjet;
 
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.maven.plugin.MojoFailureException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-import static com.excelsiorjet.Txt.s;
 
 public class EncodingDetector {
 
@@ -23,14 +17,12 @@ public class EncodingDetector {
     public static final byte[] UTF_16LE_BOM = new byte[]{(byte) 0xFF, (byte) 0xFE};
 
 
-    public static String detectEncoding(File eula) throws MojoFailureException {
+    public static String detectEncoding(File eula) throws IOException {
 
         try (InputStream is = new FileInputStream(eula)) {
             byte[] bom = new byte[4];
             IOUtils.readFully(is, bom);
             return detectEncodingByBom(bom).name();
-        } catch (IOException e) {
-            throw new MojoFailureException(s("JetMojo.Package.Eula.UnableToDetectEncoding", eula.getAbsolutePath()), e);
         }
     }
 

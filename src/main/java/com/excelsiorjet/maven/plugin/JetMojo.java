@@ -39,7 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.excelsiorjet.Txt.s;
-import static com.excelsiorjet.maven.plugin.EncodingDetector.detectEncoding;
+import static com.excelsiorjet.EncodingDetector.detectEncoding;
 
 /**
  *  Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -50,7 +50,7 @@ import static com.excelsiorjet.maven.plugin.EncodingDetector.detectEncoding;
 @Mojo( name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class JetMojo extends AbstractMojo {
 
-    public static final String AUTO_DETECT_EULA_ENCODING = "auto";
+    public static final String AUTO_DETECT_EULA_ENCODING = "autodetect";
     public static final String UNICODE_EULA_FLAG = "-unicode-eula";
     public static final String EULA_FLAG = "-eula";
 
@@ -211,9 +211,7 @@ public class JetMojo extends AbstractMojo {
      * If not set, and the file {@code ${project.basedir}/src/main/jetresources/eula.txt} exists,
      * that file is used by convention.
      *
-     * Either one or none of {@code eula} and {@link #unicodeEula} can be specified.
-     *
-     * @see #unicodeEula unicodeEula
+     * @see #eulaEncoding eulaEncoding
      */
     @Parameter(property = "eula", defaultValue = "${project.basedir}/src/main/jetresources/eula.txt")
     protected File eula;
@@ -223,7 +221,7 @@ public class JetMojo extends AbstractMojo {
      * <ul>
      *     <li>US-ASCII</li>
      *     <li>UTF-16LE</li>
-     *     <li>auto (Default value)</li>
+     *     <li>autodetect (Default value)</li>
      * </ul>
      * Automatic detection tries to read byte order mark and then:
      * <ol>
@@ -233,7 +231,7 @@ public class JetMojo extends AbstractMojo {
      * </ol>
      * @see <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte order mark</a>
      */
-    @Parameter(property = "eulaEncoding", defaultValue = "auto")
+    @Parameter(property = "eulaEncoding", defaultValue = AUTO_DETECT_EULA_ENCODING)
     protected String eulaEncoding;
 
     /**
@@ -457,8 +455,10 @@ public class JetMojo extends AbstractMojo {
     private File packWithEI(JetHome jetHome, File buildDir) throws CmdLineToolException, MojoFailureException {
         File target = new File(jetOutputDir, Utils.mangleExeName(project.getBuild().getFinalName()));
         ArrayList<String> xpackArgs = new ArrayList<>();
-        xpackArgs.add(eulaFlag());
-        xpackArgs.add(eula.getAbsolutePath());
+        if (eula.exists()) {
+            xpackArgs.add(eulaFlag());
+            xpackArgs.add(eula.getAbsolutePath());
+        }
         if (Utils.isWindows() && installerSplash.exists()) {
             xpackArgs.add("-splash"); xpackArgs.add(installerSplash.getAbsolutePath());
         }
@@ -478,15 +478,20 @@ public class JetMojo extends AbstractMojo {
     }
 
     private String eulaFlag() throws MojoFailureException {
-        String detectedEncoding = detectEncoding(eula);
+        String detectedEncoding;
+        try {
+            detectedEncoding = detectEncoding(eula);
+        } catch (IOException e) {
+            throw new MojoFailureException(s("JetMojo.Package.Eula.UnableToDetectEncoding", eula.getAbsolutePath()), e);
+        }
 
-        if (!"auto".equals(eulaEncoding)) {
+        if (!AUTO_DETECT_EULA_ENCODING.equals(eulaEncoding)) {
             if (!detectedEncoding.equals(eulaEncoding)) {
-                throw new MojoFailureException(s("JetMojo.Package.Eula.EncodingsAreNotMatches", detectedEncoding, eulaEncoding));
+                throw new MojoFailureException(s("JetMojo.Package.Eula.EncodingDoesNotMatchActual", detectedEncoding, eulaEncoding));
             }
         }
 
-        String actualEncoding = "auto".equals(eulaEncoding) ?
+        String actualEncoding = AUTO_DETECT_EULA_ENCODING.equals(eulaEncoding) ?
                 detectedEncoding :
                 eulaEncoding;
 
