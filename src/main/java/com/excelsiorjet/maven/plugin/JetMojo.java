@@ -207,7 +207,7 @@ public class JetMojo extends AbstractMojo {
     /**
      * The license agreement file. Used for Excelsior Installer.
      * File containing the end-user license agreement, for Excelsior Installer to display during installation.
-     * The file must be a plain text file in US-ASCII or UTF-16LE encoding.
+     * The file must be a plain text file either in US-ASCII or UTF-16LE encoding.
      * If not set, and the file {@code ${project.basedir}/src/main/jetresources/eula.txt} exists,
      * that file is used by convention.
      *
@@ -217,19 +217,20 @@ public class JetMojo extends AbstractMojo {
     protected File eula;
 
     /**
-     * Encoding of eula file. Allowed values:
+     * Encoding of the EULA file. Permitted values:
      * <ul>
-     *     <li>US-ASCII</li>
-     *     <li>UTF-16LE</li>
-     *     <li>autodetect (Default value)</li>
+     *     <li>{@code US-ASCII}</li>
+     *     <li>{@code UTF-16LE}</li>
+     *     <li>{@code autodetect} (Default value)</li>
      * </ul>
-     * Automatic detection tries to read byte order mark and then:
-     * <ol>
-     * <li>uses US-ASCII encodig, if no BOM found</li>
-     * <li>uses UTF-16LE encoding, if corresponding bom found</li>
-     * <li>halts execution with error, if another BOM found</li>
-     * </ol>
+     * If set to {@code autodetect}, the plugin looks for a byte order mark (BOM) in the file specified by {@link #eula}, and:
+     * <ul>
+     * <li>assumes US-ASCII encoding if no BOM is present,</li>
+     * <li>assumes UTF-16LE encoding if the respective BOM ({@code 0xFF 0xFE}) is present, or </li>
+     * <li>halts execution with error if some other BOM is present.</li>
+     * </ul>
      * @see <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte order mark</a>
+     * @see #eula eula
      */
     @Parameter(property = "eulaEncoding", defaultValue = AUTO_DETECT_EULA_ENCODING)
     protected String eulaEncoding;

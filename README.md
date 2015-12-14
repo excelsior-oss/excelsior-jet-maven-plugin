@@ -56,7 +56,7 @@ your `pom.xml` file:
 </plugin>
 ```
 
-and use the following command line to build the application:
+set the `<mainClass>` parameter, and use the following command line to build the application:
 
 ```
 mvn jet:build
@@ -79,9 +79,9 @@ So if you only have one copy of Excelsior JET installed, the plugin should be ab
 and on Linux and OS X - if you have run the Excelsior JET `setenv` script prior to launching Maven.
 
 ### Configurations other than `<mainСlass>`
-For a complete list of parameters look into JavaDoc of `@Parameter` field declarations
-of [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
-class. Most of them have default values derived from your pom.xml project
+For a complete list of parameters, look into the Javadoc of `@Parameter` field declarations
+in the  [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
+class. Most of them have default values derived from your `pom.xml` project
 such as `<outputName>` parameter specifying resulting executable name.
 
 There are also two useful Windows-specific configuration parameters:
@@ -90,10 +90,10 @@ There are also two useful Windows-specific configuration parameters:
 
 `<icon>`*icon-file*`</icon>` – set executable icon (in Windows .ico format)
 
-It is recommended to place the executable icon into VCS, and if you place it to
-`${project.basedir}/src/main/jetresources/icon.ico` you do not need to explicitly specify it
-in the configuration. We use the location `${project.basedir}/src/main/jetresources`
-for other JET specific resource files (such as EULA for Excelsior Installer setup).
+It is recommended to place the executable icon into a VCS, and if you place it to
+`${project.basedir}/src/main/jetresources/icon.ico`, you do not need to explicitly specify it
+in the configuration. The plugin uses the location `${project.basedir}/src/main/jetresources`
+for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
 
 **NEW in 0.2.0 release:**
 ##### Excelsior Installer Configurations
@@ -107,7 +107,7 @@ To create an Excelsior Installer setup, add the following configuration into the
 
 `<packaging>excelsior-installer</packaging>`
 
-Excelsior Installer setup in turn has the following configurations:
+Excelsior Installer setup, in turn, has the following configurations:
 
 * `<product>`*product-name*`</product>` - default is `${project.name}`
 
