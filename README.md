@@ -49,7 +49,7 @@ your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -115,7 +115,7 @@ Excelsior Installer setup, in turn, has the following configurations:
 
 * `<version>`*product-version*`</version>` - default is `${project.version}`
 
-* `<eula>`*end-user-license-agreement-file`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
+* `<eula>`*end-user-license-agreement-file*`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
 
 * `<eulaEncoding>`*eula-file-encoding*`</eulaEncoding>` - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
 
@@ -185,7 +185,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
-upcoming Version 0.2.0 (??-2015)
+Version 0.2.0 (14-Dec-2015)
 
 * Support of Excelsior Installer setup generation
 * Windows Version Information generation
