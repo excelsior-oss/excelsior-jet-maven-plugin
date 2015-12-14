@@ -117,7 +117,7 @@ Excelsior Installer setup, in turn, has the following configurations:
 
 * `<eula>`*end-user-license-agreement-file`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
 
-* `<eulaEncoding>`*eula-file-encoding*`</eulaEncoding>` - default is `autodetect`. Supported encodings are ANSI (plain text), UTF16-LE
+* `<eulaEncoding>`*eula-file-encoding*`</eulaEncoding>` - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
 
 * `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
 
