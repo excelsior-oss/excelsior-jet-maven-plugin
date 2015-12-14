@@ -33,7 +33,8 @@ in the `dependencies-list`, then you can use this plugin.
 
 This plugin will transform your application into an optimized native executable for the platform
 on which you run Maven, and place it into a separate directory together with all required
-Excelsior JET runtime files.
+Excelsior JET runtime files. In addition, it can either pack that directory into a zip archive
+(all platforms) or create an Excelsior Installer setup (Windows and Linux only).
     
 Excelsior JET supports many more features than this plugin.
 We plan to cover all those features in the future.
@@ -55,7 +56,7 @@ your `pom.xml` file:
 </plugin>
 ```
 
-and use the following command line to build the application:
+set the `<mainClass>` parameter, and use the following command line to build the application:
 
 ```
 mvn jet:build
@@ -78,22 +79,72 @@ So if you only have one copy of Excelsior JET installed, the plugin should be ab
 and on Linux and OS X - if you have run the Excelsior JET `setenv` script prior to launching Maven.
 
 ### Configurations other than `<mainСlass>`
-For a complete list of parameters look into JavaDoc of `@Parameter` field declarations
-of [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
-class. Most of them have default value derived from your pom.xml project
+For a complete list of parameters, look into the Javadoc of `@Parameter` field declarations
+in the  [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
+class. Most of them have default values derived from your `pom.xml` project
 such as `<outputName>` parameter specifying resulting executable name.
 
 There are also two useful Windows-specific configuration parameters:
 
 `<hideConsole>true</hideConsole>` – hide console
 
-`<icon>icon-file</icon>` – set executable icon (in Windows .ico format)
+`<icon>`*icon-file*`</icon>` – set executable icon (in Windows .ico format)
 
-It is recommended to place the executable icon into VCS, and if you place it to
-`${project.basedir}/src/main/jetresources/icon.ico` you do not need to explicitly specify it
-in the configuration. In the future, we will use the location
-`${project.basedir}/src/main/jetresources` for other JET specific resource files
-(such as EULA for Excelsior Installer setup).
+It is recommended to place the executable icon into a VCS, and if you place it to
+`${project.basedir}/src/main/jetresources/icon.ico`, you do not need to explicitly specify it
+in the configuration. The plugin uses the location `${project.basedir}/src/main/jetresources`
+for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
+
+**NEW in 0.2.0 release:**
+##### Excelsior Installer Configurations
+
+Starting from 0.2.0 release, the plugin supports creation of Excelsior Installer setups -
+conventional installer GUIs for Windows or self-extracting archives with command-line interface
+for Linux.
+
+To create an Excelsior Installer setup, add the following configuration into the plugin
+`<configuration>` section:
+
+`<packaging>excelsior-installer</packaging>`
+
+Excelsior Installer setup, in turn, has the following configurations:
+
+* `<product>`*product-name*`</product>` - default is `${project.name}`
+
+* `<vendor>`*vendor-name*`</vendor>` -  default is `${project.organization.name}`
+
+* `<version>`*product-version*`</version>` - default is `${project.version}`
+
+* `<eula>`*end-user-license-agreement-file`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
+
+* `<eulaEncoding>`*eula-file-encoding*`</eulaEncoding>` - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
+
+* `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
+
+##### Windows Version-Information Resource Configurations
+
+On Windows, the plugin automatically adds a
+[version-information resource](https://msdn.microsoft.com/en-us/library/windows/desktop/ms646981%28v=vs.85%29.aspx)
+to the resulting executable. This can be disabled by specifying the following
+configuration:
+
+    <addWindowsVersionInfo>false</addWindowsVersionInfo>
+
+By default, the values of version-information resource strings are derived from project settings.
+The values of `<product>` and `<vendor>` configurations are used verbatim as
+`ProductName` and `CompanyName` respectively;
+other defaults can be changed using the following configuration parameters:
+
+* `<winVIVersion>`*version-string*`</winVIVersion>` - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
+
+    **Notice:** unlike Maven `${project.version}`, this string must have format `v1.v2.v3.v4`, where vi is a number.
+    The plugin would use heuristics to derive a correct version string from the specified value if the latter
+    does not meet this requirement, or from `${project.version}` if this configuration is not present.
+
+* `<winVICopyright>`*legal-copyright*`</winVICopyright>` - `LegalCopyright` string, with default value derived from other parameters
+
+* `<winVIDescription>`*executable-description*`</winVIDescription>` - `FileDescription` string, default is `${project.name}`
+
 
 ### Build process
 
@@ -110,9 +161,10 @@ into the `jet/app` directory, and binds the executable to that copy of the Runti
 
 Finally, the plugin packs the contents of the `jet/app` directory into
 a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
+**New in 0.2.0:** On Windows and Linux, you can set the `<packaging>excelsior-installer</packaging>`
+configuration parameter to have the plugin create an Excelsior Installer setup instead.
 
-In the future, the plugin will also support the creation of Windows installers
-and OS X app bundles.
+In the future, the plugin will also support the creation of OS X app bundles.
 
 ## Sample Project
 
@@ -132,12 +184,22 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
     mvn jet:build
 ```
 
+## Release Notes
+upcoming Version 0.2.0 (??-2015)
+
+* Support of Excelsior Installer setup generation
+* Windows Version Information generation
+
+
+Version 0.1.0 (08-Dec-2015)
+* Initial release supporting compilation of the Maven Project with all dependencies into native executable
+and placing it into a separate directory with required Excelsior JET runtime files.
+
 ## Roadmap
 
 Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
 So the next few releases will add the following features:
 
-* Packaging the natively compiled application with Excelsior Installer for Windows and Linux. Adding version information to Windows executables will also be also supported.
 * Startup time optimizations. These optimizations are only possible in the presence of a startup execution profile, so the plugin will have the ability to gather that profile.
 * [Java Runtime Slim-Down](http://www.excelsiorjet.com/solutions/java-download-size).
 * Mapping of compiler and packager options to plugin configuration parameters.
@@ -146,4 +208,3 @@ So the next few releases will add the following features:
 * Tomcat Web Applications support.
 
 Note that the order of appearance of these features is not fixed and can be adjusted based on your feedback.
-
