@@ -172,9 +172,9 @@ To demonstrate the process and result of plugin usage, we have forked the [JavaF
 
 You can download the binaries from here:
 
-* [Windows (32-bit, 46MB)](http://www.excelsior-usa.com/download/jet/maven/jfxvnc-ui-1.0.0-windows-x86.zip)
+* [Windows (32-bit, 33MB installer)](http://www.excelsior-usa.com/download/jet/maven/jfxvnc-ui-1.0.0-windows-x86.exe)
 * [OS X (64-bit, 45MB)](http://www.excelsior-usa.com/download/jet/maven/jfxvnc-ui-1.0.0-osx-amd64.zip)
-* [Linux (64-bit, 45MB)](http://www.excelsior-usa.com/download/jet/maven/jfxvnc-ui-1.0.0-linux-amd64.zip)
+* [Linux (64-bit, 31MB installer)](http://www.excelsior-usa.com/download/jet/maven/jfxvnc-ui-1.0.0-linux-amd64.bin)
 
 or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
