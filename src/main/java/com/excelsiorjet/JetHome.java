@@ -159,7 +159,7 @@ public class JetHome {
     private String obtainVersionString() throws JetHomeException {
         try {
             String[] result = {null};
-            if ((new JetCompiler(this).withLog(new SystemStreamLog() {
+            CmdLineTool jetCompiler = new JetCompiler(this).withLog(new SystemStreamLog() {
                 public void info(CharSequence info) {
                     if (result[0] == null) {
                         String line = info.toString();
@@ -168,9 +168,11 @@ public class JetHome {
                         }
                     }
                 }
+
                 public void error(CharSequence charSequence) {
                 }
-            }).execute() != 0) || result[0] == null)  {
+            });
+            if ((jetCompiler.execute() != 0) || result[0] == null)  {
                 throw new JetHomeException(Txt.s("JetHome.UnableToDetectEdition.Error"));
             }
             return result[0];

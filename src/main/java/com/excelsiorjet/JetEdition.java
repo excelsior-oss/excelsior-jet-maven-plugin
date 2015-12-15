@@ -53,11 +53,9 @@ public enum JetEdition {
     }
 
     static JetEdition retrieveEdition(String version) {
-        JetEdition result[] = {null};
-        Arrays.stream(JetEdition.values())
+        return Arrays.stream(JetEdition.values())
                 .filter(e -> version.contains(e.fullEditionName()))
                 .findFirst()
-                .ifPresent(e -> result[0] = e);
-        return result[0];
+                .orElse(null);
     }
 }

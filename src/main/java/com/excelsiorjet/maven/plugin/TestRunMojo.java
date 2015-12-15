@@ -28,6 +28,7 @@ import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Mojo for performing Test Run before building the application.
@@ -42,7 +43,7 @@ import java.util.ArrayList;
  *  </li>
  *  <li>
  *      enable startup time optimization.
- *      Startup time cna be reduced by a factor of 2 due to performing Test Run.
+ *      Startup time can be reduced by a factor of 2 due to performing Test Run.
  *  </li>
  * </ul>
  * To perform Test Run, specify the following Maven command:
@@ -53,7 +54,7 @@ import java.util.ArrayList;
  * </p>
  * <p>
  * It is recommended to commit the profiles (.usg, .startup) to VCS to allow the plugin
- * use the profiles during automatic application builds withour running the Test Run.
+ * to use the profiles during automatic application builds without performing the Test Run.
  * Profiles are placed to {@code ${project.basedir}/src/main/jetresources}, by default.
  * </p>
  *
@@ -89,17 +90,10 @@ public class TestRunMojo extends AbstractJetMojo {
         xjava.arg(String.join(File.pathSeparator, compilerArgs));
         xjava.arg(mainClass);
         try {
-            String cmdLine = "";
-            for (String arg: xjava.getArgs()) {
-                if (arg.indexOf(' ') >= 0) {
-                    arg = "\"" + arg + "\"";
-                }
-                if (cmdLine.isEmpty()) {
-                    cmdLine = arg;
-                } else {
-                    cmdLine = cmdLine + " " + arg;
-                }
-            }
+            String cmdLine = xjava.getArgs().stream()
+                    .map(arg -> arg.contains(" ") ? '"' + arg + '"' : arg)
+                    .collect(Collectors.joining(" "));
+
             getLog().info(Txt.s("TestRunMojo.Start.Info", cmdLine));
 
             int errCode = xjava.execute();
