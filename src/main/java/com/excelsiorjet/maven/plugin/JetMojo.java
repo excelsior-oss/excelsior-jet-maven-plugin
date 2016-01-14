@@ -123,6 +123,12 @@ public class JetMojo extends AbstractMojo {
     @Parameter(property = "hideConsole")
     protected boolean hideConsole;
 
+    /**
+     * If set to {@code true}, the multi-app mode is enabled for the resulting executable.
+     */
+    @Parameter(property = "multiApp", defaultValue = "false")
+    protected boolean multiApp;
+
     //packaging types
     private static final String ZIP = "zip";
     private static final String NONE = "none";
@@ -428,6 +434,10 @@ public class JetMojo extends AbstractMojo {
             compilerArgs.add("-versioninfoproductversion=" + winVIVersion);
             compilerArgs.add("-versioninfolegalcopyright=" + winVICopyright);
             compilerArgs.add("-versioninfofiledescription=" + winVIDescription);
+        }
+
+        if(multiApp) {
+            compilerArgs.add("-multiapp+");
         }
 
         if (new JetCompiler(jetHome, compilerArgs.toArray(new String[compilerArgs.size()]))
