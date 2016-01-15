@@ -26,6 +26,10 @@
                   <packaging>excelsior-installer</packaging>
                   <hideConsole>true</hideConsole>
                   <multiApp>true</multiApp>
+                  <optRtFiles>
+                    <optRtFile>javafx</optRtFile>
+                    <optRtFile>javafx-webkit</optRtFile>
+                  </optRtFiles>
               </configuration>
           </plugin>
       </plugins>

@@ -129,6 +129,12 @@ public class JetMojo extends AbstractMojo {
     @Parameter(property = "multiApp", defaultValue = "false")
     protected boolean multiApp;
 
+    /**
+     * Add optional JET Runtime components to the package.
+     */
+    @Parameter(property = "optRtFiles")
+    protected String[] optRtFiles;
+
     //packaging types
     private static final String ZIP = "zip";
     private static final String NONE = "none";
@@ -481,6 +487,11 @@ public class JetMojo extends AbstractMojo {
                         "-version", version,
                         "-target", target.getAbsolutePath())
         );
+        if(optRtFiles != null && optRtFiles.length > 0) {
+            xpackArgs.add("-add-opt-rt-files");
+            xpackArgs.add(String.join(",", optRtFiles));
+        }
+
         if (new JetPackager(jetHome, xpackArgs.toArray(new String[xpackArgs.size()]))
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
