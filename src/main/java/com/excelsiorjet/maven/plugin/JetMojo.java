@@ -131,7 +131,9 @@ public class JetMojo extends AbstractMojo {
     protected boolean multiApp;
 
     /**
-     * Add optional JET Runtime components to the package (e.g. javafx-webkit).
+     * Add optional JET Runtime components to the package. Available optional components:
+     * runtime_utilities, fonts, awt_natives, api_classes, jce,
+     * accessibility, javafx, javafx-webkit, nashorn, cldr
      */
     @Parameter(property = "optRtFiles")
     protected String[] optRtFiles;
