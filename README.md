@@ -78,7 +78,7 @@ If none of above is set, the plugin searches for an Excelsior JET installation a
 So if you only have one copy of Excelsior JET installed, the plugin should be able to find it on Windows right away,
 and on Linux and OS X - if you have run the Excelsior JET `setenv` script prior to launching Maven.
 
-### Configurations other than `<mainСlass>`
+### Configurations other than `<mainClass>`
 For a complete list of parameters, look into the Javadoc of `@Parameter` field declarations
 in the  [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
 class. Most of them have default values derived from your `pom.xml` project
@@ -145,6 +145,23 @@ other defaults can be changed using the following configuration parameters:
 
 * `<winVIDescription>`*executable-description*`</winVIDescription>` - `FileDescription` string, default is `${project.name}`
 
+**NEW in 0.2.1 release:**
+##### Multi-app executables
+The plugin may compile more than one application into a single executable and
+let you select a particular application at launch time via command line arguments.
+
+The command line syntax of [multi-app executables](http://www.excelsior-usa.com/doc/jet/jetw011.html#0330)
+is an extension of the `java` launcher command
+line syntax that allows specifying the main class, VM options, Java system properties,
+and the arguments of the application:
+
+```
+    Exe-name [Properties-and-options] Main-classname [App-arguments]
+```
+
+To enable the multi-app mode add the following configuration parameter:
+
+`<multiApp>true</multiApp>`
 
 ### Build process
 
@@ -185,6 +202,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+Version 0.2.1 (??-Jan-2016)
+
+* Support of multi-app executables
+
 Version 0.2.0 (14-Dec-2015)
 
 * Support of Excelsior Installer setup generation

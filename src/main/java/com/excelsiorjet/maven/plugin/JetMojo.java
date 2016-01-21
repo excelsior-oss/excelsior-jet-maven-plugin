@@ -124,7 +124,8 @@ public class JetMojo extends AbstractMojo {
     protected boolean hideConsole;
 
     /**
-     * If set to {@code true}, the multi-app mode is enabled for the resulting executable.
+     * If set to {@code true}, the multi-app mode is enabled for the resulting executable
+     * (executable with Java command line syntax).
      */
     @Parameter(property = "multiApp", defaultValue = "false")
     protected boolean multiApp;
@@ -436,7 +437,7 @@ public class JetMojo extends AbstractMojo {
             compilerArgs.add("-versioninfofiledescription=" + winVIDescription);
         }
 
-        if(multiApp) {
+        if (multiApp) {
             compilerArgs.add("-multiapp+");
         }
 

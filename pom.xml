@@ -3,7 +3,7 @@
 
   <groupId>com.excelsiorjet</groupId>
   <artifactId>excelsior-jet-maven-plugin</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.2.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Excelsior JET Maven Plugin</name>
