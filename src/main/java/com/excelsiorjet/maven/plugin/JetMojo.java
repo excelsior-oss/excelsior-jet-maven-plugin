@@ -131,7 +131,7 @@ public class JetMojo extends AbstractMojo {
     protected boolean multiApp;
 
     /**
-     * Add optional JET Runtime components to the package.
+     * Add optional JET Runtime components to the package (e.g. javafx-webkit).
      */
     @Parameter(property = "optRtFiles")
     protected String[] optRtFiles;
@@ -494,7 +494,7 @@ public class JetMojo extends AbstractMojo {
                         "-version", version,
                         "-target", target.getAbsolutePath())
         );
-        if(optRtFiles != null && optRtFiles.length > 0) {
+        if (optRtFiles != null && optRtFiles.length > 0) {
             xpackArgs.add("-add-opt-rt-files");
             xpackArgs.add(String.join(",", optRtFiles));
         }
