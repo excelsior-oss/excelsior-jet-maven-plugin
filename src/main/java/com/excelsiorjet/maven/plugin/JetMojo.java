@@ -341,13 +341,36 @@ public class JetMojo extends AbstractJetMojo {
         return jetHomeObj;
     }
 
+    private String createJetCompilerProject(File buildDir, ArrayList<String> compilerArgs, List<Dependency> dependencies, ArrayList<String> modules) throws MojoExecutionException {
+        String prj = outputName + ".prj";
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(
+                new FileOutputStream(new File (buildDir, prj))))))
+        {
+            compilerArgs.forEach(out::println);
+            for (Dependency dep: dependencies) {
+                out.println("!classpathentry " + dep.dependency);
+                out.println("  -optimize=" + (dep.isLib?"autodetect":"all"));
+                out.println("  -protect=" + (dep.isLib?"nomatter":"all"));
+                out.println("!end");
+            }
+            for(String mod: modules) {
+                out.println("!module " + mod);
+            }
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage());
+        }
+        return prj;
+    }
+
     /**
      * Invokes the Excelsior JET AOT compiler.
      */
-    private void compile(JetHome jetHome, File buildDir, ArrayList<String> compilerArgs) throws MojoFailureException, CmdLineToolException {
+    private void compile(JetHome jetHome, File buildDir, List<Dependency> dependencies) throws MojoFailureException, CmdLineToolException, MojoExecutionException {
+        ArrayList<String> compilerArgs = new ArrayList<>();
+        ArrayList<String> modules = new ArrayList<>();
         if (Utils.isWindows()) {
             if (icon.isFile()) {
-                compilerArgs.add(icon.getAbsolutePath());
+                modules.add(icon.getAbsolutePath());
             }
             if (hideConsole) {
                 compilerArgs.add("-gui+");
@@ -379,10 +402,12 @@ public class JetMojo extends AbstractJetMojo {
             compilerArgs.add("-startupprofile=" + execProfiles.getStartup().getAbsolutePath());
         }
         if (execProfiles.getUsg().exists()) {
-            compilerArgs.add(execProfiles.getUsg().getAbsolutePath());
+            modules.add(execProfiles.getUsg().getAbsolutePath());
         }
 
-        if (new JetCompiler(jetHome, compilerArgs.toArray(new String[compilerArgs.size()]))
+        String prj = createJetCompilerProject(buildDir, compilerArgs, dependencies, modules);
+
+        if (new JetCompiler(jetHome, "=p", prj)
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Build.Failure"));
         }
@@ -532,10 +557,10 @@ public class JetMojo extends AbstractJetMojo {
             throw new MojoFailureException(e.getMessage(), e);
         }
 
-        ArrayList<String> compilerArgs = copyDependencies(buildDir, mainJar);
+        List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
 
         try {
-            compile(jetHome, buildDir, compilerArgs);
+            compile(jetHome, buildDir, dependencies);
 
             createAppDir(jetHome, buildDir, appDir);
 

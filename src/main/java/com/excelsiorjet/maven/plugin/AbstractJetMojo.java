@@ -25,7 +25,6 @@ import com.excelsiorjet.JetHome;
 import com.excelsiorjet.JetHomeException;
 import com.excelsiorjet.Txt;
 import com.excelsiorjet.Utils;
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -36,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.excelsiorjet.Txt.s;
 
@@ -156,12 +156,22 @@ public abstract class AbstractJetMojo extends AbstractMojo {
         return buildDir;
     }
 
-    private void copyDependency(File from, File to, File buildDir, ArrayList<String> dependencies) {
+    protected static class Dependency {
+        final String dependency;
+        final boolean isLib;
+
+        public Dependency(String dependency, boolean isLib) {
+            this.dependency = dependency;
+            this.isLib = isLib;
+        }
+    }
+
+    private void copyDependency(File from, File to, File buildDir, List<Dependency> dependencies, boolean isLib) {
         try {
             if (!to.exists()) {
                 Files.copy(from.toPath(), to.toPath());
             }
-            dependencies.add(buildDir.toPath().relativize(to.toPath()).toString());
+            dependencies.add(new Dependency(buildDir.toPath().relativize(to.toPath()).toString(), isLib));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -172,16 +182,18 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      *
      * @return list of dependencies relative to buildDir
      */
-    protected ArrayList<String> copyDependencies(File buildDir, File mainJar) throws MojoExecutionException {
+    protected List<Dependency> copyDependencies(File buildDir, File mainJar) throws MojoExecutionException {
         File libDir = new File(buildDir, LIB_DIR);
         mkdir(libDir);
-        ArrayList<String> dependencies = new ArrayList<>();
+        ArrayList<Dependency> dependencies = new ArrayList<>();
         try {
-            copyDependency(mainJar, new File(buildDir, mainJar.getName()), buildDir, dependencies);
+            copyDependency(mainJar, new File(buildDir, mainJar.getName()), buildDir, dependencies, false);
             project.getArtifacts().stream()
-                    .map(Artifact::getFile)
-                    .filter(File::isFile)
-                    .forEach(f -> copyDependency(f, new File(libDir, f.getName()), buildDir, dependencies))
+                    .filter(a -> a.getFile().isFile())
+                    .forEach(a ->
+                            copyDependency(a.getFile(), new File(libDir, a.getFile().getName()), buildDir,
+                                    dependencies, !a.getGroupId().equals(project.getGroupId()))
+                    )
             ;
             return dependencies;
         } catch (Exception e) {
