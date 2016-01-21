@@ -464,9 +464,16 @@ public class JetMojo extends AbstractMojo {
      * as a self-contained directory
      */
     private void createAppDir(JetHome jetHome, File buildDir, File appDir) throws CmdLineToolException, MojoFailureException {
-        if (new JetPackager(jetHome,
-                 "-add-file", Utils.mangleExeName(outputName), "/",
-                 "-target", appDir.getAbsolutePath())
+        ArrayList<String> xpackArgs = new ArrayList<>();
+        xpackArgs.addAll(Arrays.asList(
+            "-add-file", Utils.mangleExeName(outputName), "/",
+            "-target", appDir.getAbsolutePath()
+        ));
+        if (optRtFiles != null && optRtFiles.length > 0) {
+            xpackArgs.add("-add-opt-rt-files");
+            xpackArgs.add(String.join(",", optRtFiles));
+        }
+        if (new JetPackager(jetHome, xpackArgs.toArray(new String[xpackArgs.size()]))
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
         }
@@ -494,11 +501,6 @@ public class JetMojo extends AbstractMojo {
                         "-version", version,
                         "-target", target.getAbsolutePath())
         );
-        if (optRtFiles != null && optRtFiles.length > 0) {
-            xpackArgs.add("-add-opt-rt-files");
-            xpackArgs.add(String.join(",", optRtFiles));
-        }
-
         if (new JetPackager(jetHome, xpackArgs.toArray(new String[xpackArgs.size()]))
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
