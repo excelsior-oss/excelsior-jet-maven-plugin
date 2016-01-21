@@ -364,6 +364,12 @@ public class JetMojo extends AbstractMojo {
             jetHomeObj = Utils.isEmpty(jetHome)? new JetHome() : new JetHome(jetHome);
 
             checkVersionInfo(jetHomeObj);
+
+            if (multiApp && (jetHomeObj.getEdition() == JetEdition.STANDARD)) {
+                getLog().warn(s("JetMojo.NoMultiappInStandard.Warning"));
+                multiApp = false;
+            }
+
         } catch (JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
         }
