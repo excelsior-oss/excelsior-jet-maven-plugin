@@ -27,7 +27,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -75,7 +75,7 @@ public class TestRunMojo extends AbstractJetMojo {
         // creating output dirs
         File buildDir = createBuildDir();
 
-        ArrayList<String> compilerArgs = copyDependencies(buildDir, mainJar);
+        List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
 
         mkdir(execProfilesDir);
 
@@ -88,7 +88,8 @@ public class TestRunMojo extends AbstractJetMojo {
             throw new MojoFailureException(e.getMessage());
         }
         xjava.arg("-cp");
-        xjava.arg(String.join(File.pathSeparator, compilerArgs));
+        xjava.arg(String.join(File.pathSeparator,
+                dependencies.stream().map(d -> d.dependency).collect(Collectors.toList())));
         xjava.arg(mainClass);
         try {
             String cmdLine = xjava.getArgs().stream()
