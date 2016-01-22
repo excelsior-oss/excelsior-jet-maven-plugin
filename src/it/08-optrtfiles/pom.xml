@@ -24,6 +24,7 @@
                   <mainClass>HelloWorld</mainClass>
                   <optRtFiles>
                     <param>javafx-webkit</param>
+                    <param>nashorn</param>
                   </optRtFiles>
               </configuration>
           </plugin>
