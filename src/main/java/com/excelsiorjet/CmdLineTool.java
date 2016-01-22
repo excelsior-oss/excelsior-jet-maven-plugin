@@ -24,6 +24,9 @@ package com.excelsiorjet;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.*;
+import java.lang.ProcessBuilder.Redirect;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,13 +37,13 @@ import java.util.Map;
  */
 public class CmdLineTool {
 
-    private String[] args;
+    private ArrayList<String> args;
     private Log log;
     private File workDir;
     private HashMap<String, String> env = new HashMap<>();
 
     public CmdLineTool(String... args) {
-        this.args = args;
+        this.args = new ArrayList<>(Arrays.asList(args));
     }
 
     public CmdLineTool withLog(Log log) {
@@ -55,6 +58,11 @@ public class CmdLineTool {
 
     public CmdLineTool withEnvironment(String var, String val) {
         this.env.put(Utils.isWindows() ? var.toUpperCase() : var, val);
+        return this;
+    }
+
+    public CmdLineTool arg(String arg) {
+        args.add(arg);
         return this;
     }
 
@@ -90,7 +98,7 @@ public class CmdLineTool {
 
     public int execute() throws CmdLineToolException {
         try {
-            ProcessBuilder pb = new ProcessBuilder(args).directory(workDir);
+            ProcessBuilder pb = new ProcessBuilder(args).directory(workDir).redirectInput(Redirect.INHERIT);
             if (!env.isEmpty()) {
                 Map<String, String> penv = pb.environment();
                 if (Utils.isWindows()) {
@@ -116,6 +124,9 @@ public class CmdLineTool {
         } catch (IOException | InterruptedException e) {
             throw new CmdLineToolException(e);
         }
+    }
 
+    public ArrayList<String> getArgs() {
+        return args;
     }
 }

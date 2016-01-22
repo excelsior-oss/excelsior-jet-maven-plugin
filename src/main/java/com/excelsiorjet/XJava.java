@@ -18,44 +18,27 @@
  *  along with Excelsior JET Maven Plugin.
  *  If not, see <http://www.gnu.org/licenses/>.
  *
- */
+*/
 package com.excelsiorjet;
 
-import org.apache.maven.plugin.logging.SystemStreamLog;
-
-import java.util.Arrays;
-import java.util.Collection;
-
 /**
- * Excelsior JET Edition enum.
+ * Excelsior JET "xjava" tool executor utility class.
  *
  * @author Nikita Lipsky
  */
-public enum JetEdition {
-    EVALUATION("Evaluation"),
-    STANDARD("Standard Edition"),
-    PROFESSIONAL("Professional Edition"),
-    ENTERPRISE("Enterprise Edition"),
-    EMBEDDED("Embedded Edition"),
-    EMBEDDED_EVALUATION("Embedded Evaluation");
+public class XJava extends JetTool {
 
-    private final String fullName;
+    private static final String X_JAVA = "xjava";
 
-    JetEdition(String fullName) {
-        this.fullName = fullName;
+    public XJava(JetHome jetHome, String... args) {
+        super(jetHome, X_JAVA, args);
     }
 
-    /**
-     * Examples: "Enterprise Edition", "Embedded Evaluation".
-     */
-    public String fullEditionName() {
-        return fullName;
-    }
-
-    static JetEdition retrieveEdition(String version) {
-        return Arrays.stream(JetEdition.values())
-                .filter(e -> version.contains(e.fullEditionName()))
-                .findFirst()
-                .orElse(null);
+    public XJava addTestRunArgs(TestRunExecProfiles execProfiles) throws JetHomeException {
+        arg("-Djet.jit.profile.startup=" + execProfiles.getStartup().getAbsolutePath());
+        if (!jetHome.is64bit()) {
+            arg("-Djet.usage.list=" + execProfiles.getUsg().getAbsolutePath());
+        }
+        return this;
     }
 }

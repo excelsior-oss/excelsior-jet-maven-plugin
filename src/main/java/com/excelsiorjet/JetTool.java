@@ -30,6 +30,8 @@ import java.io.File;
  */
 class JetTool extends CmdLineTool {
 
+    protected JetHome jetHome;
+
     private static String[] prependCommand(JetHome jetHome, String tool, String[] args) {
         String newArgs[] = new String[args.length + 1];
         System.arraycopy(args, 0, newArgs, 1, args.length);
@@ -39,6 +41,7 @@ class JetTool extends CmdLineTool {
 
     public JetTool(JetHome jetHome, String tool, String... args) {
         super(prependCommand(jetHome, tool, args));
+        this.jetHome = jetHome;
         String path = System.getenv("PATH");
         //place itself to the start of path
         path = jetHome.getJetBinDirectory() + File.pathSeparator + path;
