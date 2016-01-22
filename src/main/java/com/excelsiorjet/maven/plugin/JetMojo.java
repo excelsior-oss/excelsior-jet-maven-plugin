@@ -75,6 +75,42 @@ public class JetMojo extends AbstractJetMojo {
     protected boolean hideConsole;
 
     /**
+     * (32-bit only) If set to {@code true}, the Global Optimizer is enabled
+     * providing higher performance and lower memory usage for the compiled application.
+     * Performing the Test Run is mandatory when Global Optimizer is enabled.
+     * Global Optimizer is enabled automatically when you use Java Runtime Slim-Down.
+     *
+     * @see TestRunMojo
+     * @see #detachedBaseURL
+     */
+    @Parameter(property = "globalOptimizer")
+    protected boolean globalOptimizer;
+
+    /**
+     * (32-bit only) Detach the specified components from the main installation package and move them
+     * to a remote package. If not specified, components detected to be unused by your
+     * application are automatically detached if Java Runtime Slim-Down is enabled.
+     * Available detachable components:
+     *  corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws
+     *
+     *  @see #detachedBaseURL
+     */
+    @Parameter(property = "detachComponents")
+    protected String[] detachComponents;
+
+    /**
+     * (32-bit only) Enable Java Runtime Slim-Down and set the base url for the detached package.
+     */
+    @Parameter(property = "detachedBaseURL")
+    protected String detachedBaseURL;
+
+    /**
+     * (32-bit only) Set the detached package name.
+     */
+    @Parameter(property = "detachedPackage", defaultValue = "${project.build.finalName}.pkl")
+    protected String detachedPackage;
+
+    /**
      * If set to {@code true}, the multi-app mode is enabled for the resulting executable
      * (executable with Java command line syntax).
      */
@@ -286,6 +322,31 @@ public class JetMojo extends AbstractJetMojo {
         }
     }
 
+    private void checkGlobalAndSlimDownParameters(JetHome jetHome) throws JetHomeException, MojoFailureException {
+        if (globalOptimizer) {
+            if (jetHome.is64bit()) {
+                getLog().warn(s("JetMojo.NoGlobalIn64Bit.Warning"));
+                globalOptimizer = false;
+            }
+        }
+
+        if (detachedBaseURL != null) {
+            if (jetHome.is64bit()) {
+                getLog().warn(s("JetMojo.NoSlimDownIn64Bit.Warning"));
+                detachedBaseURL = null;
+            } else {
+                globalOptimizer = true;
+            }
+        }
+
+        if (globalOptimizer) {
+            TestRunExecProfiles execProfiles = new TestRunExecProfiles(execProfilesDir, execProfilesName);
+            if (!execProfiles.getUsg().exists()) {
+                throw new MojoFailureException(s("JetMojo.NoTestRun.Failure"));
+            }
+        }
+    }
+
     @Override
     protected JetHome checkPrerequisites() throws MojoFailureException {
         JetHome jetHomeObj = super.checkPrerequisites();
@@ -333,6 +394,8 @@ public class JetMojo extends AbstractJetMojo {
                     profileStartup = false;
                 }
             }
+
+            checkGlobalAndSlimDownParameters(jetHomeObj);
 
         } catch (JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
@@ -397,6 +460,10 @@ public class JetMojo extends AbstractJetMojo {
             compilerArgs.add("-multiapp+");
         }
 
+        if (globalOptimizer) {
+            compilerArgs.add("-global+");
+        }
+
         TestRunExecProfiles execProfiles = new TestRunExecProfiles(execProfilesDir, execProfilesName);
         if (execProfiles.getStartup().exists()) {
             compilerArgs.add("-startupprofile=" + execProfiles.getStartup().getAbsolutePath());
@@ -415,13 +482,26 @@ public class JetMojo extends AbstractJetMojo {
 
     private ArrayList<String> getCommonXPackArgs() {
         ArrayList<String> xpackArgs = new ArrayList<>();
+
         xpackArgs.addAll(Arrays.asList(
             "-add-file", Utils.mangleExeName(outputName), "/"
         ));
+
         if (optRtFiles != null && optRtFiles.length > 0) {
             xpackArgs.add("-add-opt-rt-files");
             xpackArgs.add(String.join(",", optRtFiles));
         }
+
+        if (detachedBaseURL != null) {
+
+            xpackArgs.addAll(Arrays.asList(
+                "-detached-base-url", detachedBaseURL,
+                "-detach-components",
+                  (detachComponents != null && detachComponents.length > 0)? String.join(",", detachComponents) : "auto",
+                "-detached-package", new File(jetOutputDir, detachedPackage).getAbsolutePath()
+            ));
+        }
+
         return xpackArgs;
     }
 
@@ -540,6 +620,10 @@ public class JetMojo extends AbstractJetMojo {
             default:
                 getLog().info(s("JetMojo.Build.Success"));
                 getLog().info(s("JetMojo.GetDir.Info", packageDir.getAbsolutePath()));
+        }
+
+        if (detachedBaseURL != null) {
+            getLog().info(s("JetMojo.SlimDown.Info", new File(jetOutputDir, detachedPackage), detachedBaseURL));
         }
     }
 
