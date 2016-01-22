@@ -378,20 +378,27 @@ public class JetMojo extends AbstractJetMojo {
         }
     }
 
-    /**
-     * Packages the generated executable and required Excelsior JET runtime files
-     * as a self-contained directory
-     */
-    private void createAppDir(JetHome jetHome, File buildDir, File appDir) throws CmdLineToolException, MojoFailureException {
+    private ArrayList<String> getCommonXPackArgs() {
         ArrayList<String> xpackArgs = new ArrayList<>();
         xpackArgs.addAll(Arrays.asList(
-            "-add-file", Utils.mangleExeName(outputName), "/",
-            "-target", appDir.getAbsolutePath()
+            "-add-file", Utils.mangleExeName(outputName), "/"
         ));
         if (optRtFiles != null && optRtFiles.length > 0) {
             xpackArgs.add("-add-opt-rt-files");
             xpackArgs.add(String.join(",", optRtFiles));
         }
+        return xpackArgs;
+    }
+
+    /**
+     * Packages the generated executable and required Excelsior JET runtime files
+     * as a self-contained directory
+     */
+    private void createAppDir(JetHome jetHome, File buildDir, File appDir) throws CmdLineToolException, MojoFailureException {
+        ArrayList<String> xpackArgs = getCommonXPackArgs();
+        xpackArgs.addAll(Arrays.asList(
+            "-target", appDir.getAbsolutePath()
+        ));
         if (new JetPackager(jetHome, xpackArgs.toArray(new String[xpackArgs.size()]))
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
@@ -404,7 +411,7 @@ public class JetMojo extends AbstractJetMojo {
      */
     private File packWithEI(JetHome jetHome, File buildDir) throws CmdLineToolException, MojoFailureException {
         File target = new File(jetOutputDir, Utils.mangleExeName(project.getBuild().getFinalName()));
-        ArrayList<String> xpackArgs = new ArrayList<>();
+        ArrayList<String> xpackArgs = getCommonXPackArgs();
         if (eula.exists()) {
             xpackArgs.add(eulaFlag());
             xpackArgs.add(eula.getAbsolutePath());
@@ -413,7 +420,6 @@ public class JetMojo extends AbstractJetMojo {
             xpackArgs.add("-splash"); xpackArgs.add(installerSplash.getAbsolutePath());
         }
         xpackArgs.addAll(Arrays.asList(
-                        "-add-file", Utils.mangleExeName(outputName), "/",
                         "-backend", "excelsior-installer",
                         "-company", vendor,
                         "-product", product,
