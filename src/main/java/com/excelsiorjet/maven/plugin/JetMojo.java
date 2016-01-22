@@ -96,6 +96,14 @@ public class JetMojo extends AbstractJetMojo {
     @Parameter(property = "profileStartupTimeout", defaultValue = "20")
     protected int profileStartupTimeout;
 
+    /**
+     * Add optional JET Runtime components to the package. Available optional components:
+     * runtime_utilities, fonts, awt_natives, api_classes, jce,
+     * accessibility, javafx, javafx-webkit, nashorn, cldr
+     */
+    @Parameter(property = "optRtFiles")
+    protected String[] optRtFiles;
+
     //packaging types
     private static final String ZIP = "zip";
     private static final String NONE = "none";
@@ -375,9 +383,16 @@ public class JetMojo extends AbstractJetMojo {
      * as a self-contained directory
      */
     private void createAppDir(JetHome jetHome, File buildDir, File appDir) throws CmdLineToolException, MojoFailureException {
-        if (new JetPackager(jetHome,
-                 "-add-file", Utils.mangleExeName(outputName), "/",
-                 "-target", appDir.getAbsolutePath())
+        ArrayList<String> xpackArgs = new ArrayList<>();
+        xpackArgs.addAll(Arrays.asList(
+            "-add-file", Utils.mangleExeName(outputName), "/",
+            "-target", appDir.getAbsolutePath()
+        ));
+        if (optRtFiles != null && optRtFiles.length > 0) {
+            xpackArgs.add("-add-opt-rt-files");
+            xpackArgs.add(String.join(",", optRtFiles));
+        }
+        if (new JetPackager(jetHome, xpackArgs.toArray(new String[xpackArgs.size()]))
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
         }
