@@ -31,35 +31,36 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 /**
- * Mojo for performing Test Run before building the application.
+ * Mojo for performing a Test Run before building the application.
  * Running your Java application before optimization helps Excelsior JET:
  * <ul>
- *  <li> verify that your application can run on Excelsior JET JVM flawlessly
- *      (thus do not have implicit dependencies on Oracle JVM implementation
- *      and does not have configuration problems)
+ *  <li>
+ *      Verify that your application can run on the Excelsior JET JVM flawlessly
+ *      (i.e. it has no implicit dependencies on the Oracle JVM implementation
+ *      and your Maven project has no configuration issues specific to Excelsior JET).
  *  </li>
  *  <li>
- *      collect profile information to optimize your app more effectively.
+ *      Collect profile information to optimize your app more effectively.
  *  </li>
  *  <li>
- *      enable startup time optimization.
- *      Startup time can be reduced by a factor of 2 due to performing Test Run.
+ *      Enable application startup time optimization.
+ *      Performing a Test Run can reduce the startup time by a factor of up to two.
  *  </li>
  * </ul>
- * To perform Test Run, specify the following Maven command:
+ * To perform a Test Run, issue the following Maven command:
  * <p>
  * <code>
  *     mvn jet:testrun
  * </code>
  * </p>
  * <p>
- * It is recommended to commit the profiles (.usg, .startup) to VCS to allow the plugin
- * to use the profiles during automatic application builds without performing the Test Run.
- * Profiles are placed to {@code ${project.basedir}/src/main/jetresources}, by default.
+ * It is recommended to commit the collected profiles (.usg, .startup) to VCS so as to
+ * enable the plugin to re-use them during subsequent builds without performing the Test Run.
+ * The profiles are placed to {@code ${project.basedir}/src/main/jetresources} by default.
  * </p>
  *
- *  Note: the application is run in a special TEST MODE so disregard
- *  its modest start-up time and performance during Test Run.
+ *  Note: During a Test Run, the application is executed in a special profiling mode,
+ *        so disregard its modest start-up time and performance.
  *
  * @author Nikita Lipsky
  */

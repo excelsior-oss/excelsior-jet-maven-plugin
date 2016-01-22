@@ -90,10 +90,10 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected File jetOutputDir;
 
     /**
-     * The placement of execution profiles gathered during Test Run.
-     * By default, they are placed into "src/main/jetresources" subdirectory of your project.
-     * It is recommended to commit the profiles (.usg, .startup) to VCS to allow the plugin
-     * use the profiles during automatic application builds withour running the Test Run.
+     * The target location for application execution profiles gathered during Test Run.
+     * By default, they are placed into the "src/main/jetresources" subdirectory of your project.
+     * It is recommended to commit the collected profiles (.usg, .startup) to VCS to enable the plugin
+     * to re-use them during subsequent builds without performing a Test Run.
      *
      * @see TestRunMojo
      */
@@ -101,7 +101,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected File execProfilesDir;
 
     /**
-     * The file name of execution profiles. By default, ${project.artifactId} is used.
+     * The base file name of execution profiles. By default, ${project.artifactId} is used.
      */
     @Parameter(property = "execProfilesName", defaultValue = "${project.artifactId}")
     protected String execProfilesName;
