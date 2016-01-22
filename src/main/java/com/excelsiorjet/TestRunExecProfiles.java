@@ -18,44 +18,31 @@
  *  along with Excelsior JET Maven Plugin.
  *  If not, see <http://www.gnu.org/licenses/>.
  *
- */
+*/
 package com.excelsiorjet;
 
-import org.apache.maven.plugin.logging.SystemStreamLog;
-
-import java.util.Arrays;
-import java.util.Collection;
+import java.io.File;
 
 /**
- * Excelsior JET Edition enum.
+ * Encapsulates execution profile files gathered during Test Run.
  *
  * @author Nikita Lipsky
  */
-public enum JetEdition {
-    EVALUATION("Evaluation"),
-    STANDARD("Standard Edition"),
-    PROFESSIONAL("Professional Edition"),
-    ENTERPRISE("Enterprise Edition"),
-    EMBEDDED("Embedded Edition"),
-    EMBEDDED_EVALUATION("Embedded Evaluation");
+public class TestRunExecProfiles {
 
-    private final String fullName;
+    private File usg;
+    private File startup;
 
-    JetEdition(String fullName) {
-        this.fullName = fullName;
+    public TestRunExecProfiles(File outputDir, String outputname) {
+        this.usg = new File(outputDir, outputname + ".usg");
+        this.startup = new File(outputDir, outputname + ".startup");
     }
 
-    /**
-     * Examples: "Enterprise Edition", "Embedded Evaluation".
-     */
-    public String fullEditionName() {
-        return fullName;
+    public File getUsg() {
+        return usg;
     }
 
-    static JetEdition retrieveEdition(String version) {
-        return Arrays.stream(JetEdition.values())
-                .filter(e -> version.contains(e.fullEditionName()))
-                .findFirst()
-                .orElse(null);
+    public File getStartup() {
+        return startup;
     }
 }

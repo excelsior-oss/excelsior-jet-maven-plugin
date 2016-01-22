@@ -95,8 +95,7 @@ It is recommended to place the executable icon into a VCS, and if you place it t
 in the configuration. The plugin uses the location `${project.basedir}/src/main/jetresources`
 for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
 
-**NEW in 0.2.0 release:**
-##### Excelsior Installer Configurations
+#### Excelsior Installer Configurations
 
 Starting from 0.2.0 release, the plugin supports creation of Excelsior Installer setups -
 conventional installer GUIs for Windows or self-extracting archives with command-line interface
@@ -121,7 +120,7 @@ Excelsior Installer setup, in turn, has the following configurations:
 
 * `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
 
-##### Windows Version-Information Resource Configurations
+#### Windows Version-Information Resource Configurations
 
 On Windows, the plugin automatically adds a
 [version-information resource](https://msdn.microsoft.com/en-us/library/windows/desktop/ms646981%28v=vs.85%29.aspx)
@@ -145,8 +144,7 @@ other defaults can be changed using the following configuration parameters:
 
 * `<winVIDescription>`*executable-description*`</winVIDescription>` - `FileDescription` string, default is `${project.name}`
 
-**NEW in 0.2.1 release:**
-##### Multi-app executables
+#### Multi-app Executables
 The plugin may compile more than one application into a single executable and
 let you select a particular application at launch time via command line arguments.
 
@@ -163,6 +161,63 @@ To enable the multi-app mode add the following configuration parameter:
 
 `<multiApp>true</multiApp>`
 
+#### Startup Accelerator Configurations
+
+**New in 0.3.0:**
+
+The Startup Accelerator improves the startup time of applications compiled with Excelsior JET.
+Since version 0.3.0, the plugin automatically runs the compiled application immediately after build,
+collects the necessary profile information and hard-wires it into the executable just created.
+The JET Runtime will then use the information to reduce the application startup time.
+The Startup Accelerator is enabled by default, but you may disable it by specifying the following
+configuration:
+
+`<profileStartup>false</profileStartup>`
+
+You may also specify the duration of the profiling session in seconds by specifying the following
+configuration:
+
+`<profileStartupTimeout>`*duration-in-seconds*`</profileStartupTimeout>`
+
+As soon as the specified period elapses, profiling stops and the application is automatically terminated,
+so ensure that the timeout value is large enough to capture all actions the application nomrally carries out
+during startup. (It is safe to close the application manually if the profiling period proves to be excessively long.)
+
+### Performing a Test Run
+
+**New in 0.3.0:**
+
+Since version 0.3.0, the plugin can run your Java application on the Excelsior JET JVM
+using a JIT compiler before pre-compiling it to native code. This so-called test run
+helps Excelsior JET:
+
+* verify that your application can be executed successfully on the Excelsior JET JVM.
+  Usually, if the test run completes normally, the natively compiled application also works well.
+* detect the optional parts of Excelsior JET Runtime that are used by your application.
+  For instance, JavaFX Webkit is not included in the resulting package by default
+  due to its size, but if the application used it during a test run, it gets included automatically.
+* collect profile information to optimize your app more effectively
+
+To perform a test run, execute the following Maven command:
+
+```
+mvn jet:testrun
+```
+
+The plugin will place the gathered profiles in the `${project.basedir}/src/main/jetresources` directory.
+Incremental changes of application code do not typically invalidate the profiles, so 
+it is recommended to commit the profiles (`.usg`, `.startup`) to VCS to allow the plugin
+to re-use them during automatic application builds without performing the Test Run.
+
+Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
+      So it is recommended to perform a test run on the 32-bit version of Excelsior JET at least once.
+
+The profiles will be used by the Startup Optimizer, supported since version 0.3.0 of the plugin,
+and Global Optimizer, which will be supported in the future.
+
+Note: During a test run, the application executes in a special profiling mode,
+      so disregard its modest start-up time and performance.
+
 ### Build process
 
 The native build is performed in the `jet` subdirectory of the Maven target build directory.
@@ -178,7 +233,7 @@ into the `jet/app` directory, and binds the executable to that copy of the Runti
 
 Finally, the plugin packs the contents of the `jet/app` directory into
 a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
-**New in 0.2.0:** On Windows and Linux, you can set the `<packaging>excelsior-installer</packaging>`
+On Windows and Linux, you can also set the `<packaging>excelsior-installer</packaging>`
 configuration parameter to have the plugin create an Excelsior Installer setup instead.
 
 In the future, the plugin will also support the creation of OS X app bundles.
@@ -202,6 +257,14 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.3.0 (??-Jan-2016)
+
+* Startup Accelerator supported and enabled by default
+* Test Run Mojo implemented that enables:
+   - running an application on the Excelsior JET JVM before pre-compiling it to native code
+   - gathering application execution profiles to enable the Startup Optimizer
+
 Version 0.2.1 (21-Jan-2016)
 
 * Support of multi-app executables
@@ -221,7 +284,6 @@ and placing it into a separate directory with required Excelsior JET runtime fil
 Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
 So the next few releases will add the following features:
 
-* Startup time optimizations. These optimizations are only possible in the presence of a startup execution profile, so the plugin will have the ability to gather that profile.
 * [Java Runtime Slim-Down](http://www.excelsiorjet.com/solutions/java-download-size).
 * Mapping of compiler and packager options to plugin configuration parameters.
 * Creation of Mac OS X application bundles.

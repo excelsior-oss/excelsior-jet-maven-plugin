@@ -25,6 +25,7 @@
                   <mainClass>HelloSwing</mainClass>
                   <packaging>excelsior-installer</packaging>
                   <hideConsole>true</hideConsole>
+                  <profileStartup>false</profileStartup>
               </configuration>
           </plugin>
       </plugins>
