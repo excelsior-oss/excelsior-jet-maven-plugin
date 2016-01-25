@@ -324,6 +324,16 @@ public class JetMojo extends AbstractJetMojo {
                 multiApp = false;
             }
 
+            if (profileStartup) {
+                if (jetHomeObj.getEdition() == JetEdition.STANDARD) {
+                    getLog().warn(s("JetMojo.NoStartupAcceleratorInStandard.Warning"));
+                    profileStartup = false;
+                } else if (Utils.isOSX()) {
+                    getLog().warn(s("JetMojo.NoStartupAcceleratorOnOSX.Warning"));
+                    profileStartup = false;
+                }
+            }
+
         } catch (JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
         }

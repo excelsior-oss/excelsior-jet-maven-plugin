@@ -35,7 +35,9 @@ public class XJava extends JetTool {
     }
 
     public XJava addTestRunArgs(TestRunExecProfiles execProfiles) throws JetHomeException {
-        arg("-Djet.jit.profile.startup=" + execProfiles.getStartup().getAbsolutePath());
+        if (jetHome.getEdition() != JetEdition.STANDARD) {
+            arg("-Djet.jit.profile.startup=" + execProfiles.getStartup().getAbsolutePath());
+        }
         if (!jetHome.is64bit()) {
             arg("-Djet.usage.list=" + execProfiles.getUsg().getAbsolutePath());
         }
