@@ -163,8 +163,6 @@ To enable the multi-app mode add the following configuration parameter:
 
 #### Startup Accelerator Configurations
 
-**New in 0.3.0:**
-
 The Startup Accelerator improves the startup time of applications compiled with Excelsior JET.
 Since version 0.3.0, the plugin automatically runs the compiled application immediately after build,
 collects the necessary profile information and hard-wires it into the executable just created.
@@ -183,9 +181,64 @@ As soon as the specified period elapses, profiling stops and the application is 
 so ensure that the timeout value is large enough to capture all actions the application nomrally carries out
 during startup. (It is safe to close the application manually if the profiling period proves to be excessively long.)
 
-### Performing a Test Run
+#### Global Optimizer
 
-**New in 0.3.0:**
+**New in 0.4.0:**
+Excelsior JET 32-bit versions feature the Global Optimizer - a powerful facility that has several important advantages
+over the default compilation mode:
+
+* single component linking makes an executable that does not require JET Runtime DLLs,
+  thus reducing the download size of the installation package and disk footprint
+* global optimizations improve performance and reduce startup time and memory usage of the compiled application
+
+By default, JET compiles applications in the dynamic link model, i.e. compiled application classes are linked
+into an executable that requires JET Runtime DLLs containing precompiled Java SE platform classes.
+Quite the contrary, the Global Optimizer detects the platform classes that are actually used by the application
+and compiles them along with the application’s classes into a single executable.
+Despite the resulting executable occupies more disk space as compared with the default mode,
+it does NOT require the JET Runtime DLLs. As a result, the download size of the installation package is reduced.
+
+To enable the Global Optimizer add the following configuration parameter:
+
+`<globalOptimizer>true</globalOptimizer>`
+
+**Note:** performing the Test Run (see below) is mandatory for enabling the Global Optimizer.
+
+#### Java Runtime Slim-Down Configurations
+
+**New in 0.4.0:**
+Excelsior JET 32-bit versions feature Java Runtime Slim-Down, a deployment model aimed
+at significant reduction of the download size and disk footprint of Java SE applications.
+
+The key idea is to select a few components of the Java SE API, which are not used by the application,
+and exclude them from the installation. Such components are called detached.
+For example, if your application does not use any of Swing, AWT, CORBA or, say, JNDI, Excelsior JET enables
+you to easily exclude (detach) the associated files from the installation.
+
+The detached components should be placed on a Web server so that the JET Runtime could download them
+if the deployed application attempts to use any of the components.
+
+To enable Java Runtime Slim-Down you need to specify the base URL location where you suppose to put the detached package:
+
+`<detachedBaseURL>`*URL*`</detachedBaseURL>`
+
+By default, the plugin automatically detects what Java SE APIs are not used by your application and detaches them
+from the installation package. However you may configure particular APIs to detach with the following parameter:
+
+`<detachComponents>`*comma-separated list of APIs*`</detachComponents>`
+
+Available detachable components: `corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws`
+
+In the end of the process the plugin creates detached package in the `jet` subdirectory
+of the Maven target build directory. You may configure its name with `<detachedPackage>` parameter
+(by default the name is `${project.build.finalName}.pkl`).
+
+Do not forget to upload detached package to specified URL location above before deploying your application to end-users.
+
+**Note:** Java Runtime Slim-Down enables the Global Optimizer automatically
+          so performing the Test Run is mandatory for Java Runtime Slim-Down as well.
+
+### Performing a Test Run
 
 Since version 0.3.0, the plugin can run your Java application on the Excelsior JET JVM
 using a JIT compiler before pre-compiling it to native code. This so-called test run
@@ -258,6 +311,13 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
+Version 0.4.0 (??-Feb-2016)
+
+Reduced the download size and disk footprint of resulting packages by means of supporting:
+
+* Global Optimizer
+* Java Runtime Slim-Down
+
 Version 0.3.1 (26-Jan-2016)
 
 * `optRtFiles` parameter introduced to add optional JET runtime components
@@ -288,7 +348,6 @@ and placing it into a separate directory with required Excelsior JET runtime fil
 Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
 So the next few releases will add the following features:
 
-* [Java Runtime Slim-Down](http://www.excelsiorjet.com/solutions/java-download-size).
 * Mapping of compiler and packager options to plugin configuration parameters.
 * Creation of Mac OS X application bundles.
 * Code signing.
