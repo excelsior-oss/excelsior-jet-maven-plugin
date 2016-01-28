@@ -97,7 +97,7 @@ for other Excelsior JET-specific resource files (such as the EULA for Excelsior 
 
 #### Excelsior Installer Configurations
 
-Starting from 0.2.0 release, the plugin supports creation of Excelsior Installer setups -
+The plugin supports the creation of Excelsior Installer setups -
 conventional installer GUIs for Windows or self-extracting archives with command-line interface
 for Linux.
 
@@ -164,7 +164,7 @@ To enable the multi-app mode add the following configuration parameter:
 #### Startup Accelerator Configurations
 
 The Startup Accelerator improves the startup time of applications compiled with Excelsior JET.
-Since version 0.3.0, the plugin automatically runs the compiled application immediately after build,
+The plugin automatically runs the compiled application immediately after build,
 collects the necessary profile information and hard-wires it into the executable just created.
 The JET Runtime will then use the information to reduce the application startup time.
 The Startup Accelerator is enabled by default, but you may disable it by specifying the following
@@ -184,41 +184,50 @@ during startup. (It is safe to close the application manually if the profiling p
 #### Global Optimizer
 
 **New in 0.4.0:**
-Excelsior JET 32-bit versions feature the Global Optimizer - a powerful facility that has several important advantages
-over the default compilation mode:
+The 32-bit versions of Excelsior JET feature the Global Optimizer - a powerful facility that has several
+important advantages over the default compilation mode:
 
-* single component linking makes an executable that does not require JET Runtime DLLs,
-  thus reducing the download size of the installation package and disk footprint
-* global optimizations improve performance and reduce startup time and memory usage of the compiled application
+* single component linking yields an executable that does not require the dynamic libraries
+  containing the standard Java library classes,
+  thus reducing the size of the installation package and the disk footprint of the compiled application
+* global optimizations improve application performance and reduce the startup time and memory usage
 
-By default, JET compiles applications in the dynamic link model, i.e. compiled application classes are linked
-into an executable that requires JET Runtime DLLs containing precompiled Java SE platform classes.
-Quite the contrary, the Global Optimizer detects the platform classes that are actually used by the application
-and compiles them along with the application’s classes into a single executable.
-Despite the resulting executable occupies more disk space as compared with the default mode,
-it does NOT require the JET Runtime DLLs. As a result, the download size of the installation package is reduced.
+By default, Excelsior JET uses the *dynamic link model*. It only compiles application classes, 
+linking them into an executable that depends on dynamic libraries containing precompiled
+Java SE platform classes. These dynamic libraries, found in the JET Runtime, have to be
+distributed together with the executable.
 
-To enable the Global Optimizer add the following configuration parameter:
+The Global Optimizer detects the platform classes that are actually used by the application
+and compiles them along with application classes into a single executable.
+Even though the resulting binary occupies more disk space compared with the one built
+in the default mode, it no longer requires the dynamic libraries with platform classes.
+This results, among other benefits, in a considerable reduction of the application
+installation package size.
+
+To enable the Global Optimizer, add the following configuration parameter:
 
 `<globalOptimizer>true</globalOptimizer>`
 
-**Note:** performing the Test Run (see below) is mandatory for enabling the Global Optimizer.
+**Note:** performing a Test Run (see below) is mandatory if the Global Optimizer is enabled.
 
 #### Java Runtime Slim-Down Configurations
 
 **New in 0.4.0:**
-Excelsior JET 32-bit versions feature Java Runtime Slim-Down, a deployment model aimed
-at significant reduction of the download size and disk footprint of Java SE applications.
+The 32-bit versions of Excelsior JET feature Java Runtime Slim-Down, a unique
+Java application deployment model delivering a significant reduction
+of application download size and disk footprint.
 
-The key idea is to select a few components of the Java SE API, which are not used by the application,
-and exclude them from the installation. Such components are called detached.
-For example, if your application does not use any of Swing, AWT, CORBA or, say, JNDI, Excelsior JET enables
-you to easily exclude (detach) the associated files from the installation.
+The key idea is to select the components of the Java SE API that are not used by the application,
+and exclude them from the installation altogether. Such components are called detached.
+For example, if your application does not use any of Swing, AWT, CORBA or, say, JNDI,
+Excelsior JET enables you to easily exclude (detach) the standard library classes implementiong
+those APIs and the associated files from the installation.
 
 The detached components should be placed on a Web server so that the JET Runtime could download them
-if the deployed application attempts to use any of the components.
+if the deployed application attempts to use any of the detached components via JNI or the Reflection API.
 
-To enable Java Runtime Slim-Down you need to specify the base URL location where you suppose to put the detached package:
+To enable Java Runtime Slim-Down, you need to specify the base URL of the location where you plan
+to place the detached package:
 
 `<detachedBaseURL>`*URL*`</detachedBaseURL>`
 
@@ -240,18 +249,18 @@ Do not forget to upload detached package to specified URL location above before 
 
 ### Performing a Test Run
 
-Since version 0.3.0, the plugin can run your Java application on the Excelsior JET JVM
-using a JIT compiler before pre-compiling it to native code. This so-called test run
+The plugin can run your Java application on the Excelsior JET JVM
+using a JIT compiler before pre-compiling it to native code. This so-called Test Run
 helps Excelsior JET:
 
 * verify that your application can be executed successfully on the Excelsior JET JVM.
-  Usually, if the test run completes normally, the natively compiled application also works well.
+  Usually, if the Test Run completes normally, the natively compiled application also works well.
 * detect the optional parts of Excelsior JET Runtime that are used by your application.
   For instance, JavaFX Webkit is not included in the resulting package by default
-  due to its size, but if the application used it during a test run, it gets included automatically.
+  due to its size, but if the application used it during a Test Run, it gets included automatically.
 * collect profile information to optimize your app more effectively
 
-To perform a test run, execute the following Maven command:
+To perform a Test Run, execute the following Maven command:
 
 ```
 mvn jet:testrun
@@ -260,15 +269,15 @@ mvn jet:testrun
 The plugin will place the gathered profiles in the `${project.basedir}/src/main/jetresources` directory.
 Incremental changes of application code do not typically invalidate the profiles, so 
 it is recommended to commit the profiles (`.usg`, `.startup`) to VCS to allow the plugin
-to re-use them during automatic application builds without performing the Test Run.
+to re-use them during automatic application builds without performing a Test Run.
 
 Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
-      So it is recommended to perform a test run on the 32-bit version of Excelsior JET at least once.
+      So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
 
 The profiles will be used by the Startup Optimizer, supported since version 0.3.0 of the plugin,
 and Global Optimizer, which will be supported in the future.
 
-Note: During a test run, the application executes in a special profiling mode,
+Note: During a Test Run, the application executes in a special profiling mode,
       so disregard its modest start-up time and performance.
 
 ### Build process
