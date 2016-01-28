@@ -75,10 +75,10 @@ public class JetMojo extends AbstractJetMojo {
     protected boolean hideConsole;
 
     /**
-     * (32-bit only) If set to {@code true}, the Global Optimizer is enabled
+     * (32-bit only) If set to {@code true}, the Global Optimizer is enabled,
      * providing higher performance and lower memory usage for the compiled application.
-     * Performing the Test Run is mandatory when Global Optimizer is enabled.
-     * Global Optimizer is enabled automatically when you use Java Runtime Slim-Down.
+     * Performing a Test Run is mandatory when the Global Optimizer is enabled.
+     * The Global Optimizer is enabled automatically when you enable Java Runtime Slim-Down.
      *
      * @see TestRunMojo
      * @see #javaRuntimeSlimDown
@@ -98,30 +98,30 @@ public class JetMojo extends AbstractJetMojo {
 
     /**
      * If set to {@code true}, the multi-app mode is enabled for the resulting executable
-     * (executable with Java command line syntax).
+     * (it mimicks the command line syntax of the conventional {@code java} launcher).
      */
     @Parameter(property = "multiApp", defaultValue = "false")
     protected boolean multiApp;
 
     /**
      * Enable/disable startup accelerator.
-     * If it is enabled, the compiled application will run after build
-     * for {@link #profileStartupTimeout} seconds for collecting startup profile.
+     * If enabled, the compiled application will run after build
+     * for {@link #profileStartupTimeout} seconds for collecting a startup profile.
      */
     @Parameter(property = "profileStartup", defaultValue = "true")
     protected boolean profileStartup;
 
     /**
-     * The duration of the after build profiling session in seconds after which the application
-     * will be automatically terminated.
+     * The duration of the after-build profiling session in seconds. Upon exhaustion,
+     * the application will be automatically terminated.
      */
     @Parameter(property = "profileStartupTimeout", defaultValue = "20")
     protected int profileStartupTimeout;
 
     /**
      * Add optional JET Runtime components to the package. Available optional components:
-     * runtime_utilities, fonts, awt_natives, api_classes, jce,
-     * accessibility, javafx, javafx-webkit, nashorn, cldr
+     * {@code runtime_utilities}, {@code fonts}, {@code awt_natives}, {@code api_classes}, {@code jce},
+     * {@code accessibility}, {@code javafx}, {@code javafx-webkit}, {@code nashorn}, {@code cldr}
      */
     @Parameter(property = "optRtFiles")
     protected String[] optRtFiles;

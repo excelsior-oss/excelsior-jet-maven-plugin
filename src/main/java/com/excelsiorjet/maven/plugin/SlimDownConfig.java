@@ -6,25 +6,35 @@ package com.excelsiorjet.maven.plugin;
 public class SlimDownConfig {
 
     /**
-     * Detach the specified components from the main installation package and move them
-     * to a remote package. If not specified, components detected to be unused by your
-     * application are automatically detached if Java Runtime Slim-Down is enabled.
-     * Available detachable components:
-     *  corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws
+     * <p>
+     *   Detach the specified components from the main installation package and place them
+     *   in a remote package. If unspecified, the components detected to be unused by your
+     *   application are automatically detached if Java Runtime Slim-Down is enabled.
+     * </p>
+     * <p>
+     *   Available detachable components:
+     *     {@code corba}, {@code management}, {@code xml}, {@code jndi}, {@code jdbc},
+     *     {@code awt/java2d}, {@code swing}, {@code jsound}, {@code rmi}, {@code jax-ws}
+     * </p>
      *
-     *  @see #detachedBaseURL
+     * @see #detachedBaseURL
+     * @see JetMojo#javaRuntimeSlimDown
      */
-    String[] detachComponents;
+    public String[] detachComponents;
 
     /**
-     * Set the base url for the detached package. It is mandatory parameter.
+     * Set the base url for the detached package. This parameter is mandatory.
+     * 
+     * @see JetMojo#javaRuntimeSlimDown
      */
-    String detachedBaseURL;
+    public String detachedBaseURL;
 
     /**
      * Set the detached package name.
+     * 
+     * @see JetMojo#javaRuntimeSlimDown
      */
-    String detachedPackage;
+    public String detachedPackage;
 
     boolean isEnabled() {
         return ((detachComponents != null) && (detachComponents.length > 0) || (detachedBaseURL != null) ||
