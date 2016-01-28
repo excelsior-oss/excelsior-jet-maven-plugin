@@ -81,34 +81,20 @@ public class JetMojo extends AbstractJetMojo {
      * Global Optimizer is enabled automatically when you use Java Runtime Slim-Down.
      *
      * @see TestRunMojo
-     * @see #detachedBaseURL
+     * @see #javaRuntimeSlimDown
      */
     @Parameter(property = "globalOptimizer")
     protected boolean globalOptimizer;
 
     /**
-     * (32-bit only) Detach the specified components from the main installation package and move them
-     * to a remote package. If not specified, components detected to be unused by your
-     * application are automatically detached if Java Runtime Slim-Down is enabled.
-     * Available detachable components:
-     *  corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws
+     * (32-bit only) Java Runtime Slim-Down configuration parameters.
      *
-     *  @see #detachedBaseURL
+     * @see SlimDownConfig#detachedBaseURL
+     * @see SlimDownConfig#detachComponents
+     * @see SlimDownConfig#detachedPackage
      */
-    @Parameter(property = "detachComponents")
-    protected String[] detachComponents;
-
-    /**
-     * (32-bit only) Enable Java Runtime Slim-Down and set the base url for the detached package.
-     */
-    @Parameter(property = "detachedBaseURL")
-    protected String detachedBaseURL;
-
-    /**
-     * (32-bit only) Set the detached package name.
-     */
-    @Parameter(property = "detachedPackage", defaultValue = "${project.build.finalName}.pkl")
-    protected String detachedPackage;
+    @Parameter(property = "javaRuntimeSlimDown")
+    protected SlimDownConfig javaRuntimeSlimDown;
 
     /**
      * If set to {@code true}, the multi-app mode is enabled for the resulting executable
@@ -330,13 +316,26 @@ public class JetMojo extends AbstractJetMojo {
             }
         }
 
-        if (detachedBaseURL != null) {
+        if ((javaRuntimeSlimDown != null) && !javaRuntimeSlimDown.isEnabled()) {
+            javaRuntimeSlimDown = null;
+        }
+
+        if (javaRuntimeSlimDown != null) {
             if (jetHome.is64bit()) {
                 getLog().warn(s("JetMojo.NoSlimDownIn64Bit.Warning"));
-                detachedBaseURL = null;
+                javaRuntimeSlimDown = null;
             } else {
+                if (javaRuntimeSlimDown.detachedBaseURL == null) {
+                    throw new MojoFailureException(s("JetMojo.DetachedBaseURLMandatory.Failure"));
+                }
+
+                if (javaRuntimeSlimDown.detachedPackage == null) {
+                    javaRuntimeSlimDown.detachedPackage = project.getBuild().getFinalName() + ".pkl";
+                }
+
                 globalOptimizer = true;
             }
+
         }
 
         if (globalOptimizer) {
@@ -406,8 +405,7 @@ public class JetMojo extends AbstractJetMojo {
 
     private String createJetCompilerProject(File buildDir, ArrayList<String> compilerArgs, List<Dependency> dependencies, ArrayList<String> modules) throws MojoExecutionException {
         String prj = outputName + ".prj";
-        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(
-                new FileOutputStream(new File (buildDir, prj))))))
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File (buildDir, prj)))))
         {
             compilerArgs.forEach(out::println);
             for (Dependency dep: dependencies) {
@@ -492,13 +490,14 @@ public class JetMojo extends AbstractJetMojo {
             xpackArgs.add(String.join(",", optRtFiles));
         }
 
-        if (detachedBaseURL != null) {
+        if (javaRuntimeSlimDown != null) {
 
             xpackArgs.addAll(Arrays.asList(
-                "-detached-base-url", detachedBaseURL,
+                "-detached-base-url", javaRuntimeSlimDown.detachedBaseURL,
                 "-detach-components",
-                  (detachComponents != null && detachComponents.length > 0)? String.join(",", detachComponents) : "auto",
-                "-detached-package", new File(jetOutputDir, detachedPackage).getAbsolutePath()
+                  (javaRuntimeSlimDown.detachComponents != null && javaRuntimeSlimDown.detachComponents.length > 0)?
+                          String.join(",", javaRuntimeSlimDown.detachComponents) : "auto",
+                "-detached-package", new File(jetOutputDir, javaRuntimeSlimDown.detachedPackage).getAbsolutePath()
             ));
         }
 
@@ -622,8 +621,9 @@ public class JetMojo extends AbstractJetMojo {
                 getLog().info(s("JetMojo.GetDir.Info", packageDir.getAbsolutePath()));
         }
 
-        if (detachedBaseURL != null) {
-            getLog().info(s("JetMojo.SlimDown.Info", new File(jetOutputDir, detachedPackage), detachedBaseURL));
+        if (javaRuntimeSlimDown != null) {
+            getLog().info(s("JetMojo.SlimDown.Info", new File(jetOutputDir, javaRuntimeSlimDown.detachedPackage),
+                    javaRuntimeSlimDown.detachedBaseURL));
         }
     }
 
