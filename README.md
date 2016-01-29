@@ -218,15 +218,15 @@ Java application deployment model delivering a significant reduction
 of application download size and disk footprint.
 
 The key idea is to select the components of the Java SE API that are not used by the application,
-and exclude them from the installation altogether. Such components are called detached.
-For example, if your application does not use any of Swing, AWT, CORBA or, say, JNDI,
-Excelsior JET enables you to easily exclude (detach) the standard library classes implementiong
-those APIs and the associated files from the installation.
+and exclude them from the installation altogether. Such components are called *detached*.
+For example, if your application does not use any of Swing, AWT, CORBA or, say, JNDI API,
+Excelsior JET enables you to easily exclude from the main setup package the standard library
+classes implementing those APIs and the associated files, placing them in a separate *detached package*.
 
-The detached components should be placed on a Web server so that the JET Runtime could download them
+The detached package should be placed on a Web server so that the JET Runtime could download it
 if the deployed application attempts to use any of the detached components via JNI or the Reflection API.
 
-To enable Java Runtime Slim-Down, copy&paste the following plugin configuration:
+To enable Java Runtime Slim-Down, copy and paste the following plugin configuration:
 
 ```xml
 <javaRuntimeSlimDown>
@@ -234,24 +234,27 @@ To enable Java Runtime Slim-Down, copy&paste the following plugin configuration:
 </javaRuntimeSlimDown>
 ```
 
-and specify the base URL of the location where you plan to place the detached package.
+and specify the base URL of the location where you plan to place the detached package, e.g.
+`http://www.example.com/download/myapp/detached/`.
 
-By default, the plugin automatically detects what Java SE APIs are not used by your application and detaches them
-from the installation package. However you may configure particular APIs to detach with the following parameter under
-`<javaRuntimeSlimDown>` configuration section:
+By default, the plugin automatically detects which Java SE APIs your application does not use
+and detaches the respective JET Runtime components from the installation package.
+Alternatively, you may enforce detaching of particular components using the following parameter
+under the `<javaRuntimeSlimDown>` configuration section:
 
 `<detachComponents>`*comma-separated list of APIs*`</detachComponents>`
 
 Available detachable components: `corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws`
 
-In the end of the process the plugin creates detached package in the `jet` subdirectory
-of the Maven target build directory. You may configure its name with `<detachedPackage>` parameter
-of `<javaRuntimeSlimDown>` section (by default the name is `${project.build.finalName}.pkl`).
+At the end of the build process, the plugin places the detached package in the `jet` subdirectory
+of the Maven target build directory. You may configure its name with the `<detachedPackage>` parameter
+of the `<javaRuntimeSlimDown>` section (by default the name is `${project.build.finalName}.pkl`).
 
-Do not forget to upload detached package to specified URL location above before deploying your application to end-users.
+Do not forget to upload the detached package to the location specified in `</detachedBaseURL>`
+above before deploying your application to end-users.
 
-**Note:** Java Runtime Slim-Down enables the Global Optimizer automatically
-          so performing the Test Run is mandatory for Java Runtime Slim-Down as well.
+**Note:** Enabling Java Runtime Slim-Down automatically enables the Global Optimizer, 
+          so performing a Test Run is mandatory for Java Runtime Slim-Down as well.
 
 ### Performing a Test Run
 
@@ -280,7 +283,7 @@ to re-use them during automatic application builds without performing a Test Run
 Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
       So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
 
-The profiles will be used by the Startup Optimizer and Global Optimizer supported since version 0.4.0 of the plugin.
+The profiles will be used by the Startup Optimizer **New in 0.4.0:** and the Global Optimizer.
 
 Note: During a Test Run, the application executes in a special profiling mode,
       so disregard its modest start-up time and performance.
