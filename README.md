@@ -226,13 +226,19 @@ those APIs and the associated files from the installation.
 The detached components should be placed on a Web server so that the JET Runtime could download them
 if the deployed application attempts to use any of the detached components via JNI or the Reflection API.
 
-To enable Java Runtime Slim-Down, you need to specify the base URL of the location where you plan
-to place the detached package:
+To enable Java Runtime Slim-Down, copy&paste the following plugin configuration:
 
-`<detachedBaseURL>`*URL*`</detachedBaseURL>`
+```xml
+<javaRuntimeSlimDown>
+    <detachedBaseURL></detachedBaseURL>
+</javaRuntimeSlimDown>
+```
+
+and specify the base URL of the location where you plan to place the detached package.
 
 By default, the plugin automatically detects what Java SE APIs are not used by your application and detaches them
-from the installation package. However you may configure particular APIs to detach with the following parameter:
+from the installation package. However you may configure particular APIs to detach with the following parameter under
+`<javaRuntimeSlimDown>` configuration section:
 
 `<detachComponents>`*comma-separated list of APIs*`</detachComponents>`
 
@@ -240,7 +246,7 @@ Available detachable components: `corba, management, xml, jndi, jdbc, awt/java2d
 
 In the end of the process the plugin creates detached package in the `jet` subdirectory
 of the Maven target build directory. You may configure its name with `<detachedPackage>` parameter
-(by default the name is `${project.build.finalName}.pkl`).
+of `<javaRuntimeSlimDown>` section (by default the name is `${project.build.finalName}.pkl`).
 
 Do not forget to upload detached package to specified URL location above before deploying your application to end-users.
 
