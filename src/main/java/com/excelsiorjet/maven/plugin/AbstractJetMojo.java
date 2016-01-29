@@ -35,6 +35,7 @@ import org.apache.maven.project.MavenProject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 import static com.excelsiorjet.Txt.s;
@@ -160,6 +161,10 @@ public abstract class AbstractJetMojo extends AbstractMojo {
         try {
             if (!to.exists()) {
                 Files.copy(from.toPath(), to.toPath());
+                to.setLastModified(from.lastModified());
+            } else if (to.lastModified() != from.lastModified()){
+                Files.copy(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                to.setLastModified(from.lastModified());
             }
             dependencies.add(buildDir.toPath().relativize(to.toPath()).toString());
         } catch (IOException e) {
