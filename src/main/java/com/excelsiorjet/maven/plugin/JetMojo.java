@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Excelsior LLC.
+ * Copyright (c) 2015,2016 Excelsior LLC.
  *
  *  This file is part of Excelsior JET Maven Plugin.
  *
