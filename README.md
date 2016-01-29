@@ -280,8 +280,7 @@ to re-use them during automatic application builds without performing a Test Run
 Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
       So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
 
-The profiles will be used by the Startup Optimizer, supported since version 0.3.0 of the plugin,
-and Global Optimizer, which will be supported in the future.
+The profiles will be used by the Startup Optimizer and Global Optimizer supported since version 0.4.0 of the plugin.
 
 Note: During a Test Run, the application executes in a special profiling mode,
       so disregard its modest start-up time and performance.
