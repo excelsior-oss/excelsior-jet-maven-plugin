@@ -21,7 +21,6 @@
               <artifactId>excelsior-jet-maven-plugin</artifactId>
               <version>@project.version@</version>
               <configuration>
-                  <zipOutput>false</zipOutput>
                   <mainClass>HelloSwing</mainClass>
                   <packaging>excelsior-installer</packaging>
                   <hideConsole>true</hideConsole>

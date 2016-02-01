@@ -161,10 +161,8 @@ public abstract class AbstractJetMojo extends AbstractMojo {
         try {
             if (!to.exists()) {
                 Files.copy(from.toPath(), to.toPath());
-                to.setLastModified(from.lastModified());
             } else if (to.lastModified() != from.lastModified()){
                 Files.copy(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                to.setLastModified(from.lastModified());
             }
             dependencies.add(buildDir.toPath().relativize(to.toPath()).toString());
         } catch (IOException e) {
