@@ -49,7 +49,7 @@ your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.3.1</version>
+	<version>0.3.2</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -257,6 +257,13 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.3.2 (01-Feb-2016)
+
+* "[Changes are not reflected in compiled app if building without clean #11](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues/11)" issue fixed
+* Error message corrected for "[Cannot find jar if classifier is used #10]
+  (https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues/10)",
+  explicitly referring `<mainJar>` plugin parameter that should be set for the case.
 
 Version 0.3.1 (26-Jan-2016)
 
