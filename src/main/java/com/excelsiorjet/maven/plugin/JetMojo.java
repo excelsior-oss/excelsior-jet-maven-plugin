@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Excelsior LLC.
+ * Copyright (c) 2015,2016 Excelsior LLC.
  *
  *  This file is part of Excelsior JET Maven Plugin.
  *
@@ -75,31 +75,53 @@ public class JetMojo extends AbstractJetMojo {
     protected boolean hideConsole;
 
     /**
+     * (32-bit only) If set to {@code true}, the Global Optimizer is enabled,
+     * providing higher performance and lower memory usage for the compiled application.
+     * Performing a Test Run is mandatory when the Global Optimizer is enabled.
+     * The Global Optimizer is enabled automatically when you enable Java Runtime Slim-Down.
+     *
+     * @see TestRunMojo
+     * @see #javaRuntimeSlimDown
+     */
+    @Parameter(property = "globalOptimizer")
+    protected boolean globalOptimizer;
+
+    /**
+     * (32-bit only) Java Runtime Slim-Down configuration parameters.
+     *
+     * @see SlimDownConfig#detachedBaseURL
+     * @see SlimDownConfig#detachComponents
+     * @see SlimDownConfig#detachedPackage
+     */
+    @Parameter(property = "javaRuntimeSlimDown")
+    protected SlimDownConfig javaRuntimeSlimDown;
+
+    /**
      * If set to {@code true}, the multi-app mode is enabled for the resulting executable
-     * (executable with Java command line syntax).
+     * (it mimicks the command line syntax of the conventional {@code java} launcher).
      */
     @Parameter(property = "multiApp", defaultValue = "false")
     protected boolean multiApp;
 
     /**
      * Enable/disable startup accelerator.
-     * If it is enabled, the compiled application will run after build
-     * for {@link #profileStartupTimeout} seconds for collecting startup profile.
+     * If enabled, the compiled application will run after build
+     * for {@link #profileStartupTimeout} seconds for collecting a startup profile.
      */
     @Parameter(property = "profileStartup", defaultValue = "true")
     protected boolean profileStartup;
 
     /**
-     * The duration of the after build profiling session in seconds after which the application
-     * will be automatically terminated.
+     * The duration of the after-build profiling session in seconds. Upon exhaustion,
+     * the application will be automatically terminated.
      */
     @Parameter(property = "profileStartupTimeout", defaultValue = "20")
     protected int profileStartupTimeout;
 
     /**
      * Add optional JET Runtime components to the package. Available optional components:
-     * runtime_utilities, fonts, awt_natives, api_classes, jce,
-     * accessibility, javafx, javafx-webkit, nashorn, cldr
+     * {@code runtime_utilities}, {@code fonts}, {@code awt_natives}, {@code api_classes}, {@code jce},
+     * {@code accessibility}, {@code javafx}, {@code javafx-webkit}, {@code nashorn}, {@code cldr}
      */
     @Parameter(property = "optRtFiles")
     protected String[] optRtFiles;
@@ -286,6 +308,50 @@ public class JetMojo extends AbstractJetMojo {
         }
     }
 
+    private void checkGlobalAndSlimDownParameters(JetHome jetHome) throws JetHomeException, MojoFailureException {
+        if (globalOptimizer) {
+            if (jetHome.is64bit()) {
+                getLog().warn(s("JetMojo.NoGlobalIn64Bit.Warning"));
+                globalOptimizer = false;
+            } else if (jetHome.getEdition() == JetEdition.STANDARD) {
+                getLog().warn(s("JetMojo.NoGlobalInStandard.Warning"));
+                globalOptimizer = false;
+            }
+        }
+
+        if ((javaRuntimeSlimDown != null) && !javaRuntimeSlimDown.isEnabled()) {
+            javaRuntimeSlimDown = null;
+        }
+
+        if (javaRuntimeSlimDown != null) {
+            if (jetHome.is64bit()) {
+                getLog().warn(s("JetMojo.NoSlimDownIn64Bit.Warning"));
+                javaRuntimeSlimDown = null;
+            } else if (jetHome.getEdition() == JetEdition.STANDARD) {
+                getLog().warn(s("JetMojo.NoSlimDownInStandard.Warning"));
+                javaRuntimeSlimDown = null;
+            } else {
+                if (javaRuntimeSlimDown.detachedBaseURL == null) {
+                    throw new MojoFailureException(s("JetMojo.DetachedBaseURLMandatory.Failure"));
+                }
+
+                if (javaRuntimeSlimDown.detachedPackage == null) {
+                    javaRuntimeSlimDown.detachedPackage = project.getBuild().getFinalName() + ".pkl";
+                }
+
+                globalOptimizer = true;
+            }
+
+        }
+
+        if (globalOptimizer) {
+            TestRunExecProfiles execProfiles = new TestRunExecProfiles(execProfilesDir, execProfilesName);
+            if (!execProfiles.getUsg().exists()) {
+                throw new MojoFailureException(s("JetMojo.NoTestRun.Failure"));
+            }
+        }
+    }
+
     @Override
     protected JetHome checkPrerequisites() throws MojoFailureException {
         JetHome jetHomeObj = super.checkPrerequisites();
@@ -334,6 +400,8 @@ public class JetMojo extends AbstractJetMojo {
                 }
             }
 
+            checkGlobalAndSlimDownParameters(jetHomeObj);
+
         } catch (JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
         }
@@ -341,13 +409,35 @@ public class JetMojo extends AbstractJetMojo {
         return jetHomeObj;
     }
 
+    private String createJetCompilerProject(File buildDir, ArrayList<String> compilerArgs, List<Dependency> dependencies, ArrayList<String> modules) throws MojoExecutionException {
+        String prj = outputName + ".prj";
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File (buildDir, prj)))))
+        {
+            compilerArgs.forEach(out::println);
+            for (Dependency dep: dependencies) {
+                out.println("!classpathentry " + dep.dependency);
+                out.println("  -optimize=" + (dep.isLib?"autodetect":"all"));
+                out.println("  -protect=" + (dep.isLib?"nomatter":"all"));
+                out.println("!end");
+            }
+            for(String mod: modules) {
+                out.println("!module " + mod);
+            }
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage());
+        }
+        return prj;
+    }
+
     /**
      * Invokes the Excelsior JET AOT compiler.
      */
-    private void compile(JetHome jetHome, File buildDir, ArrayList<String> compilerArgs) throws MojoFailureException, CmdLineToolException {
+    private void compile(JetHome jetHome, File buildDir, List<Dependency> dependencies) throws MojoFailureException, CmdLineToolException, MojoExecutionException {
+        ArrayList<String> compilerArgs = new ArrayList<>();
+        ArrayList<String> modules = new ArrayList<>();
         if (Utils.isWindows()) {
             if (icon.isFile()) {
-                compilerArgs.add(icon.getAbsolutePath());
+                modules.add(icon.getAbsolutePath());
             }
             if (hideConsole) {
                 compilerArgs.add("-gui+");
@@ -374,15 +464,21 @@ public class JetMojo extends AbstractJetMojo {
             compilerArgs.add("-multiapp+");
         }
 
+        if (globalOptimizer) {
+            compilerArgs.add("-global+");
+        }
+
         TestRunExecProfiles execProfiles = new TestRunExecProfiles(execProfilesDir, execProfilesName);
         if (execProfiles.getStartup().exists()) {
             compilerArgs.add("-startupprofile=" + execProfiles.getStartup().getAbsolutePath());
         }
         if (execProfiles.getUsg().exists()) {
-            compilerArgs.add(execProfiles.getUsg().getAbsolutePath());
+            modules.add(execProfiles.getUsg().getAbsolutePath());
         }
 
-        if (new JetCompiler(jetHome, compilerArgs.toArray(new String[compilerArgs.size()]))
+        String prj = createJetCompilerProject(buildDir, compilerArgs, dependencies, modules);
+
+        if (new JetCompiler(jetHome, "=p", prj)
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Build.Failure"));
         }
@@ -390,13 +486,27 @@ public class JetMojo extends AbstractJetMojo {
 
     private ArrayList<String> getCommonXPackArgs() {
         ArrayList<String> xpackArgs = new ArrayList<>();
+
         xpackArgs.addAll(Arrays.asList(
             "-add-file", Utils.mangleExeName(outputName), "/"
         ));
+
         if (optRtFiles != null && optRtFiles.length > 0) {
             xpackArgs.add("-add-opt-rt-files");
             xpackArgs.add(String.join(",", optRtFiles));
         }
+
+        if (javaRuntimeSlimDown != null) {
+
+            xpackArgs.addAll(Arrays.asList(
+                "-detached-base-url", javaRuntimeSlimDown.detachedBaseURL,
+                "-detach-components",
+                  (javaRuntimeSlimDown.detachComponents != null && javaRuntimeSlimDown.detachComponents.length > 0)?
+                          String.join(",", javaRuntimeSlimDown.detachComponents) : "auto",
+                "-detached-package", new File(jetOutputDir, javaRuntimeSlimDown.detachedPackage).getAbsolutePath()
+            ));
+        }
+
         return xpackArgs;
     }
 
@@ -516,6 +626,11 @@ public class JetMojo extends AbstractJetMojo {
                 getLog().info(s("JetMojo.Build.Success"));
                 getLog().info(s("JetMojo.GetDir.Info", packageDir.getAbsolutePath()));
         }
+
+        if (javaRuntimeSlimDown != null) {
+            getLog().info(s("JetMojo.SlimDown.Info", new File(jetOutputDir, javaRuntimeSlimDown.detachedPackage),
+                    javaRuntimeSlimDown.detachedBaseURL));
+        }
     }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -532,10 +647,10 @@ public class JetMojo extends AbstractJetMojo {
             throw new MojoFailureException(e.getMessage(), e);
         }
 
-        ArrayList<String> compilerArgs = copyDependencies(buildDir, mainJar);
+        List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
 
         try {
-            compile(jetHome, buildDir, compilerArgs);
+            compile(jetHome, buildDir, dependencies);
 
             createAppDir(jetHome, buildDir, appDir);
 
