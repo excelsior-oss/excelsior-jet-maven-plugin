@@ -313,6 +313,9 @@ public class JetMojo extends AbstractJetMojo {
             if (jetHome.is64bit()) {
                 getLog().warn(s("JetMojo.NoGlobalIn64Bit.Warning"));
                 globalOptimizer = false;
+            } else if (jetHome.getEdition() == JetEdition.STANDARD) {
+                getLog().warn(s("JetMojo.NoGlobalInStandard.Warning"));
+                globalOptimizer = false;
             }
         }
 
@@ -323,6 +326,9 @@ public class JetMojo extends AbstractJetMojo {
         if (javaRuntimeSlimDown != null) {
             if (jetHome.is64bit()) {
                 getLog().warn(s("JetMojo.NoSlimDownIn64Bit.Warning"));
+                javaRuntimeSlimDown = null;
+            } else if (jetHome.getEdition() == JetEdition.STANDARD) {
+                getLog().warn(s("JetMojo.NoSlimDownInStandard.Warning"));
                 javaRuntimeSlimDown = null;
             } else {
                 if (javaRuntimeSlimDown.detachedBaseURL == null) {
