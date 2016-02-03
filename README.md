@@ -256,6 +256,9 @@ above before deploying your application to end-users.
 **Note:** Enabling Java Runtime Slim-Down automatically enables the Global Optimizer, 
           so performing a Test Run is mandatory for Java Runtime Slim-Down as well.
 
+**Known issue:** Java Runtime Slim-Down does not work with the `excelsior-installer` packaging type yet
+                 due to a bug in Excelsior JET. We are going to fix it in the next update of Excelsior JET.
+
 ### Performing a Test Run
 
 The plugin can run your Java application on the Excelsior JET JVM
