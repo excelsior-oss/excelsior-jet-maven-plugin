@@ -49,7 +49,7 @@ your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.3.2</version>
+	<version>0.4.0</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -328,7 +328,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.4.0 (??-Feb-2016)
+Version 0.4.0 (03-Feb-2016)
 
 Reduced the download size and disk footprint of resulting packages by means of supporting:
 
