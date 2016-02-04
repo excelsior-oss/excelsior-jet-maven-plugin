@@ -85,7 +85,8 @@ First, the plugin copies the main application jar to the `jet/build` directory,
 and copies all its run time dependencies to `jet/build/lib`.
 Then it invokes the Excelsior JET AOT compiler to compile all those jars into a native executable.
 Upon success, it copies that executable and the required Excelsior JET Runtime files
-into the `jet/app` directory, and binds the executable to that copy of the Runtime.
+into the `jet/app` directory, binds the executable to that copy of the Runtime
+and finally copies the contents of `<packageFilesDir>` directory, if the later set for the project.
 
 > Your natively compiled application is ready for distribution at this point: you may copy
 > contents of the `jet/app` directory to another computer that has neither Excelsior JET nor
@@ -125,7 +126,7 @@ By default, the final package contains resulting executable and Excelsior JET Ru
 However, you may need other files in the final package such as README, licence, media, help files,
 third-party native libraries, etc. For this, add the following configuration parameter:
 
-`<packageFiles>`*extra-files-directory*`</packageFiles>`
+`<packageFilesDir>`*extra-files-directory*`</packageFilesDir>`
 
 referencing a directory with all custom files you need. The contents of the directory will be copied recursively
 to the final package.

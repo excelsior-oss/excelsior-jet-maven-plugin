@@ -75,7 +75,7 @@ public class TestRunMojo extends AbstractJetMojo {
         // We could just use Maven FileUtils.copyDirectory method but it copies a directory as a whole
         // while here we copy only those files that were changed from previous build.
         Path target = buildDir.toPath();
-        Path source = packageFiles.toPath();
+        Path source = packageFilesDir.toPath();
         try {
             Files.walkFileTree(source, new FileVisitor<Path>() {
 
@@ -99,7 +99,7 @@ public class TestRunMojo extends AbstractJetMojo {
 
                 @Override
                 public FileVisitResult visitFileFailed(Path sourceFile, IOException e) throws IOException {
-                    getLog().warn(Txt.s("TestRunMojo.CannotCopyResource.Warning", sourceFile.toString(), e.getMessage()));
+                    getLog().warn(Txt.s("TestRunMojo.CannotCopyPackageFile.Warning", sourceFile.toString(), e.getMessage()));
                     return FileVisitResult.CONTINUE;
                 }
 
@@ -122,7 +122,7 @@ public class TestRunMojo extends AbstractJetMojo {
 
         List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
 
-        if (packageFiles.exists()) {
+        if (packageFilesDir.exists()) {
             //application may access custom package files at runtime. So copy them as well.
             copyExtraPackageFiles(buildDir);
         }

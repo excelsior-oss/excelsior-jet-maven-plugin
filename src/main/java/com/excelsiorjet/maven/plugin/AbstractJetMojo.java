@@ -99,8 +99,8 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * such as {@code maven-resources-plugin}.
      * </p>
      */
-    @Parameter(property = "packageFiles", defaultValue = "${project.basedir}/src/main/jetresources/packagefiles")
-    protected File packageFiles;
+    @Parameter(property = "packageFilesDir", defaultValue = "${project.basedir}/src/main/jetresources/packagefiles")
+    protected File packageFilesDir;
 
     /**
      * The target location for application execution profiles gathered during Test Run.
