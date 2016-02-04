@@ -27,6 +27,9 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,6 +71,45 @@ import java.util.stream.Collectors;
 @Mojo( name = "testrun", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class TestRunMojo extends AbstractJetMojo {
 
+    private void copyCustomResources(File buildDir) {
+        Path target = buildDir.toPath();
+        Path source = customResources.toPath();
+        try {
+            Files.walkFileTree(source, new FileVisitor<Path>() {
+
+                @Override
+                public FileVisitResult preVisitDirectory(Path subfolder, BasicFileAttributes attrs) throws IOException {
+                    Files.createDirectories(target.resolve(source.relativize(subfolder)));
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path sourceFile, BasicFileAttributes attrs) throws IOException {
+                    Path targetFile = target.resolve(source.relativize(sourceFile));
+                    if (!targetFile.toFile().exists()) {
+                        Files.copy(sourceFile, targetFile, StandardCopyOption.COPY_ATTRIBUTES);
+                    } else if (sourceFile.toFile().lastModified() != targetFile.toFile().lastModified()) {
+                        Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path sourceFile, IOException e) throws IOException {
+                    getLog().warn(Txt.s("TestRunMojo.CannotCopyResource.Warning", sourceFile.toString(), e.getMessage()));
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path source, IOException ioe) throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            getLog().warn(Txt.s("TestRunMojo.ErrorWhileCopying.Warning", source.toString(), target.toString(), e.getMessage()));
+        }
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         JetHome jetHome = checkPrerequisites();
@@ -76,6 +118,11 @@ public class TestRunMojo extends AbstractJetMojo {
         File buildDir = createBuildDir();
 
         List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
+
+        if (customResources.exists()) {
+            //application may access custom resources at runtime. So copy them as well.
+            copyCustomResources(buildDir);
+        }
 
         mkdir(execProfilesDir);
 
