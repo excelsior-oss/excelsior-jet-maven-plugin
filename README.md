@@ -85,11 +85,13 @@ First, the plugin copies the main application jar to the `jet/build` directory,
 and copies all its run time dependencies to `jet/build/lib`.
 Then it invokes the Excelsior JET AOT compiler to compile all those jars into a native executable.
 Upon success, it copies that executable and the required Excelsior JET Runtime files
-into the `jet/app` directory, binds the executable to that copy of the Runtime
-and finally copies the contents of `<packageFilesDir>` directory, if the later set for the project.
+into the `jet/app` directory, binds the executable to that copy of the Runtime,
+**New in 0.4.1:**
+and copies the contents of the `<packageFilesDir>` directory recursively
+to `jet/app`, if applicable (see "Customizing Package Content" below.)
 
 > Your natively compiled application is ready for distribution at this point: you may copy
-> contents of the `jet/app` directory to another computer that has neither Excelsior JET nor
+> the contents of the `jet/app` directory to another computer that has neither Excelsior JET nor
 > the Oracle JRE installed, and the executable should work as expected.
 
 Finally, the plugin packs the contents of the `jet/app` directory into
@@ -119,20 +121,21 @@ It is recommended to place the executable icon into a VCS, and if you place it t
 in the configuration. The plugin uses the location `${project.basedir}/src/main/jetresources`
 for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
 
+#### Customizing Package Content
+
 **New in 0.4.1:**
-#### Customizing Package Contents
+By default, the final package contains just the resulting executable and the necessary Excelsior JET Runtime files.
+However, you may want the plugin to add other files to it: README, license, media, help files,
+third-party native libraries, and so on. For that, add the following configuration parameter:
 
-By default, the final package contains resulting executable and Excelsior JET Runtime files only.
-However, you may need other files in the final package such as README, licence, media, help files,
-third-party native libraries, etc. For this, add the following configuration parameter:
+`<packageFilesDir>`*extra-package-files-directory*`</packageFilesDir>`
 
-`<packageFilesDir>`*extra-files-directory*`</packageFilesDir>`
+referencing a directory with all such extra files that you need added to the package.
+The contents of the directory will be copied recursively to the final package.
 
-referencing a directory with all custom files you need. The contents of the directory will be copied recursively
-to the final package.
-
-By default, it is assumed that you place your custom files into the `src/main/jetresources/packagefiles` subdirectory
-of your project but you may dynamically generate the contents of the directory by means of other Maven plugins
+By default, the plugin assumes that the extra package files reside
+in the `src/main/jetresources/packagefiles` subdirectory of your project,
+but you may dynamically generate the contents of that directory by means of other Maven plugins
 such as `maven-resources-plugin`.
 
 #### Excelsior Installer Configurations
@@ -352,7 +355,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 Version 0.4.1 (??-Feb-2016)
 
-* `<customResources>` parameter introduced to add custom files to the final package
+* `<packageFiles>` parameter introduced to add extra files to the final package
 
 Version 0.4.0 (03-Feb-2016)
 
@@ -388,7 +391,6 @@ Version 0.2.0 (14-Dec-2015)
 * Support of Excelsior Installer setup generation
 * Windows Version Information generation
 
-
 Version 0.1.0 (08-Dec-2015)
 * Initial release supporting compilation of the Maven Project with all dependencies into native executable
 and placing it into a separate directory with required Excelsior JET runtime files.
@@ -403,6 +405,7 @@ So the next few releases will add the following features:
 * Code signing.
 * Tomcat Web Applications support.
 * Multi-component support: building dependencies into separate native libraries
-                           to reuse them between different Maven projects builds to reduce compilation time
+                           to reuse them across multiple Maven project builds
+                           so as to reduce overall compilation time
 
 Note that the order of appearance of these features is not fixed and can be adjusted based on your feedback.

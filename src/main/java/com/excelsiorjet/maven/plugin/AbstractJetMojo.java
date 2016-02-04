@@ -91,12 +91,12 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected File jetOutputDir;
 
     /**
-     * Directory that contains custom resource files (README, license, media, help files, native libraries)
-     * that should be added to the final application package.
+     * Directory containing additional package files - README, license, media, help files, native libraries, and the like.
+     * The plugin will copy its contents recursively to the final application package.
      * <p>
-     * By default, it is assumed that you place them into the "src/main/jetresources/packagefiles" subdirectory
-     * of your project but you may dynamically generate the contents of the directory by means of other Maven plugins
-     * such as {@code maven-resources-plugin}.
+     * By default, the plugin assumes that those files reside in the "src/main/jetresources/packagefiles" subdirectory
+     * of your project, but you may also dynamically generate the contents of the package files directory
+     * by means of other Maven plugins such as {@code maven-resources-plugin}.
      * </p>
      */
     @Parameter(property = "packageFilesDir", defaultValue = "${project.basedir}/src/main/jetresources/packagefiles")
