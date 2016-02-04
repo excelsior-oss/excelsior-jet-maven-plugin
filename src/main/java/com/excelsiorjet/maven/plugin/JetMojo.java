@@ -487,9 +487,9 @@ public class JetMojo extends AbstractJetMojo {
     private ArrayList<String> getCommonXPackArgs() {
         ArrayList<String> xpackArgs = new ArrayList<>();
 
-        if (customResources.exists()) {
+        if (packageFiles.exists()) {
             xpackArgs.add("-source");
-            xpackArgs.add(customResources.getAbsolutePath());
+            xpackArgs.add(packageFiles.getAbsolutePath());
         }
 
         xpackArgs.addAll(Arrays.asList(

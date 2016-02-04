@@ -71,9 +71,11 @@ import java.util.stream.Collectors;
 @Mojo( name = "testrun", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class TestRunMojo extends AbstractJetMojo {
 
-    private void copyCustomResources(File buildDir) {
+    private void copyExtraPackageFiles(File buildDir) {
+        // We could just use Maven FileUtils.copyDirectory method but it copies a directory as a whole
+        // while here we copy only those files that were changed from previous build.
         Path target = buildDir.toPath();
-        Path source = customResources.toPath();
+        Path source = packageFiles.toPath();
         try {
             Files.walkFileTree(source, new FileVisitor<Path>() {
 
@@ -89,6 +91,7 @@ public class TestRunMojo extends AbstractJetMojo {
                     if (!targetFile.toFile().exists()) {
                         Files.copy(sourceFile, targetFile, StandardCopyOption.COPY_ATTRIBUTES);
                     } else if (sourceFile.toFile().lastModified() != targetFile.toFile().lastModified()) {
+                        //copy only files that were changed
                         Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
                     }
                     return FileVisitResult.CONTINUE;
@@ -119,9 +122,9 @@ public class TestRunMojo extends AbstractJetMojo {
 
         List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
 
-        if (customResources.exists()) {
-            //application may access custom resources at runtime. So copy them as well.
-            copyCustomResources(buildDir);
+        if (packageFiles.exists()) {
+            //application may access custom package files at runtime. So copy them as well.
+            copyExtraPackageFiles(buildDir);
         }
 
         mkdir(execProfilesDir);

@@ -122,10 +122,10 @@ for other Excelsior JET-specific resource files (such as the EULA for Excelsior 
 #### Customizing Package Contents
 
 By default, the final package contains resulting executable and Excelsior JET Runtime files only.
-However, you may need other files in the final package such as README, licence,
+However, you may need other files in the final package such as README, licence, media, help files,
 third-party native libraries, etc. For this, add the following configuration parameter:
 
-`<customResources>`*resource-directory*`</customResources>`
+`<packageFiles>`*extra-files-directory*`</packageFiles>`
 
 referencing a directory with all custom files you need. The contents of the directory will be copied recursively
 to the final package.
