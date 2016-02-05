@@ -101,6 +101,40 @@ configuration parameter to have the plugin create an Excelsior Installer setup i
 
 In the future, the plugin will also support the creation of OS X app bundles.
 
+### Performing a Test Run
+
+The plugin can run your Java application on the Excelsior JET JVM
+using a JIT compiler before pre-compiling it to native code. This so-called Test Run
+helps Excelsior JET:
+
+* verify that your application can be executed successfully on the Excelsior JET JVM.
+  Usually, if the Test Run completes normally, the natively compiled application also works well.
+* detect the optional parts of Excelsior JET Runtime that are used by your application.
+  For instance, JavaFX Webkit is not included in the resulting package by default
+  due to its size, but if the application used it during a Test Run, it gets included automatically.
+* collect profile information to optimize your app more effectively
+
+To perform a Test Run, execute the following Maven command:
+
+```
+mvn jet:testrun
+```
+
+The plugin will place the gathered profiles in the `${project.basedir}/src/main/jetresources` directory.
+Incremental changes of application code do not typically invalidate the profiles, so
+it is recommended to commit the profiles (`.usg`, `.startup`) to VCS to allow the plugin
+to re-use them during automatic application builds without performing a Test Run.
+
+It is recommended to perform a Test Run at least once before building your application.
+
+Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
+      So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
+
+The profiles will be used by the Startup Optimizer and the Global Optimizer (see below).
+
+Note: During a Test Run, the application executes in a special profiling mode,
+      so disregard its modest start-up time and performance.
+
 ### Configurations other than `<mainClass>`
 
 For a complete list of parameters, look into the Javadoc of `@Parameter` field declarations
@@ -250,7 +284,7 @@ To enable the Global Optimizer, add the following configuration parameter:
 
 `<globalOptimizer>true</globalOptimizer>`
 
-**Note:** performing a Test Run (see below) is mandatory if the Global Optimizer is enabled.
+**Note:** performing a Test Run is mandatory if the Global Optimizer is enabled.
 
 #### Java Runtime Slim-Down Configurations
 
@@ -300,39 +334,6 @@ above before deploying your application to end-users.
 **Known issue:** Java Runtime Slim-Down does not work with the `excelsior-installer` packaging type yet
                  due to a bug in Excelsior JET. We are going to fix it in the next update of Excelsior JET.
 
-### Performing a Test Run
-
-The plugin can run your Java application on the Excelsior JET JVM
-using a JIT compiler before pre-compiling it to native code. This so-called Test Run
-helps Excelsior JET:
-
-* verify that your application can be executed successfully on the Excelsior JET JVM.
-  Usually, if the Test Run completes normally, the natively compiled application also works well.
-* detect the optional parts of Excelsior JET Runtime that are used by your application.
-  For instance, JavaFX Webkit is not included in the resulting package by default
-  due to its size, but if the application used it during a Test Run, it gets included automatically.
-* collect profile information to optimize your app more effectively
-
-To perform a Test Run, execute the following Maven command:
-
-```
-mvn jet:testrun
-```
-
-The plugin will place the gathered profiles in the `${project.basedir}/src/main/jetresources` directory.
-Incremental changes of application code do not typically invalidate the profiles, so 
-it is recommended to commit the profiles (`.usg`, `.startup`) to VCS to allow the plugin
-to re-use them during automatic application builds without performing a Test Run.
-
-Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
-      So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
-
-The profiles will be used by the Startup Optimizer and the Global Optimizer.
-
-Note: During a Test Run, the application executes in a special profiling mode,
-      so disregard its modest start-up time and performance.
-
-
 ## Sample Project
 
 To demonstrate the process and result of plugin usage, we have forked the [JavaFX VNC Client](https://github.com/comtel2000/jfxvnc) project on GitHub, added the Excelsior JET plugin to its `pom.xml` file, and run it through Maven to build native binaries for three platforms.
@@ -355,7 +356,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 Version 0.4.1 (??-Feb-2016)
 
-* `<packageFiles>` parameter introduced to add extra files to the final package
+* `<packageFilesDir>` parameter introduced to add extra files to the final package
 
 Version 0.4.0 (03-Feb-2016)
 
