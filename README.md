@@ -78,10 +78,70 @@ If none of above is set, the plugin searches for an Excelsior JET installation a
 So if you only have one copy of Excelsior JET installed, the plugin should be able to find it on Windows right away,
 and on Linux and OS X - if you have run the Excelsior JET `setenv` script prior to launching Maven.
 
+### Build process
+
+The native build is performed in the `jet` subdirectory of the Maven target build directory.
+First, the plugin copies the main application jar to the `jet/build` directory,
+and copies all its run time dependencies to `jet/build/lib`.
+Then it invokes the Excelsior JET AOT compiler to compile all those jars into a native executable.
+Upon success, it copies that executable and the required Excelsior JET Runtime files
+into the `jet/app` directory, binds the executable to that copy of the Runtime,
+**New in 0.4.1:**
+and copies the contents of the `<packageFilesDir>` directory recursively
+to `jet/app`, if applicable (see "Customizing Package Content" below.)
+
+> Your natively compiled application is ready for distribution at this point: you may copy
+> the contents of the `jet/app` directory to another computer that has neither Excelsior JET nor
+> the Oracle JRE installed, and the executable should work as expected.
+
+Finally, the plugin packs the contents of the `jet/app` directory into
+a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
+On Windows and Linux, you can also set the `<packaging>excelsior-installer</packaging>`
+configuration parameter to have the plugin create an Excelsior Installer setup instead.
+
+In the future, the plugin will also support the creation of OS X app bundles.
+
+### Performing a Test Run
+
+The plugin can run your Java application on the Excelsior JET JVM
+using a JIT compiler before pre-compiling it to native code. This so-called Test Run
+helps Excelsior JET:
+
+* verify that your application can be executed successfully on the Excelsior JET JVM.
+  Usually, if the Test Run completes normally, the natively compiled application also works well.
+* detect the optional parts of Excelsior JET Runtime that are used by your application.
+  For instance, JavaFX Webkit is not included in the resulting package by default
+  due to its size, but if the application used it during a Test Run, it gets included automatically.
+* collect profile information to optimize your app more effectively
+
+To perform a Test Run, execute the following Maven command:
+
+```
+mvn jet:testrun
+```
+
+The plugin will place the gathered profiles in the `${project.basedir}/src/main/jetresources` directory.
+Incremental changes of application code do not typically invalidate the profiles, so
+it is recommended to commit the profiles (`.usg`, `.startup`) to VCS to allow the plugin
+to re-use them during automatic application builds without performing a Test Run.
+
+It is recommended to perform a Test Run at least once before building your application.
+
+Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
+      So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
+
+The profiles will be used by the Startup Optimizer and the Global Optimizer (see below).
+
+Note: During a Test Run, the application executes in a special profiling mode,
+      so disregard its modest start-up time and performance.
+
 ### Configurations other than `<mainClass>`
+
 For a complete list of parameters, look into the Javadoc of `@Parameter` field declarations
-in the  [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
-class. Most of them have default values derived from your `pom.xml` project
+of the
+[AbstractJetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/AbstractJetMojo.java)
+and [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
+classes. Most of them have default values derived from your `pom.xml` project
 such as `<outputName>` parameter specifying resulting executable name.
 
 There are also two useful Windows-specific configuration parameters:
@@ -94,6 +154,23 @@ It is recommended to place the executable icon into a VCS, and if you place it t
 `${project.basedir}/src/main/jetresources/icon.ico`, you do not need to explicitly specify it
 in the configuration. The plugin uses the location `${project.basedir}/src/main/jetresources`
 for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
+
+#### Customizing Package Content
+
+**New in 0.4.1:**
+By default, the final package contains just the resulting executable and the necessary Excelsior JET Runtime files.
+However, you may want the plugin to add other files to it: README, license, media, help files,
+third-party native libraries, and so on. For that, add the following configuration parameter:
+
+`<packageFilesDir>`*extra-package-files-directory*`</packageFilesDir>`
+
+referencing a directory with all such extra files that you need added to the package.
+The contents of the directory will be copied recursively to the final package.
+
+By default, the plugin assumes that the extra package files reside
+in the `src/main/jetresources/packagefiles` subdirectory of your project,
+but you may dynamically generate the contents of that directory by means of other Maven plugins
+such as `maven-resources-plugin`.
 
 #### Excelsior Installer Configurations
 
@@ -183,7 +260,6 @@ during startup. (It is safe to close the application manually if the profiling p
 
 #### Global Optimizer
 
-**New in 0.4.0:**
 The 32-bit versions of Excelsior JET feature the Global Optimizer - a powerful facility that has several
 important advantages over the default compilation mode:
 
@@ -208,11 +284,10 @@ To enable the Global Optimizer, add the following configuration parameter:
 
 `<globalOptimizer>true</globalOptimizer>`
 
-**Note:** performing a Test Run (see below) is mandatory if the Global Optimizer is enabled.
+**Note:** performing a Test Run is mandatory if the Global Optimizer is enabled.
 
 #### Java Runtime Slim-Down Configurations
 
-**New in 0.4.0:**
 The 32-bit versions of Excelsior JET feature Java Runtime Slim-Down, a unique
 Java application deployment model delivering a significant reduction
 of application download size and disk footprint.
@@ -259,58 +334,6 @@ above before deploying your application to end-users.
 **Known issue:** Java Runtime Slim-Down does not work with the `excelsior-installer` packaging type yet
                  due to a bug in Excelsior JET. We are going to fix it in the next update of Excelsior JET.
 
-### Performing a Test Run
-
-The plugin can run your Java application on the Excelsior JET JVM
-using a JIT compiler before pre-compiling it to native code. This so-called Test Run
-helps Excelsior JET:
-
-* verify that your application can be executed successfully on the Excelsior JET JVM.
-  Usually, if the Test Run completes normally, the natively compiled application also works well.
-* detect the optional parts of Excelsior JET Runtime that are used by your application.
-  For instance, JavaFX Webkit is not included in the resulting package by default
-  due to its size, but if the application used it during a Test Run, it gets included automatically.
-* collect profile information to optimize your app more effectively
-
-To perform a Test Run, execute the following Maven command:
-
-```
-mvn jet:testrun
-```
-
-The plugin will place the gathered profiles in the `${project.basedir}/src/main/jetresources` directory.
-Incremental changes of application code do not typically invalidate the profiles, so 
-it is recommended to commit the profiles (`.usg`, `.startup`) to VCS to allow the plugin
-to re-use them during automatic application builds without performing a Test Run.
-
-Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
-      So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
-
-The profiles will be used by the Startup Optimizer **New in 0.4.0:** and the Global Optimizer.
-
-Note: During a Test Run, the application executes in a special profiling mode,
-      so disregard its modest start-up time and performance.
-
-### Build process
-
-The native build is performed in the `jet` subdirectory of the Maven target build directory.
-First, the plugin copies the main application jar to the `jet/build` directory,
-and copies all its run time dependencies to `jet/build/lib`.
-Then it invokes the Excelsior JET AOT compiler to compile all those jars into a native executable.
-Upon success, it copies that executable and the required Excelsior JET Runtime files
-into the `jet/app` directory, and binds the executable to that copy of the Runtime.
-
-> Your natively compiled application is ready for distribution at this point: you may copy
-> contents of the `jet/app` directory to another computer that has neither Excelsior JET nor
-> the Oracle JRE installed, and the executable should work as expected.
-
-Finally, the plugin packs the contents of the `jet/app` directory into
-a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
-On Windows and Linux, you can also set the `<packaging>excelsior-installer</packaging>`
-configuration parameter to have the plugin create an Excelsior Installer setup instead.
-
-In the future, the plugin will also support the creation of OS X app bundles.
-
 ## Sample Project
 
 To demonstrate the process and result of plugin usage, we have forked the [JavaFX VNC Client](https://github.com/comtel2000/jfxvnc) project on GitHub, added the Excelsior JET plugin to its `pom.xml` file, and run it through Maven to build native binaries for three platforms.
@@ -331,6 +354,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
+Version 0.4.1 (??-Feb-2016)
+
+* `<packageFilesDir>` parameter introduced to add extra files to the final package
+
 Version 0.4.0 (03-Feb-2016)
 
 Reduced the download size and disk footprint of resulting packages by means of supporting:
@@ -347,7 +374,7 @@ Version 0.3.2 (01-Feb-2016)
 
 Version 0.3.1 (26-Jan-2016)
 
-* `optRtFiles` parameter introduced to add optional JET runtime components
+* `<optRtFiles>` parameter introduced to add optional JET runtime components
 
 Version 0.3.0 (22-Jan-2016)
 
@@ -365,7 +392,6 @@ Version 0.2.0 (14-Dec-2015)
 * Support of Excelsior Installer setup generation
 * Windows Version Information generation
 
-
 Version 0.1.0 (08-Dec-2015)
 * Initial release supporting compilation of the Maven Project with all dependencies into native executable
 and placing it into a separate directory with required Excelsior JET runtime files.
@@ -379,5 +405,8 @@ So the next few releases will add the following features:
 * Creation of Mac OS X application bundles.
 * Code signing.
 * Tomcat Web Applications support.
+* Multi-component support: building dependencies into separate native libraries
+                           to reuse them across multiple Maven project builds
+                           so as to reduce overall compilation time
 
 Note that the order of appearance of these features is not fixed and can be adjusted based on your feedback.

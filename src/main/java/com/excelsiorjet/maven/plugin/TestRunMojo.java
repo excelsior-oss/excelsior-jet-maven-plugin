@@ -27,6 +27,9 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,6 +71,48 @@ import java.util.stream.Collectors;
 @Mojo( name = "testrun", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class TestRunMojo extends AbstractJetMojo {
 
+    private void copyExtraPackageFiles(File buildDir) {
+        // We could just use Maven FileUtils.copyDirectory method but it copies a directory as a whole
+        // while here we copy only those files that were changed from previous build.
+        Path target = buildDir.toPath();
+        Path source = packageFilesDir.toPath();
+        try {
+            Files.walkFileTree(source, new FileVisitor<Path>() {
+
+                @Override
+                public FileVisitResult preVisitDirectory(Path subfolder, BasicFileAttributes attrs) throws IOException {
+                    Files.createDirectories(target.resolve(source.relativize(subfolder)));
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path sourceFile, BasicFileAttributes attrs) throws IOException {
+                    Path targetFile = target.resolve(source.relativize(sourceFile));
+                    if (!targetFile.toFile().exists()) {
+                        Files.copy(sourceFile, targetFile, StandardCopyOption.COPY_ATTRIBUTES);
+                    } else if (sourceFile.toFile().lastModified() != targetFile.toFile().lastModified()) {
+                        //copy only files that were changed
+                        Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path sourceFile, IOException e) throws IOException {
+                    getLog().warn(Txt.s("TestRunMojo.CannotCopyPackageFile.Warning", sourceFile.toString(), e.getMessage()));
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path source, IOException ioe) throws IOException {
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            getLog().warn(Txt.s("TestRunMojo.ErrorWhileCopying.Warning", source.toString(), target.toString(), e.getMessage()));
+        }
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         JetHome jetHome = checkPrerequisites();
@@ -76,6 +121,11 @@ public class TestRunMojo extends AbstractJetMojo {
         File buildDir = createBuildDir();
 
         List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
+
+        if (packageFilesDir.exists()) {
+            //application may access custom package files at runtime. So copy them as well.
+            copyExtraPackageFiles(buildDir);
+        }
 
         mkdir(execProfilesDir);
 

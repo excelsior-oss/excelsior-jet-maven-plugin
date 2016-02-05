@@ -91,6 +91,18 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected File jetOutputDir;
 
     /**
+     * Directory containing additional package files - README, license, media, help files, native libraries, and the like.
+     * The plugin will copy its contents recursively to the final application package.
+     * <p>
+     * By default, the plugin assumes that those files reside in the "src/main/jetresources/packagefiles" subdirectory
+     * of your project, but you may also dynamically generate the contents of the package files directory
+     * by means of other Maven plugins such as {@code maven-resources-plugin}.
+     * </p>
+     */
+    @Parameter(property = "packageFilesDir", defaultValue = "${project.basedir}/src/main/jetresources/packagefiles")
+    protected File packageFilesDir;
+
+    /**
      * The target location for application execution profiles gathered during Test Run.
      * By default, they are placed into the "src/main/jetresources" subdirectory of your project.
      * It is recommended to commit the collected profiles (.usg, .startup) to VCS to enable the plugin
