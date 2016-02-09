@@ -119,6 +119,16 @@ public class JetMojo extends AbstractJetMojo {
     protected int profileStartupTimeout;
 
     /**
+     * Trial version configuration parameters.
+     *
+     * @see TrialVersionConfig#expireInDays
+     * @see TrialVersionConfig#expireDate
+     * @see TrialVersionConfig#expireMessage
+     */
+    @Parameter(property = "trialVersion")
+    TrialVersionConfig trialVersion;
+
+    /**
      * Add optional JET Runtime components to the package. Available optional components:
      * {@code runtime_utilities}, {@code fonts}, {@code awt_natives}, {@code api_classes}, {@code jce},
      * {@code accessibility}, {@code javafx}, {@code javafx-webkit}, {@code nashorn}, {@code cldr}
@@ -352,6 +362,24 @@ public class JetMojo extends AbstractJetMojo {
         }
     }
 
+    private void checkTrialVersionConfig(JetHome jetHome) throws MojoFailureException, JetHomeException {
+        if ((trialVersion != null) && trialVersion.isEnabled()) {
+            if ((trialVersion.expireInDays >= 0) && (trialVersion.expireDate != null)) {
+                throw new MojoFailureException(s("JetMojo.AmbiguousExpireSetting.Failure"));
+            }
+            if (trialVersion.expireMessage == null || trialVersion.expireMessage.isEmpty()) {
+                throw new MojoFailureException(s("JetMojo.NoExpireMessage.Failure"));
+            }
+
+            if (jetHome.getEdition() == JetEdition.STANDARD) {
+                getLog().warn(s("JetMojo.NoTrialsInStandard.Warning"));
+                trialVersion = null;
+            }
+        } else {
+            trialVersion = null;
+        }
+    }
+
     @Override
     protected JetHome checkPrerequisites() throws MojoFailureException {
         JetHome jetHomeObj = super.checkPrerequisites();
@@ -399,6 +427,8 @@ public class JetMojo extends AbstractJetMojo {
                     profileStartup = false;
                 }
             }
+
+            checkTrialVersionConfig(jetHomeObj);
 
             checkGlobalAndSlimDownParameters(jetHomeObj);
 
@@ -466,6 +496,11 @@ public class JetMojo extends AbstractJetMojo {
 
         if (globalOptimizer) {
             compilerArgs.add("-global+");
+        }
+
+        if (trialVersion != null) {
+            compilerArgs.add("-expire=" + trialVersion.getExpire());
+            compilerArgs.add("-expiremsg=" + trialVersion.expireMessage);
         }
 
         TestRunExecProfiles execProfiles = new TestRunExecProfiles(execProfilesDir, execProfilesName);

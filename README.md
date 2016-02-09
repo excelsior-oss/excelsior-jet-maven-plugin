@@ -86,7 +86,6 @@ and copies all its run time dependencies to `jet/build/lib`.
 Then it invokes the Excelsior JET AOT compiler to compile all those jars into a native executable.
 Upon success, it copies that executable and the required Excelsior JET Runtime files
 into the `jet/app` directory, binds the executable to that copy of the Runtime,
-**New in 0.4.1:**
 and copies the contents of the `<packageFilesDir>` directory recursively
 to `jet/app`, if applicable (see "Customizing Package Content" below.)
 
@@ -157,7 +156,6 @@ for other Excelsior JET-specific resource files (such as the EULA for Excelsior 
 
 #### Customizing Package Content
 
-**New in 0.4.1:**
 By default, the final package contains just the resulting executable and the necessary Excelsior JET Runtime files.
 However, you may want the plugin to add other files to it: README, license, media, help files,
 third-party native libraries, and so on. For that, add the following configuration parameter:
@@ -334,6 +332,32 @@ above before deploying your application to end-users.
 **Known issue:** Java Runtime Slim-Down does not work with the `excelsior-installer` packaging type yet
                  due to a bug in Excelsior JET. We are going to fix it in the next update of Excelsior JET.
 
+#### Creating Trial Versions
+
+**New in 0.4.2:**
+
+You can create a trial version of your Java application that will expire in a specified number of days
+after the build date of the executable or on a fixed date.
+As the evaluation period is over, the application no longer starts and shows the expiration message you specified.
+
+To enable trial version generation, copy and paste the following plugin configuration:
+
+```xml
+<trialVersion>
+    <expireInDays></expireInDays>
+    <expireMessage></expireMessage>
+</trialVersion>
+```
+
+and specify the number of days you want for the application to expire after the build and an error message
+that should be shown to end-users when the appplication is expired.
+
+To set particular expiration date, set `<expireDate>` parameter instead of `<expireInDays>`.
+The format of `<expireDate>` parameter is *DayMonthYear*, for example `15Oct2020`.
+
+**Note:** If you opt `excelsior-installer` `<packaging>` type, the generated installer file will also expire with the
+same error message.
+
 ## Sample Project
 
 To demonstrate the process and result of plugin usage, we have forked the [JavaFX VNC Client](https://github.com/comtel2000/jfxvnc) project on GitHub, added the Excelsior JET plugin to its `pom.xml` file, and run it through Maven to build native binaries for three platforms.
@@ -353,6 +377,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.4.2 (??-Feb-2016)
+
+* Trial version generation is supported
 
 Version 0.4.1 (05-Feb-2016)
 
