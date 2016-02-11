@@ -337,10 +337,11 @@ above before deploying your application to end-users.
 **New in 0.4.2:**
 
 You can create a trial version of your Java application that will expire in a specified number of days
-after the build date of the executable or on a fixed date.
-As the evaluation period is over, the application no longer starts and shows the expiration message you specified.
+after the build date of the executable, or on a fixed date.
+Once the trial period is over, the application will refuse to start up,
+displaying a custom message.
 
-To enable trial version generation, copy and paste the following plugin configuration:
+To enable trial version generation, copy and paste into your `pom.xml` file the following plugin configuration:
 
 ```xml
 <trialVersion>
@@ -349,14 +350,21 @@ To enable trial version generation, copy and paste the following plugin configur
 </trialVersion>
 ```
 
-and specify the number of days you want for the application to expire after the build and an error message
-that should be shown to end-users when the appplication is expired.
+and specify the number of calendar days after the build date when you want the application
+to expire, and the error message that the expired binary should display to the user on a launch attempt.
 
-To set particular expiration date, set `<expireDate>` parameter instead of `<expireInDays>`.
-The format of `<expireDate>` parameter is *DayMonthYear*, for example `15Oct2020`.
+You can also set a particular, fixed expiration date by using the `<expireDate>` parameter
+instead of `<expireInDays>`. The format of the `<expireDate>` parameter value
+is *ddMMMyyyy*, for example `15Sep2020`.
 
-**Note:** If you opt `excelsior-installer` `<packaging>` type, the generated installer file will also expire with the
-same error message.
+**Note:** If you choose the `excelsior-installer` `<packaging>` type, the generated setup
+package will also expire, displaying the same message to the user.
+
+One common usage scenario of this functionality is setting the hard expiration date further into the future,
+while using some other mechanism to enforce a (shorter) trial period.
+Typically, you would set the hard expiration date somewhat beyond the planned release 
+date of the next version of your application. This way, you would ensure that nobody uses
+an outdated trial copy for evaluation.
 
 ## Sample Project
 

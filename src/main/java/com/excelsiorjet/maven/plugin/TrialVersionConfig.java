@@ -29,20 +29,23 @@ package com.excelsiorjet.maven.plugin;
 public class TrialVersionConfig {
 
     /**
-     * A number of days after the build date of the executable to expire.
+     * Number of calendar days for the trial executable to work after its build date.
+     * May not be set simultaneously with {@link #expireDate}.
      */
     public int expireInDays = -1;
 
     /**
-     * Expiration date in format: <i>DayMonthYear</i>.
+     * Executable expiration date, in format <i>ddMMMyyyy</i>.
      * <p>
-     *     For example: {@code 15Oct2020}
+     *     For example: {@code 15Sep2020}
      * </p>
+     * May not be set simultaneously with {@link #expireInDays}.
      */
     public String expireDate;
 
     /**
-     * Message to be shown to end-users, when application is expired.
+     * Message to display to the user on their attempt to launch the executable
+     * after its expiration date.
      */
     public String expireMessage;
 
