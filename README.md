@@ -240,6 +240,7 @@ To enable the multi-app mode add the following configuration parameter:
 #### Defining System Properties and JVM Arguments
 
 **New in 0.4.3:**
+
 Unless you opted for multi-app executable generation, the resulting executable interprets
 all its command line arguments as arguments of the main class you have specified.
 In other words, there is no place on the application command line for an argument
@@ -261,7 +262,7 @@ System property values may contain references to the *actual* root directory of 
 in the form of `$(Root)`.
 For example, suppose the package contains a subdirectory `AppFiles`. You may define the following property:
 
-`my.app.files.dir=$(Root)/AppFiles`
+`-Dmy.app.files.dir=$(Root)/AppFiles`
 
 Then you prepare a package and install it into a certain directory on the target system.
 Upon application startup, the JET Runtime replaces `$(Root)` with the absolute pathname of the installation directory.
@@ -299,8 +300,8 @@ All in all, the JET Runtime recognizes the following standard JVM arguments:
 `-verbose:gc` - be verbose about garbage collection
 
 The Excelsior JET Runtime also recognizes a handful of system properties controlling
-its own behavior, such as `-Djet.gc.ratio`. For more information,
-consult the "Java System Properties / JET Runtime Specific Properties" section
+its own behavior, such as </br>`-Djet.gc.ratio`.
+For more information,consult the "Java System Properties / JET Runtime Specific Properties" section
 of the "Application Considerations" chapter of the Excelsior JET User's Guide.
 
 #### Startup Accelerator Configurations
@@ -450,6 +451,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.4.3 (17-Feb-2016)
+
+* `<jvmArgs>` parameter introduced to define system properties and JVM arguments
 
 Version 0.4.2 (11-Feb-2016)
 
