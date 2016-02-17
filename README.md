@@ -49,7 +49,7 @@ your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.4.2</version>
+	<version>0.4.3</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -300,8 +300,8 @@ All in all, the JET Runtime recognizes the following standard JVM arguments:
 `-verbose:gc` - be verbose about garbage collection
 
 The Excelsior JET Runtime also recognizes a handful of system properties controlling
-its own behavior, such as </br>`-Djet.gc.ratio`.
-For more information,consult the "Java System Properties / JET Runtime Specific Properties" section
+its own behavior, such as `‑Djet.gc.ratio`.
+For more information, consult the "Java System Properties / JET Runtime Specific Properties" section
 of the "Application Considerations" chapter of the Excelsior JET User's Guide.
 
 #### Startup Accelerator Configurations
