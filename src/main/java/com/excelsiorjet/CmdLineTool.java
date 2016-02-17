@@ -25,10 +25,7 @@ import org.apache.maven.plugin.logging.Log;
 
 import java.io.*;
 import java.lang.ProcessBuilder.Redirect;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A wrapper around {@link ProcessBuilder} that redirects output to Maven {@link Log}.
@@ -63,6 +60,11 @@ public class CmdLineTool {
 
     public CmdLineTool arg(String arg) {
         args.add(arg);
+        return this;
+    }
+
+    public CmdLineTool addArgs(Collection<String> args) {
+        this.args.addAll(args);
         return this;
     }
 

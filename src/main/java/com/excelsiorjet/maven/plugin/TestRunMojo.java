@@ -32,6 +32,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Mojo for performing a Test Run before building the application.
@@ -137,6 +138,13 @@ public class TestRunMojo extends AbstractJetMojo {
         } catch (JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
         }
+
+        //add jvm args substituting $(Root) occurences with buildDir
+        xjava.addArgs(Stream.of(jvmArgs)
+                .map(s -> s.replace("$(Root)", buildDir.getAbsolutePath()))
+                .collect(Collectors.toList())
+        );
+
         xjava.arg("-cp");
         xjava.arg(String.join(File.pathSeparator,
                 dependencies.stream().map(d -> d.dependency).collect(Collectors.toList())));

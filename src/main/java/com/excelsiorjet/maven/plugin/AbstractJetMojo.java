@@ -103,6 +103,20 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected File packageFilesDir;
 
     /**
+     * Defines system properties and JVM arguments to be passed to the Excelsior JET JVM at runtime like:
+     * {@code -Dmy.prop1 -Dmy.prop2=value -ea -Xmx1G -Xss128M -Djet.gc.ratio=11}.
+     * <p>
+     * Please note that not all "-X" JVM arguments that you may use for Oracle Hotspot JVM
+     * are applicable to Excelsior JET JVM. For instance, {@code -Xms} Hotspot JVM argument (initial Java heap size)
+     * has no meaning for Excelsior JET JVM due to completely different memory management policy.
+     * On the other hand, Excelsior JET provides its own system properties for GC tuning like {@code -Djet.gc.ratio}.
+     * For more details, consult {@code README.md} of the plugin or Excelsior JET User's Guide.
+     * </p>
+     */
+    @Parameter(property = "jvmArgs")
+    protected String[] jvmArgs;
+
+    /**
      * The target location for application execution profiles gathered during Test Run.
      * By default, they are placed into the "src/main/jetresources" subdirectory of your project.
      * It is recommended to commit the collected profiles (.usg, .startup) to VCS to enable the plugin

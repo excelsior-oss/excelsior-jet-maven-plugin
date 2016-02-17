@@ -220,6 +220,7 @@ other defaults can be changed using the following configuration parameters:
 * `<winVIDescription>`*executable-description*`</winVIDescription>` - `FileDescription` string, default is `${project.name}`
 
 #### Multi-app Executables
+
 The plugin may compile more than one application into a single executable and
 let you select a particular application at launch time via command line arguments.
 
@@ -235,6 +236,96 @@ and the arguments of the application:
 To enable the multi-app mode add the following configuration parameter:
 
 `<multiApp>true</multiApp>`
+
+#### Defining System Properties and JVM Arguments
+
+**New in 0.4.3:**
+If you do not opt multi-app executable generation, the plugin will generate a conventional executable which command line
+arguments are arguments of the main class you specify so there is no place to set
+a system property or a JVM argument such as `-Dprop=value` or `-Xmx1G` on the application`s command line.
+To address this, the plugin allows to hardwire system properties and JVM arguments
+into the resulting executable using the following plugin configuration:
+
+```xml
+<jvmArgs>
+    <jvmArg>-Dprop=value</jvmArg>
+    <jvmArg>-jvmArg</jvmArg>
+</jvmArgs>
+```
+
+The configuration also affects on a Test Run and can be used with multi-app executables also
+(thus you will not need to specify them explicitly on the command line).
+
+System property values may contain references to root directories from the package files in the form of `$(Root)`.
+For example, suppose the package contains a subdirectory `AppFiles`. You may define the following property:
+
+`my.app.files.dir=$(Root)/AppFiles`
+
+Then you prepare a package and install it into a directory on the target system.
+Upon application startup, the JET Runtime replaces `$(Root)` with the absolute path of the installation directory.
+Thus, when the installed application inquires the value of the `my.app.files.dir` property,
+it gets the full path to the `AppFiles` directory on the target system.
+
+**Note:** most `-XX` options that you might use for Oracle HotSpot are not supported as they are specific
+to HotSpot JVM implementation. Moreover, certain `-X` options are not supported too,
+for example setting `-Xbootclasspath` or `-Xms` (initial Java heap size) take no effect.
+
+##### Standard JVM arguments
+The JET Runtime recognizes the following standard JVM arguments:
+
+`-ea, -da, -enableassertions, -disableassertions, -esa, -dsa, -enablesystemassertions, -disablesystemassertions`
+
+Assertion directives.
+
+`-Xmx`
+
+Maximum heap size.
+Setting size to zero (default) enables adaptive heap size.
+See [Memory management](http://www.excelsior-usa.com/doc/jet/jetw011.html#0324) for more information.
+
+`-Xss`
+
+Maximum stack size.
+
+`-Xverify:all`
+
+ Enabling strict verifier.
+
+`-XX:MaxDirectMemorySize`
+
+Setting maximum memory size for direct buffers.
+
+`-javaagent:`
+
+Specifying a Java Agent (for non-compiled classes).
+
+`-version`, `-verbose:gc`
+
+##### JET Runtime-specific properties
+In addition, the JET Runtime recognizes the following properties:
+
+`-Djet.gc.ratio=ratio`
+
+Specifies the maximum proportion of CPU time to be allocated to the garbage collector at runtime, in 1/1000ths.
+See [GC ratio](http://www.excelsior-usa.com/doc/jet/jetw011.html#0325) for details.
+
+`-Djet.rt=flavor-name`
+
+Select a specific JET Runtime. Valid values of flavor-name are `classic`, `desktop`, and `server`.
+
+See [Runtime Selection](http://www.excelsior-usa.com/doc/jet/jetw011.html#0306) for details.
+
+`-Djet.gc.threads=N`
+
+Sets the maximum number of concurrent threads that may be used for the CoreBalance garbage collection
+available in the Server Runtime. By default, N equals the number of processors/cores on the system.
+See [Parallel hardware](http://www.excelsior-usa.com/doc/jet/jetw011.html#0329) for more information.
+
+`-Djet.jit.memory.reserve=value`
+
+This option is specific to 64-bit version of the JET Runtime. I
+t defines the amount of address space reserved for code and data produced by the JIT compiler.
+The default value is 1 gigabyte and the maximum value is 2 gigabytes.
 
 #### Startup Accelerator Configurations
 
@@ -333,8 +424,6 @@ above before deploying your application to end-users.
                  due to a bug in Excelsior JET. We are going to fix it in the next update of Excelsior JET.
 
 #### Creating Trial Versions
-
-**New in 0.4.2:**
 
 You can create a trial version of your Java application that will expire in a specified number of days
 after the build date of the executable, or on a fixed date.
