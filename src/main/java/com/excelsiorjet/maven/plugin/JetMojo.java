@@ -511,9 +511,22 @@ public class JetMojo extends AbstractJetMojo {
             modules.add(execProfiles.getUsg().getAbsolutePath());
         }
 
+        String jetVMPropOpt = "-jetvmprop=";
+        if (jvmArgs != null && jvmArgs.length > 0) {
+            jetVMPropOpt = jetVMPropOpt + String.join(" ", jvmArgs);
+
+            // JVM args may contain $(Root) prefix for system property value
+            // (that should expand to installation directory location).
+            // However JET compiler replaces such occurrences with s value of "Root" equation if the "$(Root)" is
+            // used in the project file.
+            // So we need to pass jetvmprop as separate compiler argument as workaround.
+            // We also write the equation in commented form to the project in order to see it in the technical support.
+            compilerArgs.add("%"+jetVMPropOpt);
+        }
+
         String prj = createJetCompilerProject(buildDir, compilerArgs, dependencies, modules);
 
-        if (new JetCompiler(jetHome, "=p", prj)
+        if (new JetCompiler(jetHome, "=p", prj, jetVMPropOpt)
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Build.Failure"));
         }
