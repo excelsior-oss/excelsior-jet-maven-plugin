@@ -240,10 +240,11 @@ To enable the multi-app mode add the following configuration parameter:
 #### Defining System Properties and JVM Arguments
 
 **New in 0.4.3:**
-If you do not opt multi-app executable generation, the plugin will generate a conventional executable which command line
-arguments are arguments of the main class you specify so there is no place to set
-a system property or a JVM argument such as `-Dprop=value` or `-Xmx1G` on the application`s command line.
-To address this, the plugin allows to hardwire system properties and JVM arguments
+Unless you opted for multi-app executable generation, the resulting executable interprets
+all its command line arguments as arguments of the main class you have specified.
+In other words, there is no place on the application command line for an argument
+setting a system property or altering JVM defaults, such as `-Dprop=value` or `-Xmx1G` .
+To address this, the plugin enables you to hardwire system properties and JVM arguments
 into the resulting executable using the following plugin configuration:
 
 ```xml
@@ -253,79 +254,54 @@ into the resulting executable using the following plugin configuration:
 </jvmArgs>
 ```
 
-The configuration also affects on a Test Run and can be used with multi-app executables also
-(thus you will not need to specify them explicitly on the command line).
+This configuration also affects Test Runs and can be used with multi-app executables as well
+(relieving the user from the need to specify those arguments explicitly on the command line).
 
-System property values may contain references to root directories from the package files in the form of `$(Root)`.
+System property values may contain references to the *actual* root directory of the installed package
+in the form of `$(Root)`.
 For example, suppose the package contains a subdirectory `AppFiles`. You may define the following property:
 
 `my.app.files.dir=$(Root)/AppFiles`
 
-Then you prepare a package and install it into a directory on the target system.
-Upon application startup, the JET Runtime replaces `$(Root)` with the absolute path of the installation directory.
-Thus, when the installed application inquires the value of the `my.app.files.dir` property,
+Then you prepare a package and install it into a certain directory on the target system.
+Upon application startup, the JET Runtime replaces `$(Root)` with the absolute pathname of the installation directory.
+Thus, when the installed application retrieves the value of the `my.app.files.dir` property,
 it gets the full path to the `AppFiles` directory on the target system.
 
-**Note:** most `-XX` options that you might use for Oracle HotSpot are not supported as they are specific
-to HotSpot JVM implementation. Moreover, certain `-X` options are not supported too,
-for example setting `-Xbootclasspath` or `-Xms` (initial Java heap size) take no effect.
+**Note:** most of the `-XX` options recognized by the Oracle JRE are not supported,
+as they are specific to that HotSpot VM. Moreover, certain `-X` options are not supported either,
+for example setting `-Xbootclasspath` or `-Xms` (initial Java heap size) makes no effect.
 
-##### Standard JVM arguments
-The JET Runtime recognizes the following standard JVM arguments:
+All in all, the JET Runtime recognizes the following standard JVM arguments:
 
-`-ea, -da, -enableassertions, -disableassertions, -esa, -dsa, -enablesystemassertions, -disablesystemassertions`
+`-ea, -da, -enableassertions, -disableassertions` - assertions control
 
-Assertion directives.
+`-esa, -dsa, -enablesystemassertions, -disablesystemassertions` - system assertions control
 
-`-Xmx`
+`-Xmx` - set maximum heap size
 
-Maximum heap size.
-Setting size to zero (default) enables adaptive heap size.
-See [Memory management](http://www.excelsior-usa.com/doc/jet/jetw011.html#0324) for more information.
+> **Note:** Setting maximum heap size to zero (default) enables adaptive heap sizing.
+> Refer to the "Memory Management" section of the "Application Considerations" chapter 
+> of the Excelsior JET User's Guide
+> and [Knowledge Base Article #25](http://www.excelsiorjet.com/kb/25/)
+> for more information.
 
-`-Xss`
+`-Xss` - set maximum thread stack size
 
-Maximum stack size.
+`-Xverify:all` - enable the strict verifier
 
-`-Xverify:all`
+`-XX:MaxDirectMemorySize` - set maximum memory size for direct buffers
 
- Enabling strict verifier.
+`-javaagent:` - specify a Java Agent (for non-precompiled classes)
 
-`-XX:MaxDirectMemorySize`
+`-version` - print version information on startup
 
-Setting maximum memory size for direct buffers.
+`-verbose:gc` - be verbose about garbage collection
 
-`-javaagent:`
-
-Specifying a Java Agent (for non-compiled classes).
-
-`-version`, `-verbose:gc`
-
-##### JET Runtime-specific properties
-In addition, the JET Runtime recognizes the following properties:
-
-`-Djet.gc.ratio=ratio`
-
-Specifies the maximum proportion of CPU time to be allocated to the garbage collector at runtime, in 1/1000ths.
-See [GC ratio](http://www.excelsior-usa.com/doc/jet/jetw011.html#0325) for details.
-
-`-Djet.rt=flavor-name`
-
-Select a specific JET Runtime. Valid values of flavor-name are `classic`, `desktop`, and `server`.
-
-See [Runtime Selection](http://www.excelsior-usa.com/doc/jet/jetw011.html#0306) for details.
-
-`-Djet.gc.threads=N`
-
-Sets the maximum number of concurrent threads that may be used for the CoreBalance garbage collection
-available in the Server Runtime. By default, N equals the number of processors/cores on the system.
-See [Parallel hardware](http://www.excelsior-usa.com/doc/jet/jetw011.html#0329) for more information.
-
-`-Djet.jit.memory.reserve=value`
-
-This option is specific to 64-bit version of the JET Runtime. I
-t defines the amount of address space reserved for code and data produced by the JIT compiler.
-The default value is 1 gigabyte and the maximum value is 2 gigabytes.
+The Excelsior JET Runtime also recognizes a handful of system properties controlling
+its own behavior, such as `-Djet.gc.ratio`. For more information,
+consult the "Java System Properties / JET Runtime Specific Properties" section
+of the "Application Considerations" chapter of the Excelsior JET User's Guide.
 
 #### Startup Accelerator Configurations
 

@@ -103,14 +103,16 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected File packageFilesDir;
 
     /**
-     * Defines system properties and JVM arguments to be passed to the Excelsior JET JVM at runtime like:
+     * Defines system properties and JVM arguments to be passed to the Excelsior JET JVM at runtime, e.g.:
      * {@code -Dmy.prop1 -Dmy.prop2=value -ea -Xmx1G -Xss128M -Djet.gc.ratio=11}.
      * <p>
-     * Please note that not all "-X" JVM arguments that you may use for Oracle Hotspot JVM
-     * are applicable to Excelsior JET JVM. For instance, {@code -Xms} Hotspot JVM argument (initial Java heap size)
-     * has no meaning for Excelsior JET JVM due to completely different memory management policy.
-     * On the other hand, Excelsior JET provides its own system properties for GC tuning like {@code -Djet.gc.ratio}.
-     * For more details, consult {@code README.md} of the plugin or Excelsior JET User's Guide.
+     * Please note that only some of the non-standard Oracle HotSpot JVM arguments
+     * (those prefixed with {@code -X}) are recognized.
+     * For instance, the {@code -Xms} argument setting the initial Java heap size on HotSpot
+     * has no meaning for the Excelsior JET JVM, which has a completely different
+     * memory management policy. At the same time, Excelsior JET provides its own system properties
+     * for GC tuning, such as {@code -Djet.gc.ratio}.
+     * For more details, consult the {@code README} file of the plugin or the Excelsior JET User's Guide.
      * </p>
      */
     @Parameter(property = "jvmArgs")
