@@ -237,8 +237,8 @@ To enable the multi-app mode add the following configuration parameter:
 
 `<multiApp>true</multiApp>`
 
+<a name="jvmargs"></a>
 #### Defining System Properties and JVM Arguments
-
 **New in 0.4.3:**
 
 Unless you opted for multi-app executable generation, the resulting executable interprets
