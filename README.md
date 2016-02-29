@@ -239,7 +239,6 @@ To enable the multi-app mode add the following configuration parameter:
 
 <a name="jvmargs"></a>
 #### Defining System Properties and JVM Arguments
-**New in 0.4.3:**
 
 Unless you opted for multi-app executable generation, the resulting executable interprets
 all its command line arguments as arguments of the main class you have specified.
@@ -432,6 +431,18 @@ Typically, you would set the hard expiration date somewhat beyond the planned re
 date of the next version of your application. This way, you would ensure that nobody uses
 an outdated trial copy for evaluation.
 
+<a name="encrypt"></a>
+#### Encrypting Strings and Resources
+**New in 0.4.4:**
+
+If you do not wish constant data, such as reflection info, Java string literals and packed resource files,
+to be visible in the resulting executable, you may enable data encryption by specifying the following configuration:
+
+`<encryptResources>true</encryptResources>`
+
+For more details on data protection, refer to  "Data protection" section of
+the "Intellectual property protection" chapter of the Excelsior JET User's Guide.
+
 ## Sample Project
 
 To demonstrate the process and result of plugin usage, we have forked the [JavaFX VNC Client](https://github.com/comtel2000/jfxvnc) project on GitHub, added the Excelsior JET plugin to its `pom.xml` file, and run it through Maven to build native binaries for three platforms.
@@ -451,6 +462,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.4.4 (??-March-2016)
+
+* `<encryptResources>` parameter added to enable data protection
 
 Version 0.4.3 (17-Feb-2016)
 
