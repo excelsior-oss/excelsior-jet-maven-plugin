@@ -32,6 +32,7 @@ import org.apache.maven.plugins.annotations.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -163,6 +164,8 @@ public class JetMojo extends AbstractJetMojo {
     private static final String ZIP = "zip";
     private static final String NONE = "none";
     private static final String EXCELSIOR_INSTALLER = "excelsior-installer";
+    private static final String OSX_APP_BUNDLE = "osx-app-bundle";
+    private static final String NATIVE_BUNDLE = "native-bundle";
 
     /**
      * Application packaging mode. Permitted values are:
@@ -172,6 +175,10 @@ public class JetMojo extends AbstractJetMojo {
      *   <dt>excelsior-installer</dt>
      *   <dd>self-extracting installer with standard GUI for Windows
      *     and command-line interface for Linux</dd>
+     *   <dt>osx-app-bundle</dt>
+     *   <dd>Mac OS X bundle</dd>
+     *   <dt>native-bundle</dt>
+     *   <dd>Excelsior Installer for Windows and Linux and Mac OS X bundle on Mac OSX</dd>
      *   <dt>none</dt>
      *   <dd>skip packaging altogether</dd>
      * </dl>
@@ -279,6 +286,20 @@ public class JetMojo extends AbstractJetMojo {
     @Parameter(property = "installerSplash", defaultValue = "${project.basedir}/src/main/jetresources/installerSplash.bmp")
     protected File installerSplash;
 
+    /**
+     * Mac OSX App Bundle configuration parameters.
+     *
+     * @see OSXAppBundleConfig#fileName
+     * @see OSXAppBundleConfig#bundleName
+     * @see OSXAppBundleConfig#identifier
+     * @see OSXAppBundleConfig#shortVersion
+     * @see OSXAppBundleConfig#icon
+     * @see OSXAppBundleConfig#developerId
+     * @see OSXAppBundleConfig#publisherId
+     */
+    @Parameter(property = "osxBundleConfiguration")
+    protected OSXAppBundleConfig osxBundleConfiguration;
+
     private static final String APP_DIR = "app";
 
     private void checkVersionInfo(JetHome jetHome) throws JetHomeException {
@@ -289,7 +310,7 @@ public class JetMojo extends AbstractJetMojo {
             getLog().warn(s("JetMojo.NoVersionInfoInStandard.Warning"));
             addWindowsVersionInfo = false;
         }
-        if (addWindowsVersionInfo || EXCELSIOR_INSTALLER.equals(packaging)) {
+        if (addWindowsVersionInfo || EXCELSIOR_INSTALLER.equals(packaging) || OSX_APP_BUNDLE.equals(packaging)) {
             if (Utils.isEmpty(vendor)) {
                 //no organization name. Get it from groupId that cannot be empty.
                 String[] groupId = project.getGroupId().split("\\.");
@@ -307,23 +328,7 @@ public class JetMojo extends AbstractJetMojo {
         }
         if (addWindowsVersionInfo) {
             //Coerce winVIVersion to v1.v2.v3.v4 format.
-            String[] versions = winVIVersion.split("\\.");
-            String[] finalVersions = new String[]{"0", "0", "0", "0"};
-            for (int i = 0; i < Math.min(versions.length, 4); ++i) {
-                try {
-                    finalVersions[i] = Integer.decode(versions[i]).toString();
-                } catch (NumberFormatException e) {
-                    int minusPos = versions[i].indexOf('-');
-                    if (minusPos > 0) {
-                        String v = versions[i].substring(0, minusPos);
-                        try {
-                            finalVersions[i] = Integer.decode(v).toString();
-                        } catch (NumberFormatException ignore) {
-                        }
-                    }
-                }
-            }
-            String finalVersion = String.join(".", finalVersions);
+            String finalVersion = deriveFourDigitVersion(winVIVersion);
             if (!winVIVersion.equals(finalVersion)) {
                 getLog().warn(s("JetMojo.NotCompatibleExeVersion.Warning", winVIVersion, finalVersion));
                 winVIVersion = finalVersion;
@@ -339,6 +344,26 @@ public class JetMojo extends AbstractJetMojo {
                 winVIDescription = product;
             }
         }
+    }
+
+    private String deriveFourDigitVersion(String version) {
+        String[] versions = version.split("\\.");
+        String[] finalVersions = new String[]{"0", "0", "0", "0"};
+        for (int i = 0; i < Math.min(versions.length, 4); ++i) {
+            try {
+                finalVersions[i] = Integer.decode(versions[i]).toString();
+            } catch (NumberFormatException e) {
+                int minusPos = versions[i].indexOf('-');
+                if (minusPos > 0) {
+                    String v = versions[i].substring(0, minusPos);
+                    try {
+                        finalVersions[i] = Integer.decode(v).toString();
+                    } catch (NumberFormatException ignore) {
+                    }
+                }
+            }
+        }
+        return String.join(".", finalVersions);
     }
 
     private void checkGlobalAndSlimDownParameters(JetHome jetHome) throws JetHomeException, MojoFailureException {
@@ -403,6 +428,34 @@ public class JetMojo extends AbstractJetMojo {
         }
     }
 
+    private void checkOSXBundleConfig() {
+        if (packaging.equals(OSX_APP_BUNDLE)) {
+            if (osxBundleConfiguration.fileName == null) {
+                osxBundleConfiguration.fileName = outputName;
+            }
+            if (osxBundleConfiguration.bundleName == null) {
+                osxBundleConfiguration.bundleName = product;
+            }
+            if (osxBundleConfiguration.identifier == null) {
+                osxBundleConfiguration.identifier = project.getArtifactId();
+            }
+            if (osxBundleConfiguration.icon == null) {
+                osxBundleConfiguration.icon = new File(project.getBasedir(), "src/main/jetresources/icon.icns");
+            }
+            if (!osxBundleConfiguration.icon.exists()) {
+                getLog().warn(s("JetMojo.NoIconForOSXAppBundle.Warning"));
+            }
+            if (osxBundleConfiguration.version == null) {
+                osxBundleConfiguration.version = deriveFourDigitVersion(project.getVersion());
+            }
+            if (osxBundleConfiguration.shortVersion == null) {
+                String fourDigitVersion = deriveFourDigitVersion(version);
+                osxBundleConfiguration.shortVersion = fourDigitVersion.substring(0, fourDigitVersion.lastIndexOf('.'));
+            }
+        }
+
+    }
+
     @Override
     protected JetHome checkPrerequisites() throws MojoFailureException {
         JetHome jetHomeObj = super.checkPrerequisites();
@@ -429,7 +482,22 @@ public class JetMojo extends AbstractJetMojo {
                      packaging = ZIP;
                  }
                  break;
-             default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
+            case OSX_APP_BUNDLE:
+                if (!Utils.isOSX()) {
+                    getLog().warn(s("JetMojo.OSXBundleOnNotOSX.Warning"));
+                    packaging = ZIP;
+                }
+                break;
+
+            case NATIVE_BUNDLE:
+                if (Utils.isOSX()) {
+                    packaging = OSX_APP_BUNDLE;
+                } else {
+                    packaging = EXCELSIOR_INSTALLER;
+                }
+                break;
+
+            default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
         }
 
         // check version info
@@ -464,6 +532,8 @@ public class JetMojo extends AbstractJetMojo {
             checkTrialVersionConfig(jetHomeObj);
 
             checkGlobalAndSlimDownParameters(jetHomeObj);
+
+            checkOSXBundleConfig();
 
         } catch (JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
@@ -698,7 +768,73 @@ public class JetMojo extends AbstractJetMojo {
         }
     }
 
-    private void packageBuild(JetHome jetHome, File buildDir, File packageDir) throws IOException, MojoFailureException, CmdLineToolException {
+    private void createOSXAppBundle(JetHome jetHome, File buildDir) throws MojoExecutionException, MojoFailureException, CmdLineToolException {
+        File appBundle = new File(jetOutputDir, osxBundleConfiguration.fileName + ".app");
+        mkdir(appBundle);
+        try {
+            Utils.cleanDirectory(appBundle);
+        } catch (IOException e) {
+            throw new MojoFailureException(e.getMessage(), e);
+        }
+        File contents = new File (appBundle, "Contents");
+        mkdir(contents);
+        File contentsMacOs = new File(contents, "MacOS");
+        mkdir(contentsMacOs);
+        File contentsResources = new File (contents, "Resources");
+        mkdir(contentsResources);
+
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(
+                new FileOutputStream(new File (contents, "Info.plist")), "UTF-8")))
+        {
+            out.print (
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" +
+                    "<plist version=\"1.0\">\n" +
+                    "<dict>\n" +
+                    "  <key>CFBundlePackageType</key>\n" +
+                    "  <string>APPL</string>\n" +
+                    "  <key>CFBundleExecutable</key>\n" +
+                    "  <string>" + outputName + "</string>\n" +
+                    "  <key>CFBundleName</key>\n" +
+                    "  <string>" + osxBundleConfiguration.bundleName + "</string>\n" +
+                    "  <key>CFBundleIdentifier</key>\n" +
+                    "  <string>" + osxBundleConfiguration.identifier +"</string>\n" +
+                    "  <key>CFBundleVersionString</key>\n" +
+                    "  <string>"+ osxBundleConfiguration.version + "</string>\n" +
+                    "  <key>CFBundleShortVersionString</key>\n" +
+                    "  <string>"+ osxBundleConfiguration.shortVersion + "</string>\n" +
+                    (osxBundleConfiguration.icon.exists()?
+                            "  <key>CFBundleIconFile</key>\n" +
+                            "  <string>" + osxBundleConfiguration.icon.getName() + "</string>\n" : "") +
+                    (osxBundleConfiguration.highResolutionCapable?
+                            "  <key>NSHighResolutionCapable</key>\n" +
+                            "  <true/>" : "") +
+                    "</dict>\n" +
+                    "</plist>\n");
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage());
+        }
+
+        ArrayList<String> xpackArgs = getCommonXPackArgs();
+        xpackArgs.addAll(Arrays.asList(
+            "-target", contentsMacOs.getAbsolutePath()
+        ));
+        if (new JetPackager(jetHome, xpackArgs.toArray(new String[xpackArgs.size()]))
+                .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
+            throw new MojoFailureException(s("JetMojo.Package.Failure"));
+        }
+
+        if (osxBundleConfiguration.icon.exists()) {
+            try {
+                Files.copy(osxBundleConfiguration.icon.toPath(),
+                        new File(contentsResources, osxBundleConfiguration.icon.getName()).toPath());
+            } catch (IOException e) {
+                throw new MojoFailureException(e.getMessage(), e);
+            }
+        }
+    }
+
+    private void packageBuild(JetHome jetHome, File buildDir, File packageDir) throws IOException, MojoFailureException, CmdLineToolException, MojoExecutionException {
         switch (packaging){
             case ZIP:
                 getLog().info(s("JetMojo.ZipApp.Info"));
@@ -707,11 +843,13 @@ public class JetMojo extends AbstractJetMojo {
                 getLog().info(s("JetMojo.Build.Success"));
                 getLog().info(s("JetMojo.GetZip.Info", targetZip.getAbsolutePath()));
                 break;
-            case EXCELSIOR_INSTALLER :
+            case EXCELSIOR_INSTALLER:
                 File target = packWithEI(jetHome, buildDir);
                 getLog().info(s("JetMojo.Build.Success"));
                 getLog().info(s("JetMojo.GetEI.Info", target.getAbsolutePath()));
                 break;
+            case OSX_APP_BUNDLE:
+                createOSXAppBundle(jetHome, buildDir);
             default:
                 getLog().info(s("JetMojo.Build.Success"));
                 getLog().info(s("JetMojo.GetDir.Info", packageDir.getAbsolutePath()));
