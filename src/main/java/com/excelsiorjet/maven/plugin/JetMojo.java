@@ -450,8 +450,7 @@ public class JetMojo extends AbstractJetMojo {
 
             if (encryptResources) {
                 if (jetHomeObj.getEdition() == JetEdition.STANDARD) {
-                    getLog().warn(s("JetMojo.NoEncryptResourcesInStandard.Warning"));
-                    encryptResources = false;
+                    throw new MojoFailureException(s("JetMojo.NoEncryptResourcesInStandard.Failure"));
                 } else {
                     if (cryptSeed == null) {
                         cryptSeed = RandomStringUtils.randomAlphanumeric(64);
