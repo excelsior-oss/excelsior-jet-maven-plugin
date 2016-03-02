@@ -105,21 +105,21 @@ public class JetMojo extends AbstractJetMojo {
     protected boolean multiApp;
 
     /**
-     * Enables encryption of data in the generated executable.
+     * Enables data protection in the generated executable.
      *
      * @see #cryptSeed
      */
-    @Parameter(property = "encryptResources")
-    protected boolean encryptResources;
+    @Parameter(property = "protectData")
+    protected boolean protectData;
 
     /**
-     * Sets a seed string that will be used by JET compiler to generate a key and encrypt the data.
+     * Sets a seed string that will be used by JET compiler to generate a key and scramble the data.
      * If the {@code cryptSeed} is not set, it will be generated automatically with a random value,
-     * if encryption of data is enabled.
+     * if the data protection is enabled.
      *
-     * You may need to set the {@code cryptSeed} value if you need for the data to be encrypted in a stable way.
+     * You may need to set the {@code cryptSeed} value if you need for the data to be protected in a stable way.
      *
-     * @see #encryptResources
+     * @see #protectData
      */
     @Parameter(property = "cryptSeed")
     protected String cryptSeed;
@@ -448,9 +448,9 @@ public class JetMojo extends AbstractJetMojo {
                 }
             }
 
-            if (encryptResources) {
+            if (protectData) {
                 if (jetHomeObj.getEdition() == JetEdition.STANDARD) {
-                    throw new MojoFailureException(s("JetMojo.NoEncryptResourcesInStandard.Failure"));
+                    throw new MojoFailureException(s("JetMojo.NoDataProtectionInStandard.Failure"));
                 } else {
                     if (cryptSeed == null) {
                         cryptSeed = RandomStringUtils.randomAlphanumeric(64);
@@ -533,7 +533,7 @@ public class JetMojo extends AbstractJetMojo {
             compilerArgs.add("-expiremsg=" + trialVersion.expireMessage);
         }
 
-        if (encryptResources) {
+        if (protectData) {
             compilerArgs.add("-cryptseed=" + cryptSeed);
         }
 
