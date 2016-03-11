@@ -105,7 +105,8 @@ public class JetMojo extends AbstractJetMojo {
     protected boolean multiApp;
 
     /**
-     * Enables data protection in the generated executable.
+     * If set to {@code true}, enables protection of application data - reflection information,
+     * string literals, and resource files packed into the executable, if any.
      *
      * @see #cryptSeed
      */
@@ -113,16 +114,18 @@ public class JetMojo extends AbstractJetMojo {
     protected boolean protectData;
 
     /**
-     * Sets a seed string that will be used by JET compiler to generate a key and scramble the data.
-     * If the {@code cryptSeed} is not set, it will be generated automatically with a random value,
-     * if the data protection is enabled.
-     *
-     * You may need to set the {@code cryptSeed} value if you need for the data to be protected in a stable way.
-     *
+     * Sets a seed string that will be used by the Excelsior JET compiler to generate a key for 
+     * scrambling the data that the executable contains.
+     * If data protection is enabled, but {@code cryptSeed} is not set explicitly, a random value is used.
+     * <p>
+     * You may want to set a {@code cryptSeed} value if you need the data to be protected in a stable way.
+     * </p>
+     * 
      * @see #protectData
      */
     @Parameter(property = "cryptSeed")
     protected String cryptSeed;
+    
     /**
      * Enable/disable startup accelerator.
      * If enabled, the compiled application will run after build

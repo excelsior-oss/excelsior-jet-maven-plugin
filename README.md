@@ -431,17 +431,16 @@ Typically, you would set the hard expiration date somewhat beyond the planned re
 date of the next version of your application. This way, you would ensure that nobody uses
 an outdated trial copy for evaluation.
 
-<a name="protectData"></a>
 #### Data protection
 **New in 0.4.4:**
 
-If you do not wish constant data, such as reflection info, Java string literals and packed resource files,
-to be visible in the resulting executable, you may enable data protection by specifying the following configuration:
+If you do not wish constant data, such as reflection info, Java string literals, or packed resource files,
+to be visible in the resulting executable, enable data protection by specifying the following configuration:
 
 `<protectData>true</protectData>`
 
-For more details on data protection, refer to  "Data protection" section of
-the "Intellectual property protection" chapter of the Excelsior JET User's Guide.
+For more details on data protection, refer to the "Data Protection" section of
+the "Intellectual Property Protection" chapter of the Excelsior JET User's Guide.
 
 ## Sample Project
 
@@ -463,7 +462,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.4.4 (??-March-2016)
+Version 0.4.4 (??-Mar-2016)
 
 * `<protectData>` parameter added to enable data protection
 
