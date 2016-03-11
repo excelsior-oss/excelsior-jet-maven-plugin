@@ -25,6 +25,7 @@ import com.excelsiorjet.*;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
@@ -103,6 +104,28 @@ public class JetMojo extends AbstractJetMojo {
     @Parameter(property = "multiApp", defaultValue = "false")
     protected boolean multiApp;
 
+    /**
+     * If set to {@code true}, enables protection of application data - reflection information,
+     * string literals, and resource files packed into the executable, if any.
+     *
+     * @see #cryptSeed
+     */
+    @Parameter(property = "protectData")
+    protected boolean protectData;
+
+    /**
+     * Sets a seed string that will be used by the Excelsior JET compiler to generate a key for 
+     * scrambling the data that the executable contains.
+     * If data protection is enabled, but {@code cryptSeed} is not set explicitly, a random value is used.
+     * <p>
+     * You may want to set a {@code cryptSeed} value if you need the data to be protected in a stable way.
+     * </p>
+     * 
+     * @see #protectData
+     */
+    @Parameter(property = "cryptSeed")
+    protected String cryptSeed;
+    
     /**
      * Enable/disable startup accelerator.
      * If enabled, the compiled application will run after build
@@ -428,6 +451,16 @@ public class JetMojo extends AbstractJetMojo {
                 }
             }
 
+            if (protectData) {
+                if (jetHomeObj.getEdition() == JetEdition.STANDARD) {
+                    throw new MojoFailureException(s("JetMojo.NoDataProtectionInStandard.Failure"));
+                } else {
+                    if (cryptSeed == null) {
+                        cryptSeed = RandomStringUtils.randomAlphanumeric(64);
+                    }
+                }
+            }
+
             checkTrialVersionConfig(jetHomeObj);
 
             checkGlobalAndSlimDownParameters(jetHomeObj);
@@ -501,6 +534,10 @@ public class JetMojo extends AbstractJetMojo {
         if (trialVersion != null) {
             compilerArgs.add("-expire=" + trialVersion.getExpire());
             compilerArgs.add("-expiremsg=" + trialVersion.expireMessage);
+        }
+
+        if (protectData) {
+            compilerArgs.add("-cryptseed=" + cryptSeed);
         }
 
         TestRunExecProfiles execProfiles = new TestRunExecProfiles(execProfilesDir, execProfilesName);
