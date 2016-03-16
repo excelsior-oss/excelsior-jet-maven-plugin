@@ -396,7 +396,7 @@ public class JetMojo extends AbstractJetMojo {
                 osxBundleConfiguration.bundleName = product;
             }
             if (osxBundleConfiguration.identifier == null) {
-                osxBundleConfiguration.identifier = project.getArtifactId();
+                osxBundleConfiguration.identifier = project.getGroupId() + "." + project.getBuild().getFinalName();
             }
             if (osxBundleConfiguration.icon == null) {
                 osxBundleConfiguration.icon = new File(project.getBasedir(), "src/main/jetresources/icon.icns");
@@ -410,6 +410,12 @@ public class JetMojo extends AbstractJetMojo {
             if (osxBundleConfiguration.shortVersion == null) {
                 String fourDigitVersion = deriveFourDigitVersion(version);
                 osxBundleConfiguration.shortVersion = fourDigitVersion.substring(0, fourDigitVersion.lastIndexOf('.'));
+            }
+            if (osxBundleConfiguration.developerId == null) {
+                osxBundleConfiguration.developerId = System.getProperty("osx.developer.id");
+            }
+            if (osxBundleConfiguration.publisherId == null) {
+                osxBundleConfiguration.publisherId = System.getProperty("osx.publisher.id");
             }
         }
 
@@ -644,7 +650,7 @@ public class JetMojo extends AbstractJetMojo {
      * Packages the generated executable and required Excelsior JET runtime files
      * as a excelsior installer file.
      */
-    private File packWithEI(JetHome jetHome, File buildDir) throws CmdLineToolException, MojoFailureException {
+    private void packWithEI(JetHome jetHome, File buildDir) throws CmdLineToolException, MojoFailureException {
         File target = new File(jetOutputDir, Utils.mangleExeName(project.getBuild().getFinalName()));
         ArrayList<String> xpackArgs = getCommonXPackArgs();
         if (excelsiorInstallerConfiguration.eula.exists()) {
@@ -665,7 +671,8 @@ public class JetMojo extends AbstractJetMojo {
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
         }
-        return target;
+        getLog().info(s("JetMojo.Build.Success"));
+        getLog().info(s("JetMojo.GetEI.Info", target.getAbsolutePath()));
     }
 
 
@@ -760,6 +767,36 @@ public class JetMojo extends AbstractJetMojo {
                 throw new MojoFailureException(e.getMessage(), e);
             }
         }
+
+        File appPkg = null;
+        if (osxBundleConfiguration.developerId != null) {
+            getLog().info(s("JetMojo.SigningOSXBundle.Info"));
+            if (new CmdLineTool("codesign", "--verbose", "--force", "--deep", "--sign",
+                    osxBundleConfiguration.developerId, appBundle.getAbsolutePath()).withLog(getLog()).execute() != 0) {
+                throw new MojoFailureException(s("JetMojo.OSX.CodeSign.Failure"));
+            }
+            getLog().info(s("JetMojo.CreatingOSXInstaller.Info"));
+            if (osxBundleConfiguration.publisherId != null) {
+                appPkg = new File(jetOutputDir, project.getBuild().getFinalName() + ".pkg");
+                if (new CmdLineTool("productbuild", "--sign", osxBundleConfiguration.publisherId,
+                             "--component", appBundle.getAbsolutePath(), osxBundleConfiguration.installPath,
+                                            appPkg.getAbsolutePath())
+                        .withLog(getLog()).execute() != 0) {
+                    throw new MojoFailureException(s("JetMojo.OSX.Packaging.Failure"));
+                }
+            } else {
+                getLog().warn(s("JetMojo.NoPublisherId.Warning"));
+            }
+        } else {
+            getLog().warn(s("JetMojo.NoDeveloperId.Warning"));
+        }
+        getLog().info(s("JetMojo.Build.Success"));
+        if (appPkg != null) {
+            getLog().info(s("JetMojo.GetOSXPackage.Info", appPkg.getAbsolutePath()));
+        } else {
+            getLog().info(s("JetMojo.GetOSXBundle.Info", appBundle.getAbsolutePath()));
+        }
+
     }
 
     private void packageBuild(JetHome jetHome, File buildDir, File packageDir) throws IOException, MojoFailureException, CmdLineToolException, MojoExecutionException {
@@ -772,12 +809,11 @@ public class JetMojo extends AbstractJetMojo {
                 getLog().info(s("JetMojo.GetZip.Info", targetZip.getAbsolutePath()));
                 break;
             case EXCELSIOR_INSTALLER:
-                File target = packWithEI(jetHome, buildDir);
-                getLog().info(s("JetMojo.Build.Success"));
-                getLog().info(s("JetMojo.GetEI.Info", target.getAbsolutePath()));
+                packWithEI(jetHome, buildDir);
                 break;
             case OSX_APP_BUNDLE:
                 createOSXAppBundle(jetHome, buildDir);
+                break;
             default:
                 getLog().info(s("JetMojo.Build.Success"));
                 getLog().info(s("JetMojo.GetDir.Info", packageDir.getAbsolutePath()));

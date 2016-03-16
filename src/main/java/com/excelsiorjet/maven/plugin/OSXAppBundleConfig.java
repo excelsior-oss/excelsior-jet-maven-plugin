@@ -52,7 +52,7 @@ public class OSXAppBundleConfig {
 
     /**
      * Value for {@code CFBundleIdentifier} key in the resulting {@code Info.plist} file.
-     * Default is {@code ${project.artifactId}}.
+     * Default is {@code ${project.groupId}.${project.build.finalName}}.
      */
     public String identifier;
 
@@ -81,7 +81,7 @@ public class OSXAppBundleConfig {
 
     /**
      * "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle.
-     *
+     *  You may also set the parameter via {@code osx.developer.id"} system property.
      * <p>
      * See
      * <a href=
@@ -95,6 +95,8 @@ public class OSXAppBundleConfig {
     /**
      * "Developer ID Installer" or "Mac Installer Distribution" certificate name for signing resulting
      *  Mac Installer Package (.pkg file).
+     *  You may also set the parameter via {@code osx.publisher.id"} system property.
+     *
      * <p>
      * See
      * <a href=
@@ -105,4 +107,10 @@ public class OSXAppBundleConfig {
      *
      */
     public String publisherId;
+
+    /**
+     * The default installation path on the target system used for creation .pkg installer file.
+     * Default value is "/Applications".
+     */
+    public String installPath = "/Applications";
 }
