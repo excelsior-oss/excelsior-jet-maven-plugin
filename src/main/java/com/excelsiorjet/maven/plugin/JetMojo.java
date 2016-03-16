@@ -31,13 +31,11 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.excelsiorjet.Txt.s;
-import static com.excelsiorjet.EncodingDetector.detectEncoding;
 
 /**
  *  Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -47,16 +45,6 @@ import static com.excelsiorjet.EncodingDetector.detectEncoding;
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo( name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class JetMojo extends AbstractJetMojo {
-
-    public static final String AUTO_DETECT_EULA_ENCODING = "autodetect";
-    public static final String UNICODE_EULA_FLAG = "-unicode-eula";
-    public static final String EULA_FLAG = "-eula";
-
-    private static final Set<String> VALID_EULA_ENCODING_VALUES = new LinkedHashSet<String>() {{
-        add(StandardCharsets.US_ASCII.name());
-        add(StandardCharsets.UTF_16LE.name());
-        add(AUTO_DETECT_EULA_ENCODING);
-    }};
 
     /**
      * Target executable name. If not set, the main class name is used.
@@ -248,43 +236,14 @@ public class JetMojo extends AbstractJetMojo {
     protected String winVIDescription;
 
     /**
-     * The license agreement file. Used for Excelsior Installer.
-     * File containing the end-user license agreement, for Excelsior Installer to display during installation.
-     * The file must be a plain text file either in US-ASCII or UTF-16LE encoding.
-     * If not set, and the file {@code ${project.basedir}/src/main/jetresources/eula.txt} exists,
-     * that file is used by convention.
+     * Excelsior Installer configuration parameters.
      *
-     * @see #eulaEncoding eulaEncoding
+     * @see ExcelsiorInstallerConfig#eula
+     * @see ExcelsiorInstallerConfig#eulaEncoding
+     * @see ExcelsiorInstallerConfig#installerSplash
      */
-    @Parameter(property = "eula", defaultValue = "${project.basedir}/src/main/jetresources/eula.txt")
-    protected File eula;
-
-    /**
-     * Encoding of the EULA file. Permitted values:
-     * <ul>
-     *     <li>{@code US-ASCII}</li>
-     *     <li>{@code UTF-16LE}</li>
-     *     <li>{@code autodetect} (Default value)</li>
-     * </ul>
-     * If set to {@code autodetect}, the plugin looks for a byte order mark (BOM) in the file specified by {@link #eula}, and:
-     * <ul>
-     * <li>assumes US-ASCII encoding if no BOM is present,</li>
-     * <li>assumes UTF-16LE encoding if the respective BOM ({@code 0xFF 0xFE}) is present, or </li>
-     * <li>halts execution with error if some other BOM is present.</li>
-     * </ul>
-     * @see <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte order mark</a>
-     * @see #eula eula
-     */
-    @Parameter(property = "eulaEncoding", defaultValue = AUTO_DETECT_EULA_ENCODING)
-    protected String eulaEncoding;
-
-    /**
-     * (Windows) Excelsior Installer splash screen image in BMP format.
-     * If not set, and the file {@code ${project.basedir}/src/main/jetresources/installerSplash.bmp} exists,
-     * that file is used by convention.
-     */
-    @Parameter(property = "installerSplash", defaultValue = "${project.basedir}/src/main/jetresources/installerSplash.bmp")
-    protected File installerSplash;
+    @Parameter(property = "excelsiorInstallerConfiguration")
+    protected ExcelsiorInstallerConfig excelsiorInstallerConfiguration;
 
     /**
      * Mac OSX App Bundle configuration parameters.
@@ -467,11 +426,7 @@ public class JetMojo extends AbstractJetMojo {
             outputName = lastSlash < 0 ? mainClass : mainClass.substring(lastSlash + 1);
         }
 
-        //check eula settings
-        if (!VALID_EULA_ENCODING_VALUES.contains(eulaEncoding)) {
-            throw new MojoFailureException(s("JetMojo.Package.Eula.UnsupportedEncoding", eulaEncoding));
-        }
-
+        excelsiorInstallerConfiguration.fillDefaults(project);
 
         //check packaging type
         switch (packaging) {
@@ -692,12 +647,12 @@ public class JetMojo extends AbstractJetMojo {
     private File packWithEI(JetHome jetHome, File buildDir) throws CmdLineToolException, MojoFailureException {
         File target = new File(jetOutputDir, Utils.mangleExeName(project.getBuild().getFinalName()));
         ArrayList<String> xpackArgs = getCommonXPackArgs();
-        if (eula.exists()) {
-            xpackArgs.add(eulaFlag());
-            xpackArgs.add(eula.getAbsolutePath());
+        if (excelsiorInstallerConfiguration.eula.exists()) {
+            xpackArgs.add(excelsiorInstallerConfiguration.eulaFlag());
+            xpackArgs.add(excelsiorInstallerConfiguration.eula.getAbsolutePath());
         }
-        if (Utils.isWindows() && installerSplash.exists()) {
-            xpackArgs.add("-splash"); xpackArgs.add(installerSplash.getAbsolutePath());
+        if (Utils.isWindows() && excelsiorInstallerConfiguration.installerSplash.exists()) {
+            xpackArgs.add("-splash"); xpackArgs.add(excelsiorInstallerConfiguration.installerSplash.getAbsolutePath());
         }
         xpackArgs.addAll(Arrays.asList(
                         "-backend", "excelsior-installer",
@@ -711,33 +666,6 @@ public class JetMojo extends AbstractJetMojo {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
         }
         return target;
-    }
-
-    private String eulaFlag() throws MojoFailureException {
-        String detectedEncoding;
-        try {
-            detectedEncoding = detectEncoding(eula);
-        } catch (IOException e) {
-            throw new MojoFailureException(s("JetMojo.Package.Eula.UnableToDetectEncoding", eula.getAbsolutePath()), e);
-        }
-
-        if (!AUTO_DETECT_EULA_ENCODING.equals(eulaEncoding)) {
-            if (!detectedEncoding.equals(eulaEncoding)) {
-                throw new MojoFailureException(s("JetMojo.Package.Eula.EncodingDoesNotMatchActual", detectedEncoding, eulaEncoding));
-            }
-        }
-
-        String actualEncoding = AUTO_DETECT_EULA_ENCODING.equals(eulaEncoding) ?
-                detectedEncoding :
-                eulaEncoding;
-
-        if (StandardCharsets.UTF_16LE.name().equals(actualEncoding)) {
-            return UNICODE_EULA_FLAG;
-        } else if (StandardCharsets.US_ASCII.name().equals(actualEncoding)) {
-            return EULA_FLAG;
-        } else {
-            throw new MojoFailureException(s("JetMojo.Package.Eula.UnsupportedEncoding", eulaEncoding));
-        }
     }
 
 
