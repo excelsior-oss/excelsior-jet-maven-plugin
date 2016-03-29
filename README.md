@@ -34,7 +34,8 @@ in the `dependencies-list`, then you can use this plugin.
 This plugin will transform your application into an optimized native executable for the platform
 on which you run Maven, and place it into a separate directory together with all required
 Excelsior JET runtime files. In addition, it can either pack that directory into a zip archive
-(all platforms) or create an Excelsior Installer setup (Windows and Linux only).
+(all platforms), create an Excelsior Installer setup (Windows and Linux only)
+or create Mac OS X application bundle/installer.
     
 Excelsior JET supports many more features than this plugin.
 We plan to cover all those features in the future.
@@ -181,6 +182,13 @@ To create an Excelsior Installer setup, add the following configuration into the
 
 `<packaging>excelsior-installer</packaging>`
 
+**Note:** if you use the same pom.xml for all three supported platforms (Windows, Linux, OS X), it is recommended to
+use another configuration:
+
+`<packaging>native-bundle</packaging>`
+
+to create Excelsior Installer setup on Windows/Linux and Mac OS X application bundle and installer on Mac.
+
 Excelsior Installer setup, in turn, has the following configurations:
 
 * `<product>`*product-name*`</product>` - default is `${project.name}`
@@ -189,11 +197,70 @@ Excelsior Installer setup, in turn, has the following configurations:
 
 * `<version>`*product-version*`</version>` - default is `${project.version}`
 
+The above parameters are also used by Windows Version Information and Mac OS X bundle configurations.
+
+To further configure the Excelsior Installer setup, you need to add the following configuration section:
+
+```xml
+<excelsiorInstaller>
+</excelsiorInstaller>
+```
+
+that has the following configuration parameters:
+
 * `<eula>`*end-user-license-agreement-file*`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
 
 * `<eulaEncoding>`*eula-file-encoding*`</eulaEncoding>` - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
 
 * `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
+
+#### Creating Mac OS X application bundles and installers
+**New in 0.5.0:**
+
+The plugin supports the creation of Mac OS X application bundles and installers.
+
+To create a Mac OS X application bundle, add the following configuration into the plugin
+`<configuration>` section:
+
+`<packaging>osx-app-bundle</packaging>`
+
+**Note:** if you use the same pom.xml for all three supported platforms (Windows, Linux, OS X), it is recommended to
+use another configuration:
+
+`<packaging>native-bundle</packaging>`
+
+to create Excelsior Installer setup on Windows/Linux and Mac OS X application bundle and installer on Mac.
+
+To configure the OSX application bundle, you need to add the following configuration section:
+
+```xml
+<osxBundleConfiguration>
+</osxBundleConfiguration>
+```
+
+The most of the parameters are derived from other parameters of your `pom.xml`.
+The complete list of the parameters can be obtained
+[here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/OSXAppBundleConfig.java)
+
+However you need to say the plugin where the OSX icon (.icns) for your bundle is located.
+You may do it using `<icon>` parameter of `<osxBundleConfiguration>` or you may place it to
+`${project.basedir}/src/main/jetresources/icon.icns` to let the plugin to pick it automatically.
+
+By default, the plugin will create the OS X application bundle only,
+but to distribute your application to your customers you probably need to sign it and package to Mac OS X installer.
+The plugin allows you to do it with the following parameters under `<osxBundleConfiguration>` section:
+
+* `<developerId>`*developer-identity-certificate*`</developerId>` - "Developer ID Application" or "Mac App Distribution"
+certificate name for signing resulting OSX app bundle with `codesign` tool.
+* `<publisherId>`*publisher-identity-certificate*`</developerId>` - "Developer ID Installer" or "Mac Installer Distribution"
+certificate name for signing resulting Mac Installer Package (.pkg file) with `productbuild` tool.
+
+If you do not want to expose above parameters into `pom.xml` you may use system properties instead for `mvn` command:
+`-Dosx.developer.id` and `-Dosx.publisher.id` correspondingly.
+
+**Troubleshooting:** if you would like to test the created installer file right after build on the same PC,
+you need to remove the created OS X application bundle located near to the installer, else the installer
+will overwrite the existing OS X application bundle instead of installing it to `Applications` folder.
 
 #### Windows Version-Information Resource Configurations
 
@@ -397,7 +464,8 @@ above before deploying your application to end-users.
           so performing a Test Run is mandatory for Java Runtime Slim-Down as well.
 
 **Known issue:** Java Runtime Slim-Down does not work with the `excelsior-installer` packaging type yet
-                 due to a bug in Excelsior JET. We are going to fix it in the next update of Excelsior JET.
+                 due to a bug in Excelsior JET prior to Excelsior JET Maintenance Pack 2.
+                 It is fixed in Excelsior JET 11 MP2.
 
 #### Creating Trial Versions
 
@@ -432,7 +500,6 @@ date of the next version of your application. This way, you would ensure that no
 an outdated trial copy for evaluation.
 
 #### Data protection
-**New in 0.4.4:**
 
 If you do not wish constant data, such as reflection info, Java string literals, or packed resource files,
 to be visible in the resulting executable, enable data protection by specifying the following configuration:
@@ -461,6 +528,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.5.0 (??-Apr-2016)
+
+* Mac OS X application bundles and installers support
 
 Version 0.4.4 (11-Mar-2016)
 
@@ -521,10 +592,9 @@ and placing it into a separate directory with required Excelsior JET runtime fil
 Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
 So the next few releases will add the following features:
 
-* Mapping of compiler and packager options to plugin configuration parameters.
-* Creation of Mac OS X application bundles.
-* Code signing.
 * Tomcat Web Applications support.
+* Windows services support.
+* Code signing.
 * Multi-component support: building dependencies into separate native libraries
                            to reuse them across multiple Maven project builds
                            so as to reduce overall compilation time
