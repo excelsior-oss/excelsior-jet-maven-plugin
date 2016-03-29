@@ -37,15 +37,21 @@ public class CmdLineTool {
     private ArrayList<String> args;
     private Log log;
     private File workDir;
+    private boolean errToOut = false;
     private HashMap<String, String> env = new HashMap<>();
 
     public CmdLineTool(String... args) {
         this.args = new ArrayList<>(Arrays.asList(args));
     }
 
-    public CmdLineTool withLog(Log log) {
+    public CmdLineTool withLog(Log log, boolean errToOut) {
         this.log = log;
+        this.errToOut = errToOut;
         return this;
+    }
+
+    public CmdLineTool withLog(Log log) {
+        return withLog(log, false);
     }
 
     public CmdLineTool workingDirectory(File workDir) {
@@ -86,7 +92,7 @@ public class CmdLineTool {
                         return;
                     }
                     if (log != null) {
-                        if (err) {
+                        if (err && !errToOut) {
                             log.error(line);
                         } else {
                             log.info(line);

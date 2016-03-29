@@ -772,7 +772,7 @@ public class JetMojo extends AbstractJetMojo {
         if (osxBundleConfiguration.developerId != null) {
             getLog().info(s("JetMojo.SigningOSXBundle.Info"));
             if (new CmdLineTool("codesign", "--verbose", "--force", "--deep", "--sign",
-                    osxBundleConfiguration.developerId, appBundle.getAbsolutePath()).withLog(getLog()).execute() != 0) {
+                    osxBundleConfiguration.developerId, appBundle.getAbsolutePath()).withLog(getLog(), true).execute() != 0) {
                 throw new MojoFailureException(s("JetMojo.OSX.CodeSign.Failure"));
             }
             getLog().info(s("JetMojo.CreatingOSXInstaller.Info"));
