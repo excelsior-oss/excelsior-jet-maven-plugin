@@ -195,6 +195,62 @@ Excelsior Installer setup, in turn, has the following configurations:
 
 * `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
 
+#### Creating iOS application bundles
+**New in 1.4.6:**
+
+The plugin supports the creation of native iOS application bundles from your Java applications.
+
+To create an iOS application bundle, add the following configuration into the plugin
+`<configuration>` section:
+
+`<packaging>ios-app-bundle</packaging>`
+
+**Note:** if you use the same pom.xml for all four supported platforms (Windows, OS X, iOS and Linux),
+it is recommended to use another configuration:
+
+`<packaging>native-bundle</packaging>`
+
+to create Excelsior Installer setups on Windows and Linux and an application bundle and installer on iOS and OS X.
+
+To configure the iOS application bundle, you need to add the following configuration section:
+
+```xml
+<iosBundleConfiguration>
+</iosBundleConfiguration>
+```
+
+The values of most bundle parameters are derived automatically from the other parameters of your `pom.xml`.
+The complete list of the parameters can be obtained
+[here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/mac-osx-bundle/src/main/java/com/excelsiorjet/maven/plugin/OSXAppBundleConfig.java)
+
+You still need to tell the plugin where the iOS icons (`.icns` file) for your bundle is located.
+Do that using the `<icon>` parameter of `<iosBundleConfiguration>`, or simply place the icon file at
+`${project.basedir}/src/main/jetresources/icon.icns` to let the plugin pick it up automatically.
+
+By default, the plugin will create an iOS application bundle only,
+but to distribute your application to iOS AppStore you need to sign it and package as an
+iOS archive (`.ipa` file).
+The plugin enables you to do that using the following parameters under `<iosBundleConfiguration>` section:
+
+* `<developerId>`*developer-identity-certificate*`</developerId>` - "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting iOS app bundle with `codesign` tool.
+* `<publisherId>`*publisher-identity-certificate*`</publisherId>` - "Developer ID Installer" or "Mac Installer Distribution"
+certificate name for signing the resulting iOS Application Package (`.ipa` file) with the `productbuild` tool.
+
+If you do not want to expose above parameters via `pom.xml`, you may pass them as system properties
+to the `mvn` command instead, using the arguments `-Dios.developer.id` and `-Dios.publisher.id` respectively.
+
+##### iOS benchmarking
+To compare the performance of Excelsior JET with native Objective-C and Swift,
+we have implemented a typical iOS application with widgets, animation and so on,
+in three languages: Java, Objective-C and Swift.
+Then we wrote an automatic script that manipulates with the UI of the application,
+and finally we have run three resulting binaries on iOS devices: iPhone 4s and iPhone 6s
+and scored the results. Here they are:
+
+![JFCMark](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/1st-april-joke/src/jfcmark.jpg)
+
+As you can see Java translated to native code can be two times faster than Objective-C!
+
 #### Windows Version-Information Resource Configurations
 
 On Windows, the plugin automatically adds a
