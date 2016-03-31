@@ -45,71 +45,71 @@ public class OSXAppBundleConfig {
     public String fileName;
 
     /**
-     * Value for {@code CFBundleName} key in the resulting {@code Info.plist} file.
+     * Value for the {@code CFBundleName} key in the resulting {@code Info.plist} file.
      * Default is {@link JetMojo#product}.
      */
     public String bundleName;
 
     /**
-     * Value for {@code CFBundleIdentifier} key in the resulting {@code Info.plist} file.
+     * Value for the {@code CFBundleIdentifier} key in the resulting {@code Info.plist} file.
      * Default is {@code ${project.groupId}.${project.build.finalName}}.
      */
     public String identifier;
 
     /**
-     * Value for {@code CFBundleShortVersionString} key in the resulting {@code Info.plist} file.
-     * By default is derived from {@link JetMojo#version}.
+     * Value for the {@code CFBundleShortVersionString} key in the resulting {@code Info.plist} file.
+     * By default, derived from {@link JetMojo#version}.
      */
     public String shortVersion;
 
     /**
-     * Value for {@code CFBundleVersionString} key in the resulting {@code Info.plist} file.
-     * By default is derived from {@code ${project.version}}.
+     * Value for the {@code CFBundleVersionString} key in the resulting {@code Info.plist} file.
+     * By default, derived from {@code ${project.version}}.
      */
     public String version;
 
     /**
-     * Value for {@code CFBundleIconFile} key in the resulting {@code Info.plist} file.
+     * Value for the {@code CFBundleIconFile} key in the resulting {@code Info.plist} file.
      * Default is {@code ${project.basedir}/src/main/jetresources/icon.icns}.
      */
     public File icon;
 
     /**
-     * Value for {@code NSHighResolutionCapable} key in the resulting {@code Info.plist} file.
+     * Value for the {@code NSHighResolutionCapable} key in the resulting {@code Info.plist} file.
      */
     public boolean highResolutionCapable = true;
 
     /**
-     * "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle.
-     *  You may also set the parameter via {@code osx.developer.id"} system property.
+     * "Developer ID Application" or "Mac App Distribution" certificate name for signing the resulting OS X app bundle.
+     *  You may also set the parameter via the {@code osx.developer.id} system property.
      * <p>
-     * See
+     * Refer to the official
      * <a href=
      * "https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html">
      * App Distribution Guide</A>
-     * for more details.
+     * for details.
      * </p>
      */
     public String developerId;
 
     /**
-     * "Developer ID Installer" or "Mac Installer Distribution" certificate name for signing resulting
-     *  Mac Installer Package (.pkg file).
+     * "Developer ID Installer" or "Mac Installer Distribution" certificate name for signing the resulting
+     *  OS X Installer Package (.pkg file).
      *  You may also set the parameter via {@code osx.publisher.id"} system property.
      *
      * <p>
-     * See
+     * Refer to the official
      * <a href=
      * "https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html">
      * App Distribution Guide</A>
-     * for more details.
+     * for details.
      * </p>
      *
      */
     public String publisherId;
 
     /**
-     * The default installation path on the target system used for creation .pkg installer file.
+     * The default installation path on the target system, used during the creation of the .pkg installer file.
      * Default value is "/Applications".
      */
     public String installPath = "/Applications";

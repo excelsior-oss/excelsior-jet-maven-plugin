@@ -164,9 +164,9 @@ public class JetMojo extends AbstractJetMojo {
      *   <dd>self-extracting installer with standard GUI for Windows
      *     and command-line interface for Linux</dd>
      *   <dt>osx-app-bundle</dt>
-     *   <dd>Mac OS X bundle</dd>
+     *   <dd>OS X application bundle</dd>
      *   <dt>native-bundle</dt>
-     *   <dd>Excelsior Installer for Windows and Linux and Mac OS X bundle on Mac OSX</dd>
+     *   <dd>Excelsior Installer setups for Windows and Linux, application bundle for OS X</dd>
      *   <dt>none</dt>
      *   <dd>skip packaging altogether</dd>
      * </dl>
@@ -246,7 +246,7 @@ public class JetMojo extends AbstractJetMojo {
     protected ExcelsiorInstallerConfig excelsiorInstallerConfiguration;
 
     /**
-     * Mac OSX App Bundle configuration parameters.
+     * OS X Application Bundle configuration parameters.
      *
      * @see OSXAppBundleConfig#fileName
      * @see OSXAppBundleConfig#bundleName
