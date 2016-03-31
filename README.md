@@ -35,7 +35,7 @@ This plugin will transform your application into an optimized native executable 
 on which you run Maven, and place it into a separate directory together with all required
 Excelsior JET runtime files. In addition, it can either pack that directory into a zip archive
 (all platforms), create an Excelsior Installer setup (Windows and Linux only)
-or create Mac OS X application bundle/installer.
+or an OS X application bundle/installer.
     
 Excelsior JET supports many more features than this plugin.
 We plan to cover all those features in the future.
@@ -97,9 +97,9 @@ to `jet/app`, if applicable (see "Customizing Package Content" below.)
 Finally, the plugin packs the contents of the `jet/app` directory into
 a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
 On Windows and Linux, you can also set the `<packaging>excelsior-installer</packaging>`
-configuration parameter to have the plugin create an Excelsior Installer setup instead.
-
-In the future, the plugin will also support the creation of OS X app bundles.
+configuration parameter to have the plugin create an Excelsior Installer setup instead,
+and on OS X, setting `<packaging>osx-app-bundle</packaging>` will result in the creation
+of an application bundle and, optionally, a native OS X installer package (`.pkg` file).
 
 ### Performing a Test Run
 
@@ -182,12 +182,12 @@ To create an Excelsior Installer setup, add the following configuration into the
 
 `<packaging>excelsior-installer</packaging>`
 
-**Note:** if you use the same pom.xml for all three supported platforms (Windows, Linux, OS X), it is recommended to
-use another configuration:
+**Note:** if you use the same pom.xml for all three supported platforms (Windows, OS X, and Linux),
+it is recommended to use another configuration:
 
 `<packaging>native-bundle</packaging>`
 
-to create Excelsior Installer setup on Windows/Linux and Mac OS X application bundle and installer on Mac.
+to create Excelsior Installer setups on Windows and Linux and an application bundle and installer on OS X.
 
 Excelsior Installer setup, in turn, has the following configurations:
 
@@ -197,7 +197,7 @@ Excelsior Installer setup, in turn, has the following configurations:
 
 * `<version>`*product-version*`</version>` - default is `${project.version}`
 
-The above parameters are also used by Windows Version Information and Mac OS X bundle configurations.
+The above parameters are also used by Windows Version Information and OS X bundle configurations.
 
 To further configure the Excelsior Installer setup, you need to add the following configuration section:
 
@@ -214,53 +214,53 @@ that has the following configuration parameters:
 
 * `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
 
-#### Creating Mac OS X application bundles and installers
+#### Creating OS X application bundles and installers
 **New in 0.5.0:**
 
-The plugin supports the creation of Mac OS X application bundles and installers.
+The plugin supports the creation of OS X application bundles and installers.
 
-To create a Mac OS X application bundle, add the following configuration into the plugin
+To create an OS X application bundle, add the following configuration into the plugin
 `<configuration>` section:
 
 `<packaging>osx-app-bundle</packaging>`
 
-**Note:** if you use the same pom.xml for all three supported platforms (Windows, Linux, OS X), it is recommended to
-use another configuration:
+**Note:** if you use the same pom.xml for all three supported platforms (Windows, OS X, and Linux), it is recommended to use another configuration:
 
 `<packaging>native-bundle</packaging>`
 
-to create Excelsior Installer setup on Windows/Linux and Mac OS X application bundle and installer on Mac.
+to create Excelsior Installer setups on Windows and Linux and an application bundle and installer on OS X.
 
-To configure the OSX application bundle, you need to add the following configuration section:
+To configure the OS X application bundle, you need to add the following configuration section:
 
 ```xml
 <osxBundleConfiguration>
 </osxBundleConfiguration>
 ```
 
-The most of the parameters are derived from other parameters of your `pom.xml`.
+The values of most bundle parameters are derived automatically from the other parameters of your `pom.xml`.
 The complete list of the parameters can be obtained
 [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/OSXAppBundleConfig.java)
 
-However you need to say the plugin where the OSX icon (.icns) for your bundle is located.
-You may do it using `<icon>` parameter of `<osxBundleConfiguration>` or you may place it to
-`${project.basedir}/src/main/jetresources/icon.icns` to let the plugin to pick it automatically.
+You still need to tell the plugin where the OS X icon (`.icns` file) for your bundle is located.
+Do that using the `<icon>` parameter of `<osxBundleConfiguration>`, or simply place the icon file at
+`${project.basedir}/src/main/jetresources/icon.icns` to let the plugin pick it up automatically.
 
-By default, the plugin will create the OS X application bundle only,
-but to distribute your application to your customers you probably need to sign it and package to Mac OS X installer.
-The plugin allows you to do it with the following parameters under `<osxBundleConfiguration>` section:
+By default, the plugin will create an OS X application bundle only,
+but to distribute your application to your customers you probably need to sign it and package as an
+OS X installer (`.pkg` file).
+The plugin enables you to do that using the following parameters under `<osxBundleConfiguration>` section:
 
-* `<developerId>`*developer-identity-certificate*`</developerId>` - "Developer ID Application" or "Mac App Distribution"
-certificate name for signing resulting OSX app bundle with `codesign` tool.
-* `<publisherId>`*publisher-identity-certificate*`</developerId>` - "Developer ID Installer" or "Mac Installer Distribution"
-certificate name for signing resulting Mac Installer Package (.pkg file) with `productbuild` tool.
+* `<developerId>`*developer-identity-certificate*`</developerId>` - "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle with `codesign` tool.
+* `<publisherId>`*publisher-identity-certificate*`</publisherId>` - "Developer ID Installer" or "Mac Installer Distribution"
+certificate name for signing the resulting OS X Installer Package (`.pkg` file) with the `productbuild` tool.
 
-If you do not want to expose above parameters into `pom.xml` you may use system properties instead for `mvn` command:
-`-Dosx.developer.id` and `-Dosx.publisher.id` correspondingly.
-
-**Troubleshooting:** if you would like to test the created installer file right after build on the same PC,
-you need to remove the created OS X application bundle located near to the installer, else the installer
-will overwrite the existing OS X application bundle instead of installing it to `Applications` folder.
+If you do not want to expose above parameters via `pom.xml`, you may pass them as system properties
+to the `mvn` command instead, using the arguments `-Dosx.developer.id` and `-Dosx.publisher.id` respectively.
+ 
+**Troubleshooting:** If you would like to test the created installer file on the same OS X system on which
+it was built, you need to first remove the OS X application bundle created by the plugin and located
+next to the installer. Otherwise, the installer will overwrite that existing OS X application bundle
+instead of installing the application into the `Applications` folder.
 
 #### Windows Version-Information Resource Configurations
 
@@ -463,9 +463,8 @@ above before deploying your application to end-users.
 **Note:** Enabling Java Runtime Slim-Down automatically enables the Global Optimizer, 
           so performing a Test Run is mandatory for Java Runtime Slim-Down as well.
 
-**Known issue:** Java Runtime Slim-Down does not work with the `excelsior-installer` packaging type yet
-                 due to a bug in Excelsior JET prior to Excelsior JET Maintenance Pack 2.
-                 It is fixed in Excelsior JET 11 MP2.
+**Fixed issue:** Java Runtime Slim-Down did not work with the `excelsior-installer` packaging type 
+                 due to a bug in Excelsior JET. This issue is fixed in Excelsior JET 11 Maintenance Pack 2.
 
 #### Creating Trial Versions
 
@@ -559,9 +558,8 @@ Reduced the download size and disk footprint of resulting packages by means of s
 Version 0.3.2 (01-Feb-2016)
 
 * "[Changes are not reflected in compiled app if building without clean #11](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues/11)" issue fixed
-* Error message corrected for "[Cannot find jar if classifier is used #10]
-  (https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues/10)",
-  explicitly referring `<mainJar>` plugin parameter that should be set for the case.
+* Error message corrected for "[Cannot find jar if classifier is used #10](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues/10)",
+  explicitly referring the `<mainJar>` plugin parameter that should be set in such cases.
 
 Version 0.3.1 (26-Jan-2016)
 
