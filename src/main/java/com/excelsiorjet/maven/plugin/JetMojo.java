@@ -31,12 +31,11 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.excelsiorjet.Txt.s;
-import static com.excelsiorjet.EncodingDetector.detectEncoding;
 
 /**
  *  Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -46,16 +45,6 @@ import static com.excelsiorjet.EncodingDetector.detectEncoding;
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo( name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class JetMojo extends AbstractJetMojo {
-
-    public static final String AUTO_DETECT_EULA_ENCODING = "autodetect";
-    public static final String UNICODE_EULA_FLAG = "-unicode-eula";
-    public static final String EULA_FLAG = "-eula";
-
-    private static final Set<String> VALID_EULA_ENCODING_VALUES = new LinkedHashSet<String>() {{
-        add(StandardCharsets.US_ASCII.name());
-        add(StandardCharsets.UTF_16LE.name());
-        add(AUTO_DETECT_EULA_ENCODING);
-    }};
 
     /**
      * Target executable name. If not set, the main class name is used.
@@ -163,6 +152,8 @@ public class JetMojo extends AbstractJetMojo {
     private static final String ZIP = "zip";
     private static final String NONE = "none";
     private static final String EXCELSIOR_INSTALLER = "excelsior-installer";
+    private static final String OSX_APP_BUNDLE = "osx-app-bundle";
+    private static final String NATIVE_BUNDLE = "native-bundle";
 
     /**
      * Application packaging mode. Permitted values are:
@@ -172,6 +163,10 @@ public class JetMojo extends AbstractJetMojo {
      *   <dt>excelsior-installer</dt>
      *   <dd>self-extracting installer with standard GUI for Windows
      *     and command-line interface for Linux</dd>
+     *   <dt>osx-app-bundle</dt>
+     *   <dd>OS X application bundle</dd>
+     *   <dt>native-bundle</dt>
+     *   <dd>Excelsior Installer setups for Windows and Linux, application bundle for OS X</dd>
      *   <dt>none</dt>
      *   <dd>skip packaging altogether</dd>
      * </dl>
@@ -241,43 +236,28 @@ public class JetMojo extends AbstractJetMojo {
     protected String winVIDescription;
 
     /**
-     * The license agreement file. Used for Excelsior Installer.
-     * File containing the end-user license agreement, for Excelsior Installer to display during installation.
-     * The file must be a plain text file either in US-ASCII or UTF-16LE encoding.
-     * If not set, and the file {@code ${project.basedir}/src/main/jetresources/eula.txt} exists,
-     * that file is used by convention.
+     * Excelsior Installer configuration parameters.
      *
-     * @see #eulaEncoding eulaEncoding
+     * @see ExcelsiorInstallerConfig#eula
+     * @see ExcelsiorInstallerConfig#eulaEncoding
+     * @see ExcelsiorInstallerConfig#installerSplash
      */
-    @Parameter(property = "eula", defaultValue = "${project.basedir}/src/main/jetresources/eula.txt")
-    protected File eula;
+    @Parameter(property = "excelsiorInstallerConfiguration")
+    protected ExcelsiorInstallerConfig excelsiorInstallerConfiguration;
 
     /**
-     * Encoding of the EULA file. Permitted values:
-     * <ul>
-     *     <li>{@code US-ASCII}</li>
-     *     <li>{@code UTF-16LE}</li>
-     *     <li>{@code autodetect} (Default value)</li>
-     * </ul>
-     * If set to {@code autodetect}, the plugin looks for a byte order mark (BOM) in the file specified by {@link #eula}, and:
-     * <ul>
-     * <li>assumes US-ASCII encoding if no BOM is present,</li>
-     * <li>assumes UTF-16LE encoding if the respective BOM ({@code 0xFF 0xFE}) is present, or </li>
-     * <li>halts execution with error if some other BOM is present.</li>
-     * </ul>
-     * @see <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte order mark</a>
-     * @see #eula eula
+     * OS X Application Bundle configuration parameters.
+     *
+     * @see OSXAppBundleConfig#fileName
+     * @see OSXAppBundleConfig#bundleName
+     * @see OSXAppBundleConfig#identifier
+     * @see OSXAppBundleConfig#shortVersion
+     * @see OSXAppBundleConfig#icon
+     * @see OSXAppBundleConfig#developerId
+     * @see OSXAppBundleConfig#publisherId
      */
-    @Parameter(property = "eulaEncoding", defaultValue = AUTO_DETECT_EULA_ENCODING)
-    protected String eulaEncoding;
-
-    /**
-     * (Windows) Excelsior Installer splash screen image in BMP format.
-     * If not set, and the file {@code ${project.basedir}/src/main/jetresources/installerSplash.bmp} exists,
-     * that file is used by convention.
-     */
-    @Parameter(property = "installerSplash", defaultValue = "${project.basedir}/src/main/jetresources/installerSplash.bmp")
-    protected File installerSplash;
+    @Parameter(property = "osxBundleConfiguration")
+    protected OSXAppBundleConfig osxBundleConfiguration;
 
     private static final String APP_DIR = "app";
 
@@ -289,7 +269,7 @@ public class JetMojo extends AbstractJetMojo {
             getLog().warn(s("JetMojo.NoVersionInfoInStandard.Warning"));
             addWindowsVersionInfo = false;
         }
-        if (addWindowsVersionInfo || EXCELSIOR_INSTALLER.equals(packaging)) {
+        if (addWindowsVersionInfo || EXCELSIOR_INSTALLER.equals(packaging) || OSX_APP_BUNDLE.equals(packaging)) {
             if (Utils.isEmpty(vendor)) {
                 //no organization name. Get it from groupId that cannot be empty.
                 String[] groupId = project.getGroupId().split("\\.");
@@ -307,23 +287,7 @@ public class JetMojo extends AbstractJetMojo {
         }
         if (addWindowsVersionInfo) {
             //Coerce winVIVersion to v1.v2.v3.v4 format.
-            String[] versions = winVIVersion.split("\\.");
-            String[] finalVersions = new String[]{"0", "0", "0", "0"};
-            for (int i = 0; i < Math.min(versions.length, 4); ++i) {
-                try {
-                    finalVersions[i] = Integer.decode(versions[i]).toString();
-                } catch (NumberFormatException e) {
-                    int minusPos = versions[i].indexOf('-');
-                    if (minusPos > 0) {
-                        String v = versions[i].substring(0, minusPos);
-                        try {
-                            finalVersions[i] = Integer.decode(v).toString();
-                        } catch (NumberFormatException ignore) {
-                        }
-                    }
-                }
-            }
-            String finalVersion = String.join(".", finalVersions);
+            String finalVersion = deriveFourDigitVersion(winVIVersion);
             if (!winVIVersion.equals(finalVersion)) {
                 getLog().warn(s("JetMojo.NotCompatibleExeVersion.Warning", winVIVersion, finalVersion));
                 winVIVersion = finalVersion;
@@ -339,6 +303,26 @@ public class JetMojo extends AbstractJetMojo {
                 winVIDescription = product;
             }
         }
+    }
+
+    private String deriveFourDigitVersion(String version) {
+        String[] versions = version.split("\\.");
+        String[] finalVersions = new String[]{"0", "0", "0", "0"};
+        for (int i = 0; i < Math.min(versions.length, 4); ++i) {
+            try {
+                finalVersions[i] = Integer.decode(versions[i]).toString();
+            } catch (NumberFormatException e) {
+                int minusPos = versions[i].indexOf('-');
+                if (minusPos > 0) {
+                    String v = versions[i].substring(0, minusPos);
+                    try {
+                        finalVersions[i] = Integer.decode(v).toString();
+                    } catch (NumberFormatException ignore) {
+                    }
+                }
+            }
+        }
+        return String.join(".", finalVersions);
     }
 
     private void checkGlobalAndSlimDownParameters(JetHome jetHome) throws JetHomeException, MojoFailureException {
@@ -403,6 +387,40 @@ public class JetMojo extends AbstractJetMojo {
         }
     }
 
+    private void checkOSXBundleConfig() {
+        if (packaging.equals(OSX_APP_BUNDLE)) {
+            if (osxBundleConfiguration.fileName == null) {
+                osxBundleConfiguration.fileName = outputName;
+            }
+            if (osxBundleConfiguration.bundleName == null) {
+                osxBundleConfiguration.bundleName = product;
+            }
+            if (osxBundleConfiguration.identifier == null) {
+                osxBundleConfiguration.identifier = project.getGroupId() + "." + project.getBuild().getFinalName();
+            }
+            if (osxBundleConfiguration.icon == null) {
+                osxBundleConfiguration.icon = new File(project.getBasedir(), "src/main/jetresources/icon.icns");
+            }
+            if (!osxBundleConfiguration.icon.exists()) {
+                getLog().warn(s("JetMojo.NoIconForOSXAppBundle.Warning"));
+            }
+            if (osxBundleConfiguration.version == null) {
+                osxBundleConfiguration.version = deriveFourDigitVersion(project.getVersion());
+            }
+            if (osxBundleConfiguration.shortVersion == null) {
+                String fourDigitVersion = deriveFourDigitVersion(version);
+                osxBundleConfiguration.shortVersion = fourDigitVersion.substring(0, fourDigitVersion.lastIndexOf('.'));
+            }
+            if (osxBundleConfiguration.developerId == null) {
+                osxBundleConfiguration.developerId = System.getProperty("osx.developer.id");
+            }
+            if (osxBundleConfiguration.publisherId == null) {
+                osxBundleConfiguration.publisherId = System.getProperty("osx.publisher.id");
+            }
+        }
+
+    }
+
     @Override
     protected JetHome checkPrerequisites() throws MojoFailureException {
         JetHome jetHomeObj = super.checkPrerequisites();
@@ -414,11 +432,7 @@ public class JetMojo extends AbstractJetMojo {
             outputName = lastSlash < 0 ? mainClass : mainClass.substring(lastSlash + 1);
         }
 
-        //check eula settings
-        if (!VALID_EULA_ENCODING_VALUES.contains(eulaEncoding)) {
-            throw new MojoFailureException(s("JetMojo.Package.Eula.UnsupportedEncoding", eulaEncoding));
-        }
-
+        excelsiorInstallerConfiguration.fillDefaults(project);
 
         //check packaging type
         switch (packaging) {
@@ -429,7 +443,22 @@ public class JetMojo extends AbstractJetMojo {
                      packaging = ZIP;
                  }
                  break;
-             default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
+            case OSX_APP_BUNDLE:
+                if (!Utils.isOSX()) {
+                    getLog().warn(s("JetMojo.OSXBundleOnNotOSX.Warning"));
+                    packaging = ZIP;
+                }
+                break;
+
+            case NATIVE_BUNDLE:
+                if (Utils.isOSX()) {
+                    packaging = OSX_APP_BUNDLE;
+                } else {
+                    packaging = EXCELSIOR_INSTALLER;
+                }
+                break;
+
+            default: throw new MojoFailureException(s("JetMojo.UnknownPackagingMode.Failure", packaging));
         }
 
         // check version info
@@ -464,6 +493,8 @@ public class JetMojo extends AbstractJetMojo {
             checkTrialVersionConfig(jetHomeObj);
 
             checkGlobalAndSlimDownParameters(jetHomeObj);
+
+            checkOSXBundleConfig();
 
         } catch (JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
@@ -619,15 +650,15 @@ public class JetMojo extends AbstractJetMojo {
      * Packages the generated executable and required Excelsior JET runtime files
      * as a excelsior installer file.
      */
-    private File packWithEI(JetHome jetHome, File buildDir) throws CmdLineToolException, MojoFailureException {
+    private void packWithEI(JetHome jetHome, File buildDir) throws CmdLineToolException, MojoFailureException {
         File target = new File(jetOutputDir, Utils.mangleExeName(project.getBuild().getFinalName()));
         ArrayList<String> xpackArgs = getCommonXPackArgs();
-        if (eula.exists()) {
-            xpackArgs.add(eulaFlag());
-            xpackArgs.add(eula.getAbsolutePath());
+        if (excelsiorInstallerConfiguration.eula.exists()) {
+            xpackArgs.add(excelsiorInstallerConfiguration.eulaFlag());
+            xpackArgs.add(excelsiorInstallerConfiguration.eula.getAbsolutePath());
         }
-        if (Utils.isWindows() && installerSplash.exists()) {
-            xpackArgs.add("-splash"); xpackArgs.add(installerSplash.getAbsolutePath());
+        if (Utils.isWindows() && excelsiorInstallerConfiguration.installerSplash.exists()) {
+            xpackArgs.add("-splash"); xpackArgs.add(excelsiorInstallerConfiguration.installerSplash.getAbsolutePath());
         }
         xpackArgs.addAll(Arrays.asList(
                         "-backend", "excelsior-installer",
@@ -640,34 +671,8 @@ public class JetMojo extends AbstractJetMojo {
                 .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
             throw new MojoFailureException(s("JetMojo.Package.Failure"));
         }
-        return target;
-    }
-
-    private String eulaFlag() throws MojoFailureException {
-        String detectedEncoding;
-        try {
-            detectedEncoding = detectEncoding(eula);
-        } catch (IOException e) {
-            throw new MojoFailureException(s("JetMojo.Package.Eula.UnableToDetectEncoding", eula.getAbsolutePath()), e);
-        }
-
-        if (!AUTO_DETECT_EULA_ENCODING.equals(eulaEncoding)) {
-            if (!detectedEncoding.equals(eulaEncoding)) {
-                throw new MojoFailureException(s("JetMojo.Package.Eula.EncodingDoesNotMatchActual", detectedEncoding, eulaEncoding));
-            }
-        }
-
-        String actualEncoding = AUTO_DETECT_EULA_ENCODING.equals(eulaEncoding) ?
-                detectedEncoding :
-                eulaEncoding;
-
-        if (StandardCharsets.UTF_16LE.name().equals(actualEncoding)) {
-            return UNICODE_EULA_FLAG;
-        } else if (StandardCharsets.US_ASCII.name().equals(actualEncoding)) {
-            return EULA_FLAG;
-        } else {
-            throw new MojoFailureException(s("JetMojo.Package.Eula.UnsupportedEncoding", eulaEncoding));
-        }
+        getLog().info(s("JetMojo.Build.Success"));
+        getLog().info(s("JetMojo.GetEI.Info", target.getAbsolutePath()));
     }
 
 
@@ -698,7 +703,103 @@ public class JetMojo extends AbstractJetMojo {
         }
     }
 
-    private void packageBuild(JetHome jetHome, File buildDir, File packageDir) throws IOException, MojoFailureException, CmdLineToolException {
+    private void createOSXAppBundle(JetHome jetHome, File buildDir) throws MojoExecutionException, MojoFailureException, CmdLineToolException {
+        File appBundle = new File(jetOutputDir, osxBundleConfiguration.fileName + ".app");
+        mkdir(appBundle);
+        try {
+            Utils.cleanDirectory(appBundle);
+        } catch (IOException e) {
+            throw new MojoFailureException(e.getMessage(), e);
+        }
+        File contents = new File (appBundle, "Contents");
+        mkdir(contents);
+        File contentsMacOs = new File(contents, "MacOS");
+        mkdir(contentsMacOs);
+        File contentsResources = new File (contents, "Resources");
+        mkdir(contentsResources);
+
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(
+                new FileOutputStream(new File (contents, "Info.plist")), "UTF-8")))
+        {
+            out.print (
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" +
+                    "<plist version=\"1.0\">\n" +
+                    "<dict>\n" +
+                    "  <key>CFBundlePackageType</key>\n" +
+                    "  <string>APPL</string>\n" +
+                    "  <key>CFBundleExecutable</key>\n" +
+                    "  <string>" + outputName + "</string>\n" +
+                    "  <key>CFBundleName</key>\n" +
+                    "  <string>" + osxBundleConfiguration.bundleName + "</string>\n" +
+                    "  <key>CFBundleIdentifier</key>\n" +
+                    "  <string>" + osxBundleConfiguration.identifier +"</string>\n" +
+                    "  <key>CFBundleVersionString</key>\n" +
+                    "  <string>"+ osxBundleConfiguration.version + "</string>\n" +
+                    "  <key>CFBundleShortVersionString</key>\n" +
+                    "  <string>"+ osxBundleConfiguration.shortVersion + "</string>\n" +
+                    (osxBundleConfiguration.icon.exists()?
+                            "  <key>CFBundleIconFile</key>\n" +
+                            "  <string>" + osxBundleConfiguration.icon.getName() + "</string>\n" : "") +
+                    (osxBundleConfiguration.highResolutionCapable?
+                            "  <key>NSHighResolutionCapable</key>\n" +
+                            "  <true/>" : "") +
+                    "</dict>\n" +
+                    "</plist>\n");
+        } catch (IOException e) {
+            throw new MojoExecutionException(e.getMessage());
+        }
+
+        ArrayList<String> xpackArgs = getCommonXPackArgs();
+        xpackArgs.addAll(Arrays.asList(
+            "-target", contentsMacOs.getAbsolutePath()
+        ));
+        if (new JetPackager(jetHome, xpackArgs.toArray(new String[xpackArgs.size()]))
+                .workingDirectory(buildDir).withLog(getLog()).execute() != 0) {
+            throw new MojoFailureException(s("JetMojo.Package.Failure"));
+        }
+
+        if (osxBundleConfiguration.icon.exists()) {
+            try {
+                Files.copy(osxBundleConfiguration.icon.toPath(),
+                        new File(contentsResources, osxBundleConfiguration.icon.getName()).toPath());
+            } catch (IOException e) {
+                throw new MojoFailureException(e.getMessage(), e);
+            }
+        }
+
+        File appPkg = null;
+        if (osxBundleConfiguration.developerId != null) {
+            getLog().info(s("JetMojo.SigningOSXBundle.Info"));
+            if (new CmdLineTool("codesign", "--verbose", "--force", "--deep", "--sign",
+                    osxBundleConfiguration.developerId, appBundle.getAbsolutePath()).withLog(getLog(), true).execute() != 0) {
+                throw new MojoFailureException(s("JetMojo.OSX.CodeSign.Failure"));
+            }
+            getLog().info(s("JetMojo.CreatingOSXInstaller.Info"));
+            if (osxBundleConfiguration.publisherId != null) {
+                appPkg = new File(jetOutputDir, project.getBuild().getFinalName() + ".pkg");
+                if (new CmdLineTool("productbuild", "--sign", osxBundleConfiguration.publisherId,
+                             "--component", appBundle.getAbsolutePath(), osxBundleConfiguration.installPath,
+                                            appPkg.getAbsolutePath())
+                        .withLog(getLog()).execute() != 0) {
+                    throw new MojoFailureException(s("JetMojo.OSX.Packaging.Failure"));
+                }
+            } else {
+                getLog().warn(s("JetMojo.NoPublisherId.Warning"));
+            }
+        } else {
+            getLog().warn(s("JetMojo.NoDeveloperId.Warning"));
+        }
+        getLog().info(s("JetMojo.Build.Success"));
+        if (appPkg != null) {
+            getLog().info(s("JetMojo.GetOSXPackage.Info", appPkg.getAbsolutePath()));
+        } else {
+            getLog().info(s("JetMojo.GetOSXBundle.Info", appBundle.getAbsolutePath()));
+        }
+
+    }
+
+    private void packageBuild(JetHome jetHome, File buildDir, File packageDir) throws IOException, MojoFailureException, CmdLineToolException, MojoExecutionException {
         switch (packaging){
             case ZIP:
                 getLog().info(s("JetMojo.ZipApp.Info"));
@@ -707,10 +808,11 @@ public class JetMojo extends AbstractJetMojo {
                 getLog().info(s("JetMojo.Build.Success"));
                 getLog().info(s("JetMojo.GetZip.Info", targetZip.getAbsolutePath()));
                 break;
-            case EXCELSIOR_INSTALLER :
-                File target = packWithEI(jetHome, buildDir);
-                getLog().info(s("JetMojo.Build.Success"));
-                getLog().info(s("JetMojo.GetEI.Info", target.getAbsolutePath()));
+            case EXCELSIOR_INSTALLER:
+                packWithEI(jetHome, buildDir);
+                break;
+            case OSX_APP_BUNDLE:
+                createOSXAppBundle(jetHome, buildDir);
                 break;
             default:
                 getLog().info(s("JetMojo.Build.Success"));
