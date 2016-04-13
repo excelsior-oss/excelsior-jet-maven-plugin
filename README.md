@@ -528,6 +528,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
+Version 0.5.1 (??-Apr-2016)
+
+* Fix for incorrect default EULA value
+
 Version 0.5.0 (04-Apr-2016)
 
 * Mac OS X application bundles and installers support

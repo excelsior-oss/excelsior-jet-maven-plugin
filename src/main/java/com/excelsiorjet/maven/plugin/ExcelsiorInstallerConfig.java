@@ -94,7 +94,7 @@ public class ExcelsiorInstallerConfig {
         }
 
         if (eula == null) {
-            eula = new File(project.getBasedir(), "src/main/jetresources/icon.ico");
+            eula = new File(project.getBasedir(), "src/main/jetresources/eula.txt");
         }
 
         if (installerSplash == null) {
@@ -103,22 +103,18 @@ public class ExcelsiorInstallerConfig {
     }
 
     String eulaFlag() throws MojoFailureException {
-        String detectedEncoding;
+        String actualEncoding;
         try {
-            detectedEncoding = detectEncoding(eula);
+            actualEncoding = detectEncoding(eula);
         } catch (IOException e) {
             throw new MojoFailureException(s("JetMojo.Package.Eula.UnableToDetectEncoding", eula.getAbsolutePath()), e);
         }
 
         if (!AUTO_DETECT_EULA_ENCODING.equals(eulaEncoding)) {
-            if (!detectedEncoding.equals(eulaEncoding)) {
-                throw new MojoFailureException(s("JetMojo.Package.Eula.EncodingDoesNotMatchActual", detectedEncoding, eulaEncoding));
+            if (!actualEncoding.equals(eulaEncoding)) {
+                throw new MojoFailureException(s("JetMojo.Package.Eula.EncodingDoesNotMatchActual", actualEncoding, eulaEncoding));
             }
         }
-
-        String actualEncoding = AUTO_DETECT_EULA_ENCODING.equals(eulaEncoding) ?
-                detectedEncoding :
-                eulaEncoding;
 
         if (StandardCharsets.UTF_16LE.name().equals(actualEncoding)) {
             return UNICODE_EULA_FLAG;
