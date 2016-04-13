@@ -50,7 +50,7 @@ your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.5.0</version>
+	<version>0.5.1</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -528,9 +528,9 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.5.1 (??-Apr-2016)
+Version 0.5.1 (13-Apr-2016)
 
-* Fix for incorrect default EULA value
+* Fix for incorrect default EULA value for Excelsior Installer
 
 Version 0.5.0 (04-Apr-2016)
 
