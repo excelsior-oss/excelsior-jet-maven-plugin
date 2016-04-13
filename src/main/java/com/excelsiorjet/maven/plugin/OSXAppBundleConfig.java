@@ -21,6 +21,8 @@
 */
 package com.excelsiorjet.maven.plugin;
 
+import org.apache.maven.project.MavenProject;
+
 import java.io.File;
 
 /**
@@ -113,4 +115,31 @@ public class OSXAppBundleConfig {
      * Default value is "/Applications".
      */
     public String installPath = "/Applications";
+
+    void fillDefaults(MavenProject project, String fileName, String bundleName, String version, String shortVersion) {
+        if (this.fileName == null) {
+            this.fileName = fileName;
+        }
+        if (this.bundleName == null) {
+            this.bundleName = bundleName;
+        }
+        if (this.identifier == null) {
+            this.identifier = project.getGroupId() + "." + project.getBuild().getFinalName();
+        }
+        if (this.icon == null) {
+            this.icon = new File(project.getBasedir(), "src/main/jetresources/icon.icns");
+        }
+        if (this.version == null) {
+            this.version = version;
+        }
+        if (this.shortVersion == null) {
+            this.shortVersion = shortVersion;
+        }
+        if (this.developerId == null) {
+            this.developerId = System.getProperty("osx.developer.id");
+        }
+        if (this.publisherId == null) {
+            this.publisherId = System.getProperty("osx.publisher.id");
+        }
+    }
 }

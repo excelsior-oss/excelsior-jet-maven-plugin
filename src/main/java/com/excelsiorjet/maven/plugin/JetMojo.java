@@ -387,35 +387,20 @@ public class JetMojo extends AbstractJetMojo {
         }
     }
 
+    private void checkExcelsiorInstallerConfig() throws MojoFailureException {
+        if (packaging.equals(EXCELSIOR_INSTALLER)) {
+            excelsiorInstallerConfiguration.fillDefaults(project);
+        }
+    }
+
     private void checkOSXBundleConfig() {
         if (packaging.equals(OSX_APP_BUNDLE)) {
-            if (osxBundleConfiguration.fileName == null) {
-                osxBundleConfiguration.fileName = outputName;
-            }
-            if (osxBundleConfiguration.bundleName == null) {
-                osxBundleConfiguration.bundleName = product;
-            }
-            if (osxBundleConfiguration.identifier == null) {
-                osxBundleConfiguration.identifier = project.getGroupId() + "." + project.getBuild().getFinalName();
-            }
-            if (osxBundleConfiguration.icon == null) {
-                osxBundleConfiguration.icon = new File(project.getBasedir(), "src/main/jetresources/icon.icns");
-            }
+            String fourDigitVersion = deriveFourDigitVersion(version);
+            osxBundleConfiguration.fillDefaults(project, outputName, product,
+                    deriveFourDigitVersion(project.getVersion()),
+                    deriveFourDigitVersion(fourDigitVersion.substring(0, fourDigitVersion.lastIndexOf('.'))));
             if (!osxBundleConfiguration.icon.exists()) {
                 getLog().warn(s("JetMojo.NoIconForOSXAppBundle.Warning"));
-            }
-            if (osxBundleConfiguration.version == null) {
-                osxBundleConfiguration.version = deriveFourDigitVersion(project.getVersion());
-            }
-            if (osxBundleConfiguration.shortVersion == null) {
-                String fourDigitVersion = deriveFourDigitVersion(version);
-                osxBundleConfiguration.shortVersion = fourDigitVersion.substring(0, fourDigitVersion.lastIndexOf('.'));
-            }
-            if (osxBundleConfiguration.developerId == null) {
-                osxBundleConfiguration.developerId = System.getProperty("osx.developer.id");
-            }
-            if (osxBundleConfiguration.publisherId == null) {
-                osxBundleConfiguration.publisherId = System.getProperty("osx.publisher.id");
             }
         }
 
@@ -431,8 +416,6 @@ public class JetMojo extends AbstractJetMojo {
             int lastSlash = mainClass.lastIndexOf('/');
             outputName = lastSlash < 0 ? mainClass : mainClass.substring(lastSlash + 1);
         }
-
-        excelsiorInstallerConfiguration.fillDefaults(project);
 
         //check packaging type
         switch (packaging) {
@@ -493,6 +476,8 @@ public class JetMojo extends AbstractJetMojo {
             checkTrialVersionConfig(jetHomeObj);
 
             checkGlobalAndSlimDownParameters(jetHomeObj);
+
+            checkExcelsiorInstallerConfig();
 
             checkOSXBundleConfig();
 
