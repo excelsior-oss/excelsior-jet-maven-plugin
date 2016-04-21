@@ -22,10 +22,7 @@
 package com.excelsiorjet;
 
 import java.io.*;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class Utils {
@@ -86,6 +83,44 @@ public class Utils {
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 deleteFile(dir.toFile());
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    public static void copyFile(Path source, Path target) throws IOException {
+        if (!target.toFile().exists()) {
+            Files.copy(source, target, StandardCopyOption.COPY_ATTRIBUTES);
+        } else if (source.toFile().lastModified() != target.toFile().lastModified()) {
+            //copy only files that were changed
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+        }
+
+    }
+
+    public static void copyDirectory(Path source, Path target) throws IOException {
+        Files.walkFileTree(source, new FileVisitor<Path>() {
+
+            @Override
+            public FileVisitResult preVisitDirectory(Path subfolder, BasicFileAttributes attrs) throws IOException {
+                Files.createDirectories(target.resolve(source.relativize(subfolder)));
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path sourceFile, BasicFileAttributes attrs) throws IOException {
+                Path targetFile = target.resolve(source.relativize(sourceFile));
+                copyFile(sourceFile, targetFile);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path sourceFile, IOException e) throws IOException {
+                throw new IOException(Txt.s("Utils.CannotCopyFile.Error", sourceFile.toString(), e.getMessage()), e);
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path source, IOException ioe) throws IOException {
                 return FileVisitResult.CONTINUE;
             }
         });

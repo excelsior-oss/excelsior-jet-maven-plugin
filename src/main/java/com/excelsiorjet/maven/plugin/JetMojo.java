@@ -410,11 +410,22 @@ public class JetMojo extends AbstractJetMojo {
     protected JetHome checkPrerequisites() throws MojoFailureException {
         JetHome jetHomeObj = super.checkPrerequisites();
 
-        //normalize main and set outputName
-        mainClass = mainClass.replace('.', '/');
-        if (outputName == null) {
-            int lastSlash = mainClass.lastIndexOf('/');
-            outputName = lastSlash < 0 ? mainClass : mainClass.substring(lastSlash + 1);
+        switch (appType) {
+            case PLAIN:
+                //normalize main and set outputName
+                mainClass = mainClass.replace('.', '/');
+                if (outputName == null) {
+                    int lastSlash = mainClass.lastIndexOf('/');
+                    outputName = lastSlash < 0 ? mainClass : mainClass.substring(lastSlash + 1);
+                }
+                break;
+            case TOMCAT:
+                if (outputName == null) {
+                    outputName = project.getArtifactId();
+                }
+                break;
+            default:
+                throw new AssertionError("Unknown application type");
         }
 
         //check packaging type
@@ -514,6 +525,19 @@ public class JetMojo extends AbstractJetMojo {
     private void compile(JetHome jetHome, File buildDir, List<Dependency> dependencies) throws MojoFailureException, CmdLineToolException, MojoExecutionException {
         ArrayList<String> compilerArgs = new ArrayList<>();
         ArrayList<String> modules = new ArrayList<>();
+
+        switch (appType) {
+            case PLAIN:
+                compilerArgs.add("-main=" + mainClass);
+                break;
+            case TOMCAT:
+                compilerArgs.add("-apptype=tomcat");
+                compilerArgs.add("-appdir=" + getTomcatInBuildDir());
+                break;
+            default: throw new AssertionError("Unknown app type");
+        }
+
+
         if (Utils.isWindows()) {
             if (icon.isFile()) {
                 modules.add(icon.getAbsolutePath());
@@ -522,7 +546,7 @@ public class JetMojo extends AbstractJetMojo {
                 compilerArgs.add("-gui+");
             }
         }
-        compilerArgs.add("-main=" + mainClass);
+
         compilerArgs.add("-outputname=" + outputName);
         compilerArgs.add("-decor=ht");
 
@@ -588,14 +612,26 @@ public class JetMojo extends AbstractJetMojo {
     private ArrayList<String> getCommonXPackArgs() {
         ArrayList<String> xpackArgs = new ArrayList<>();
 
-        if (packageFilesDir.exists()) {
-            xpackArgs.add("-source");
-            xpackArgs.add(packageFilesDir.getAbsolutePath());
-        }
+        switch (appType) {
+            case PLAIN:
+                if (packageFilesDir.exists()) {
+                    xpackArgs.add("-source");
+                    xpackArgs.add(packageFilesDir.getAbsolutePath());
+                }
 
-        xpackArgs.addAll(Arrays.asList(
-            "-add-file", Utils.mangleExeName(outputName), "/"
-        ));
+                xpackArgs.addAll(Arrays.asList(
+                        "-add-file", Utils.mangleExeName(outputName), "/"
+                ));
+                break;
+            case TOMCAT:
+                xpackArgs.add("-source");
+                xpackArgs.add(getTomcatInBuildDir().getAbsolutePath());
+                if (packageFilesDir.exists()) {
+                    getLog().warn(s("JetMojo.PackageFilesIgnoredForTomcat.Warning"));
+                }
+                break;
+            default: throw new AssertionError("Unknown app type");
+        }
 
         if (optRtFiles != null && optRtFiles.length > 0) {
             xpackArgs.add("-add-opt-rt-files");
@@ -824,10 +860,13 @@ public class JetMojo extends AbstractJetMojo {
             throw new MojoFailureException(e.getMessage(), e);
         }
 
-        List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
-
         try {
-            compile(jetHome, buildDir, dependencies);
+            if (appType == ApplicationType.PLAIN) {
+                compile(jetHome, buildDir, copyDependencies(buildDir, mainJar));
+            } else {
+                copyTomcatAndWar();
+                compile(jetHome, buildDir, Collections.emptyList());
+            }
 
             createAppDir(jetHome, buildDir, appDir);
 
@@ -838,4 +877,5 @@ public class JetMojo extends AbstractJetMojo {
             throw new MojoExecutionException(s("JetMojo.Unexpected.Error"), e);
         }
     }
+
 }

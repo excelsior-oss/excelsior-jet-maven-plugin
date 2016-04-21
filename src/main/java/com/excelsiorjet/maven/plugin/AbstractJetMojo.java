@@ -28,13 +28,12 @@ import com.excelsiorjet.Utils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +45,14 @@ import static com.excelsiorjet.Txt.s;
  * @author Nikita Lipsky
  */
 public abstract class AbstractJetMojo extends AbstractMojo {
+
+    public enum ApplicationType {
+        PLAIN,
+        TOMCAT
+    }
+
+    protected ApplicationType appType;
+
     /**
      * The Maven Project Object.
      */
@@ -55,15 +62,34 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     /**
      * The main application class.
      */
-    @Parameter(property = "mainClass", required = true)
+    @Parameter(property = "mainClass")
     protected String mainClass;
 
     /**
      * The main application jar.
-     * The default is the main project artifact, which must be a jar file.
+     * The default is the main project artifact, if it is a jar file.
      */
     @Parameter(property = "mainJar", defaultValue = "${project.build.directory}/${project.build.finalName}.jar")
     protected File mainJar;
+
+    /**
+     * The web application archive.
+     * The default is the main project artifact, if it is a war file.
+     */
+    @Parameter(property = "mainWar", defaultValue = "${project.build.directory}/${project.build.finalName}.war")
+    protected File mainWar;
+
+    /**
+     * The name of war to be deployed into Tomcat.
+     * Default value is the name of your main artifact that should be war file.
+     * <p>
+     * By default, Tomcat uses name of war as context path of respective web application.
+     * If you need for your web application to be on "/" context path,
+     * set warDeployName to "ROOT" value.
+     * </p>
+     */
+    @Parameter(property = "warDeployName")
+    protected String warDeployName;
 
     /**
      * Excelsior JET installation directory.
@@ -76,6 +102,17 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      */
     @Parameter(property = "jetHome", defaultValue = "${jet.home}")
     protected String jetHome;
+
+    /**
+     * The location of Tomcat application server installation
+     * that is required parameter for Web applications native compilation.
+     * Your .war artifact will be deployed into a copy of Tomcat and compiled together with it.
+     *
+     * You may use the tomcat.home system property or either TOMCAT_HOME or CATALINA_HOME environment variables
+     * to set the parameter.
+     */
+    @Parameter(property = "tomcatHome", defaultValue = "${tomcat.home}")
+    protected String tomcatHome;
 
     /**
      * Directory for temporary files generated during the build process
@@ -137,26 +174,57 @@ public abstract class AbstractJetMojo extends AbstractMojo {
 
     protected static final String BUILD_DIR = "build";
     protected static final String LIB_DIR = "lib";
+    private static final String WEBAPPS_DIR = "webapps";
 
     protected JetHome checkPrerequisites() throws MojoFailureException {
         Txt.log = getLog();
 
-        // first check that main jar were built
-        if (!mainJar.exists()) {
-            String error;
-            if (!"jar".equalsIgnoreCase(project.getPackaging())) {
-                error = s("JetMojo.BadPackaging.Failure", project.getPackaging());
-            } else {
-                error = s("JetMojo.MainJarNotFound.Failure", mainJar.getAbsolutePath());
-            }
-            getLog().error(error);
-            throw new MojoFailureException(error);
+
+        switch (project.getPackaging().toLowerCase()) {
+            case "jar":
+                if (!mainJar.exists()) {
+                    throw new MojoFailureException(s("JetMojo.MainJarNotFound.Failure", mainJar.getAbsolutePath()));
+                }
+                appType = ApplicationType.PLAIN;
+                // check main class
+                if (Utils.isEmpty(mainClass)) {
+                    throw new MojoFailureException(s("JetMojo.MainNotSpecified.Failure"));
+                }
+                break;
+            case "war":
+                if (!mainWar.exists()) {
+                    throw new MojoFailureException(s("JetMojo.MainWarNotFound.Failure", mainWar.getAbsolutePath()));
+                }
+                // check Tomcat home
+                if (Utils.isEmpty(tomcatHome)) {
+                    tomcatHome = System.getenv("TOMCAT_HOME");
+                    if (Utils.isEmpty(tomcatHome)) {
+                        tomcatHome = System.getenv("CATALINA_HOME");
+                    }
+                }
+
+                if (Utils.isEmpty(tomcatHome)) {
+                    throw new MojoFailureException(s("JetMojo.TomcatNotSpecified.Failure"));
+                }
+
+                if (!getTomcatHome().exists()) {
+                    throw new MojoFailureException(s("JetMojo.TomcatDoesNotExist.Failure", tomcatHome));
+                }
+
+                if (!new File(tomcatHome, WEBAPPS_DIR).exists()) {
+                    throw new MojoFailureException(s("JetMojo.TomcatWebappsDoesNotExist.Failure", tomcatHome));
+                }
+
+                if (!Utils.isEmpty(warDeployName) && !warDeployName.endsWith(".war")) {
+                    warDeployName = warDeployName + ".war";
+                }
+
+                appType = ApplicationType.TOMCAT;
+                break;
+            default:
+                throw new MojoFailureException(s("JetMojo.BadPackaging.Failure", project.getPackaging()));
         }
 
-        // check main class
-        if (Utils.isEmpty(mainClass)) {
-            throw new MojoFailureException(s("JetMojo.MainNotSpecified.Failure"));
-        }
 
         // check jet home
         JetHome jetHomeObj;
@@ -179,10 +247,22 @@ public abstract class AbstractJetMojo extends AbstractMojo {
         }
     }
 
+    protected File getBuildDir() {
+        return new File(jetOutputDir, BUILD_DIR);
+    }
+
     protected File createBuildDir() throws MojoExecutionException {
-        File buildDir = new File(jetOutputDir, BUILD_DIR);
+        File buildDir = getBuildDir();
         mkdir(buildDir);
         return buildDir;
+    }
+
+    protected File getTomcatHome() {
+        return new File(tomcatHome);
+    }
+
+    protected File getTomcatInBuildDir() {
+        return new File(getBuildDir(), getTomcatHome().getName());
     }
 
     protected static class Dependency {
@@ -197,11 +277,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
 
     private void copyDependency(File from, File to, File buildDir, List<Dependency> dependencies, boolean isLib) {
         try {
-            if (!to.exists()) {
-                Files.copy(from.toPath(), to.toPath());
-            } else if (to.lastModified() != from.lastModified()){
-                Files.copy(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
+            Utils.copyFile(from.toPath(), to.toPath());
             dependencies.add(new Dependency(buildDir.toPath().relativize(to.toPath()).toString(), isLib));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -231,4 +307,22 @@ public abstract class AbstractJetMojo extends AbstractMojo {
             throw new MojoExecutionException(s("JetMojo.ErrorCopyingDependency.Exception"), e);
         }
     }
+
+    /**
+     * Copies Tomcat server to the build directory and main project artifact (.war) to
+     * "webapps" folder of copied Tomcat.
+     *
+     * @throws MojoExecutionException
+     */
+    protected void copyTomcatAndWar() throws MojoExecutionException {
+        try {
+            Utils.copyDirectory(getTomcatHome().toPath(), getTomcatInBuildDir().toPath());
+            String warName = (Utils.isEmpty(warDeployName))? mainWar.getName() : warDeployName;
+            Utils.copyFile(mainWar.toPath(), new File(getTomcatInBuildDir(), WEBAPPS_DIR + File.separator + warName).toPath());
+        } catch (IOException e) {
+            throw new MojoExecutionException(s("JetMojo.ErrorCopyingTomcat.Exception"), e);
+        }
+    }
+
+
 }

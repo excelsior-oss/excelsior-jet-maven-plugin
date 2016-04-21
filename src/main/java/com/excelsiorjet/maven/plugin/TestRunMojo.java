@@ -78,39 +78,9 @@ public class TestRunMojo extends AbstractJetMojo {
         Path target = buildDir.toPath();
         Path source = packageFilesDir.toPath();
         try {
-            Files.walkFileTree(source, new FileVisitor<Path>() {
-
-                @Override
-                public FileVisitResult preVisitDirectory(Path subfolder, BasicFileAttributes attrs) throws IOException {
-                    Files.createDirectories(target.resolve(source.relativize(subfolder)));
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFile(Path sourceFile, BasicFileAttributes attrs) throws IOException {
-                    Path targetFile = target.resolve(source.relativize(sourceFile));
-                    if (!targetFile.toFile().exists()) {
-                        Files.copy(sourceFile, targetFile, StandardCopyOption.COPY_ATTRIBUTES);
-                    } else if (sourceFile.toFile().lastModified() != targetFile.toFile().lastModified()) {
-                        //copy only files that were changed
-                        Files.copy(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFileFailed(Path sourceFile, IOException e) throws IOException {
-                    getLog().warn(Txt.s("TestRunMojo.CannotCopyPackageFile.Warning", sourceFile.toString(), e.getMessage()));
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path source, IOException ioe) throws IOException {
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+            Utils.copyDirectory(source, target);
         } catch (IOException e) {
-            getLog().warn(Txt.s("TestRunMojo.ErrorWhileCopying.Warning", source.toString(), target.toString(), e.getMessage()));
+            getLog().warn(Txt.s("TestRunMojo.ErrorWhileCopying.Warning", source.toString(), target.toString(), e.getMessage()), e);
         }
     }
 
