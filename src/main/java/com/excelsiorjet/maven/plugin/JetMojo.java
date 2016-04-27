@@ -726,6 +726,9 @@ public class JetMojo extends AbstractJetMojo {
                     (osxBundleConfiguration.icon.exists()?
                             "  <key>CFBundleIconFile</key>\n" +
                             "  <string>" + osxBundleConfiguration.icon.getName() + "</string>\n" : "") +
+                    (osxBundleConfiguration.appStorePublishing?
+                            "    <key>LSApplicationCategoryType</key>\n" +
+                            "    <string>public.app-category.reference</string>": "") +
                     (osxBundleConfiguration.highResolutionCapable?
                             "  <key>NSHighResolutionCapable</key>\n" +
                             "  <true/>" : "") +
@@ -756,8 +759,45 @@ public class JetMojo extends AbstractJetMojo {
         File appPkg = null;
         if (osxBundleConfiguration.developerId != null) {
             getLog().info(s("JetMojo.SigningOSXBundle.Info"));
-            if (new CmdLineTool("codesign", "--verbose", "--force", "--deep", "--sign",
-                    osxBundleConfiguration.developerId, appBundle.getAbsolutePath()).withLog(getLog(), true).execute() != 0) {
+
+            CmdLineTool sign = new CmdLineTool("codesign", "--verbose", "--force", "--deep", "--sign",
+                                osxBundleConfiguration.developerId);
+
+            if (osxBundleConfiguration.appStorePublishing) {
+                File appEntitlement = new File (buildDir, "app.entitlement");
+                try (PrintWriter out = new PrintWriter(new OutputStreamWriter(
+                        new FileOutputStream(appEntitlement), "UTF-8")))
+                {
+                    out.print (
+                            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                                    "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" +
+                                    "<plist version=\"1.0\">\n" +
+                                    "<dict>\n" +
+                                    "    <key>com.apple.security.app-sandbox</key>\n" +
+                                    "    <true/>\n"
+                    );
+
+                    if (osxBundleConfiguration.entitlements != null) {
+                        for (String entitlement: osxBundleConfiguration.entitlements) {
+                            out.print(
+                                    "    <key>" + entitlement + "</key>\n" +
+                                    "    <true/>\n"
+                            );
+                        }
+                    }
+                    out.print (
+                                    "</dict>\n" +
+                                    "</plist>"
+                    );
+
+                } catch (IOException e) {
+                    throw new MojoExecutionException(e.getMessage());
+                }
+                sign.arg("--entitlements");
+                sign.arg(appEntitlement.getAbsolutePath());
+            }
+
+            if (sign.arg(appBundle.getAbsolutePath()).withLog(getLog(), true).execute() != 0) {
                 throw new MojoFailureException(s("JetMojo.OSX.CodeSign.Failure"));
             }
             getLog().info(s("JetMojo.CreatingOSXInstaller.Info"));

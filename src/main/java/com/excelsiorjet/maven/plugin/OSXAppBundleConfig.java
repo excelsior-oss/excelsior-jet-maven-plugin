@@ -116,6 +116,29 @@ public class OSXAppBundleConfig {
      */
     public String installPath = "/Applications";
 
+    /**
+     * Make the resulting .pkg file suitable for Mac App Store publishing.
+     * To submit your app to Mac App Store, your application must be sandboxed.
+     * Thus setting this property to true, effectively means sandboxing resulting application bundle and installer.
+     * You also need to set {#link developerId}, {#publisherId} parameters to make this parameter taking any effect.
+     * You may also set the parameter via the {@code app.store.publishing} system property.
+     *
+     * @see #entitlements
+     */
+    public boolean appStorePublishing;
+
+    /**
+     * The list of sandbox entitlement keys.
+     * Each key enables certain capability for your application in sandboxed mode.
+     * The list of available entitlements can be seen here:
+     *   https://developer.apple.com/library/mac/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/EnablingAppSandbox.html
+     * The entitlement list is applied only when {@link #appStorePublishing} is set to {@code true}.
+     * <p>
+     * {@code com.apple.security.app-sandbox} entitlement is enabled by default and should not be specified explicitly.
+     * </p>
+     */
+    public String[] entitlements;
+
     void fillDefaults(MavenProject project, String fileName, String bundleName, String version, String shortVersion) {
         if (this.fileName == null) {
             this.fileName = fileName;
@@ -141,5 +164,11 @@ public class OSXAppBundleConfig {
         if (this.publisherId == null) {
             this.publisherId = System.getProperty("osx.publisher.id");
         }
+
+        String appStore = System.getProperty("app.store.publishing");
+        if (appStore != null && !appStore.equals("false")) {
+            appStorePublishing = true;
+        }
+
     }
 }
