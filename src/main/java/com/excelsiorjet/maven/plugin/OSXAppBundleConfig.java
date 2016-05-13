@@ -65,7 +65,7 @@ public class OSXAppBundleConfig {
     public String shortVersion;
 
     /**
-     * Value for the {@code CFBundleVersionString} key in the resulting {@code Info.plist} file.
+     * Value for the {@code CFBundleVersion} key in the resulting {@code Info.plist} file.
      * By default, derived from {@code ${project.version}}.
      */
     public String version;

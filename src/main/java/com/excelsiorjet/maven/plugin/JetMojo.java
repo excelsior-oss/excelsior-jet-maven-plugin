@@ -719,7 +719,7 @@ public class JetMojo extends AbstractJetMojo {
                     "  <string>" + osxBundleConfiguration.bundleName + "</string>\n" +
                     "  <key>CFBundleIdentifier</key>\n" +
                     "  <string>" + osxBundleConfiguration.identifier +"</string>\n" +
-                    "  <key>CFBundleVersionString</key>\n" +
+                    "  <key>CFBundleVersion</key>\n" +
                     "  <string>"+ osxBundleConfiguration.version + "</string>\n" +
                     "  <key>CFBundleShortVersionString</key>\n" +
                     "  <string>"+ osxBundleConfiguration.shortVersion + "</string>\n" +
@@ -728,10 +728,10 @@ public class JetMojo extends AbstractJetMojo {
                             "  <string>" + osxBundleConfiguration.icon.getName() + "</string>\n" : "") +
                     (osxBundleConfiguration.appStorePublishing?
                             "    <key>LSApplicationCategoryType</key>\n" +
-                            "    <string>public.app-category.reference</string>": "") +
+                            "    <string>public.app-category.reference</string>\n": "") +
                     (osxBundleConfiguration.highResolutionCapable?
                             "  <key>NSHighResolutionCapable</key>\n" +
-                            "  <true/>" : "") +
+                            "  <true/>\n" : "") +
                     "</dict>\n" +
                     "</plist>\n");
         } catch (IOException e) {
