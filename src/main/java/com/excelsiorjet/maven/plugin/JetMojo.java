@@ -325,6 +325,11 @@ public class JetMojo extends AbstractJetMojo {
         return String.join(".", finalVersions);
     }
 
+    private String deriveThreeDigitVersion(String version) {
+        String fourDigitVersion = deriveFourDigitVersion(version);
+        return fourDigitVersion.substring(0, fourDigitVersion.lastIndexOf('.'));
+    }
+
     private void checkGlobalAndSlimDownParameters(JetHome jetHome) throws JetHomeException, MojoFailureException {
         if (globalOptimizer) {
             if (jetHome.is64bit()) {
@@ -395,10 +400,9 @@ public class JetMojo extends AbstractJetMojo {
 
     private void checkOSXBundleConfig() {
         if (packaging.equals(OSX_APP_BUNDLE)) {
-            String fourDigitVersion = deriveFourDigitVersion(version);
             osxBundleConfiguration.fillDefaults(project, outputName, product,
-                    deriveFourDigitVersion(project.getVersion()),
-                    deriveFourDigitVersion(fourDigitVersion.substring(0, fourDigitVersion.lastIndexOf('.'))));
+                    deriveThreeDigitVersion(project.getVersion()),
+                    deriveThreeDigitVersion(version));
             if (!osxBundleConfiguration.icon.exists()) {
                 getLog().warn(s("JetMojo.NoIconForOSXAppBundle.Warning"));
             }
