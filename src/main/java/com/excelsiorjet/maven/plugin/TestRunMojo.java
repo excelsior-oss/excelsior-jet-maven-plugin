@@ -29,8 +29,9 @@ import org.apache.maven.plugins.annotations.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.List;
+import java.util.*;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,6 +73,9 @@ import java.util.stream.Stream;
 @Mojo( name = "testrun", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class TestRunMojo extends AbstractJetMojo {
 
+    private static final String TOMCAT_MAIN_CLASS = "org/apache/catalina/startup/Bootstrap";
+    private static final String BOOTSTRAP_JAR = "bootstrap.jar";
+
     private void copyExtraPackageFiles(File buildDir) {
         // We could just use Maven FileUtils.copyDirectory method but it copies a directory as a whole
         // while here we copy only those files that were changed from previous build.
@@ -84,6 +88,47 @@ public class TestRunMojo extends AbstractJetMojo {
         }
     }
 
+    public String getTomcatClassPath(File tomcatBin) throws MojoExecutionException {
+        File f = new File(tomcatBin, BOOTSTRAP_JAR);
+        if (!f.exists()) {
+            throw new MojoExecutionException(Txt.s("TestRunMojo.Tomcat.NoBootstrapJar.Failure", tomcatBin.getAbsolutePath()));
+        }
+
+        Manifest bootManifest;
+        try {
+            bootManifest = new JarFile(f).getManifest();
+        } catch (IOException e) {
+            throw new MojoExecutionException(Txt.s("TestRunMojo.Tomcat.FailedToReadBootstrapJar.Failure", tomcatBin.getAbsolutePath(), e.getMessage()), e);
+        }
+
+        ArrayList<String> classPath = new ArrayList<String>();
+        classPath.add(BOOTSTRAP_JAR);
+
+        String bootstrapJarCP = bootManifest.getMainAttributes().getValue("CLASS-PATH");
+        if (bootstrapJarCP != null) {
+            StringTokenizer strtok = new StringTokenizer(bootstrapJarCP);
+            while (strtok.hasMoreTokens()){
+                String cpe = strtok.nextToken();
+                classPath.add(cpe);
+            }
+        }
+
+        classPath.add(jetHome + File.separator + "lib" + File.separator + "tomcat" + File.separator + "TomcatSupport.jar");
+        return String.join(File.pathSeparator, classPath);
+    }
+
+    public List<String> getTomcatVMArgs() {
+        String tomcatDir = getTomcatInBuildDir().getAbsolutePath();
+        return Arrays.asList(
+                "-Djet.classloader.id.provider=com/excelsior/jet/runtime/classload/customclassloaders/tomcat/TomcatCLIDProvider",
+                "-Dcatalina.base=" + tomcatDir,
+                "-Dcatalina.home=" + tomcatDir,
+                "-Djava.io.tmpdir="+ tomcatDir + File.separator + "temp",
+                "-Djava.util.logging.config.file=../conf/logging.properties",
+                "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager"
+        );
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         JetHome jetHome = checkPrerequisites();
@@ -91,11 +136,31 @@ public class TestRunMojo extends AbstractJetMojo {
         // creating output dirs
         File buildDir = createBuildDir();
 
-        List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
+        String classpath;
+        List<String> additionalVMArgs;
+        File workingDirectory;
+        switch (appType) {
+            case PLAIN:
+                List<Dependency> dependencies = copyDependencies(buildDir, mainJar);
+                if (packageFilesDir.exists()) {
+                    //application may access custom package files at runtime. So copy them as well.
+                    copyExtraPackageFiles(buildDir);
+                }
 
-        if (packageFilesDir.exists()) {
-            //application may access custom package files at runtime. So copy them as well.
-            copyExtraPackageFiles(buildDir);
+                classpath = String.join(File.pathSeparator,
+                        dependencies.stream().map(d -> d.dependency).collect(Collectors.toList()));
+                additionalVMArgs = Collections.emptyList();
+                workingDirectory = buildDir;
+                break;
+            case TOMCAT:
+                copyTomcatAndWar();
+                workingDirectory = new File(getTomcatInBuildDir(), "bin");
+                classpath = getTomcatClassPath(workingDirectory);
+                additionalVMArgs = getTomcatVMArgs();
+                mainClass = TOMCAT_MAIN_CLASS;
+                break;
+            default:
+                throw new AssertionError("Unknown app type");
         }
 
         mkdir(execProfilesDir);
@@ -103,11 +168,15 @@ public class TestRunMojo extends AbstractJetMojo {
         XJava xjava = new XJava(jetHome);
         try {
             xjava.addTestRunArgs(new TestRunExecProfiles(execProfilesDir, execProfilesName))
-                    .withLog(getLog())
-                    .workingDirectory(buildDir);
+                    .withLog(getLog(),
+                            appType == ApplicationType.TOMCAT) // Tomcat outputs to std error, so to not confuse users,
+                                                               // we  redirect its output to std out in test run
+                    .workingDirectory(workingDirectory);
         } catch (JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
         }
+
+        xjava.addArgs(additionalVMArgs);
 
         //add jvm args substituting $(Root) occurences with buildDir
         xjava.addArgs(Stream.of(jvmArgs)
@@ -116,8 +185,7 @@ public class TestRunMojo extends AbstractJetMojo {
         );
 
         xjava.arg("-cp");
-        xjava.arg(String.join(File.pathSeparator,
-                dependencies.stream().map(d -> d.dependency).collect(Collectors.toList())));
+        xjava.arg(classpath);
         xjava.arg(mainClass);
         try {
             String cmdLine = xjava.getArgs().stream()
