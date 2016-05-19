@@ -30,7 +30,11 @@
               <artifactId>excelsior-jet-maven-plugin</artifactId>
               <version>@project.version@</version>
               <configuration>
-                  <warDeployName>ROOT</warDeployName>
+                  <tomcatConfiguration>
+                      <warDeployName>ROOT</warDeployName>
+                      <hideConfig>true</hideConfig>
+                      <genScripts>false</genScripts>
+                  </tomcatConfiguration>
               </configuration>
           </plugin>
       </plugins>

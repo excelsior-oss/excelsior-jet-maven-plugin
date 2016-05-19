@@ -533,6 +533,12 @@ public class JetMojo extends AbstractJetMojo {
             case TOMCAT:
                 compilerArgs.add("-apptype=tomcat");
                 compilerArgs.add("-appdir=" + getTomcatInBuildDir());
+                if (tomcatConfiguration.hideConfig) {
+                    compilerArgs.add("-hideconfiguration+");
+                }
+                if (!tomcatConfiguration.genScripts) {
+                    compilerArgs.add("-gentomcatscripts-");
+                }
                 break;
             default: throw new AssertionError("Unknown app type");
         }

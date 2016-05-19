@@ -28,7 +28,6 @@ import com.excelsiorjet.Utils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
@@ -38,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.excelsiorjet.Txt.s;
+import static com.excelsiorjet.maven.plugin.TomcatConfig.WEBAPPS_DIR;
 
 /**
  * Parent of Excelsior JET Maven Plugin mojos.
@@ -73,23 +73,11 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected File mainJar;
 
     /**
-     * The web application archive.
+     * The main web application archive.
      * The default is the main project artifact, if it is a war file.
      */
     @Parameter(property = "mainWar", defaultValue = "${project.build.directory}/${project.build.finalName}.war")
     protected File mainWar;
-
-    /**
-     * The name of war to be deployed into Tomcat.
-     * Default value is the name of your main artifact that should be war file.
-     * <p>
-     * By default, Tomcat uses name of war as context path of respective web application.
-     * If you need for your web application to be on "/" context path,
-     * set warDeployName to "ROOT" value.
-     * </p>
-     */
-    @Parameter(property = "warDeployName")
-    protected String warDeployName;
 
     /**
      * Excelsior JET installation directory.
@@ -104,17 +92,6 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected String jetHome;
 
     /**
-     * The location of Tomcat application server installation
-     * that is required parameter for Web applications native compilation.
-     * Your .war artifact will be deployed into a copy of Tomcat and compiled together with it.
-     *
-     * You may use the tomcat.home system property or either TOMCAT_HOME or CATALINA_HOME environment variables
-     * to set the parameter.
-     */
-    @Parameter(property = "tomcatHome", defaultValue = "${tomcat.home}")
-    protected String tomcatHome;
-
-    /**
      * Directory for temporary files generated during the build process
      * and the target directory for the resulting package.
      * <p>
@@ -126,6 +103,17 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      */
     @Parameter(property = "jetOutputDir", defaultValue = "${project.build.directory}/jet")
     protected File jetOutputDir;
+
+    /**
+     * Tomcat web applications specific parameters.
+     *
+     * @see TomcatConfig#tomcatHome
+     * @see TomcatConfig#warDeployName
+     * @see TomcatConfig#hideConfig
+     * @see TomcatConfig#genScripts
+     */
+    @Parameter(property = "tomcatConfiguration")
+    protected TomcatConfig tomcatConfiguration;
 
     /**
      * Directory containing additional package files - README, license, media, help files, native libraries, and the like.
@@ -174,7 +162,6 @@ public abstract class AbstractJetMojo extends AbstractMojo {
 
     protected static final String BUILD_DIR = "build";
     protected static final String LIB_DIR = "lib";
-    private static final String WEBAPPS_DIR = "webapps";
 
     protected JetHome checkPrerequisites() throws MojoFailureException {
         Txt.log = getLog();
@@ -195,29 +182,8 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                 if (!mainWar.exists()) {
                     throw new MojoFailureException(s("JetMojo.MainWarNotFound.Failure", mainWar.getAbsolutePath()));
                 }
-                // check Tomcat home
-                if (Utils.isEmpty(tomcatHome)) {
-                    tomcatHome = System.getenv("TOMCAT_HOME");
-                    if (Utils.isEmpty(tomcatHome)) {
-                        tomcatHome = System.getenv("CATALINA_HOME");
-                    }
-                }
 
-                if (Utils.isEmpty(tomcatHome)) {
-                    throw new MojoFailureException(s("JetMojo.TomcatNotSpecified.Failure"));
-                }
-
-                if (!getTomcatHome().exists()) {
-                    throw new MojoFailureException(s("JetMojo.TomcatDoesNotExist.Failure", tomcatHome));
-                }
-
-                if (!new File(tomcatHome, WEBAPPS_DIR).exists()) {
-                    throw new MojoFailureException(s("JetMojo.TomcatWebappsDoesNotExist.Failure", tomcatHome));
-                }
-
-                if (!Utils.isEmpty(warDeployName) && !warDeployName.endsWith(".war")) {
-                    warDeployName = warDeployName + ".war";
-                }
+                tomcatConfiguration.fillDefaults();
 
                 appType = ApplicationType.TOMCAT;
                 break;
@@ -258,7 +224,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     }
 
     protected File getTomcatHome() {
-        return new File(tomcatHome);
+        return new File(tomcatConfiguration.tomcatHome);
     }
 
     protected File getTomcatInBuildDir() {
@@ -317,7 +283,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected void copyTomcatAndWar() throws MojoExecutionException {
         try {
             Utils.copyDirectory(getTomcatHome().toPath(), getTomcatInBuildDir().toPath());
-            String warName = (Utils.isEmpty(warDeployName))? mainWar.getName() : warDeployName;
+            String warName = (Utils.isEmpty(tomcatConfiguration.warDeployName))? mainWar.getName() : tomcatConfiguration.warDeployName;
             Utils.copyFile(mainWar.toPath(), new File(getTomcatInBuildDir(), WEBAPPS_DIR + File.separator + warName).toPath());
         } catch (IOException e) {
             throw new MojoExecutionException(s("JetMojo.ErrorCopyingTomcat.Exception"), e);
