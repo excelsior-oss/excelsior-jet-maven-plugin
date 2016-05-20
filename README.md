@@ -19,9 +19,11 @@ separately. The supported platforms are Windows (32- and 64-bit), Linux (32- and
 
 ### Overview
 
-The current version of the plugin supports very basic functionality.
-It can only handle *plain Java SE applications*, i.e. applications that have a main class
-and all their dependencies are explicitly listed in the JVM classpath at launch time.
+The current version of the plugin can handle either *plain Java SE applications*,
+i.e. applications that have a main class
+and all their dependencies are explicitly listed in the JVM classpath at launch time
+or web applications that can be deployed and run in Tomcat application server.
+
 In other words, if your application can be launched using a command line
 of the following form:
     
@@ -29,7 +31,8 @@ of the following form:
 java -cp [dependencies-list] [main class]
 ```
 and loads classes mostly from jars that are present
-in the `dependencies-list`, then you can use this plugin.
+in the `dependencies-list`, or it is packaged to a .war file that can be deployed to a Tomcat application server instance
+then you can use this plugin.
 
 This plugin will transform your application into an optimized native executable for the platform
 on which you run Maven, and place it into a separate directory together with all required
@@ -37,14 +40,15 @@ Excelsior JET runtime files. In addition, it can either pack that directory into
 (all platforms), create an Excelsior Installer setup (Windows and Linux only)
 or an OS X application bundle/installer.
     
-Excelsior JET supports many more features than this plugin.
-We plan to cover all those features in the future.
-
+The plugin unlike Excelsior JET itself does note yet support building Eclipse RCP applications
+and some advanced features are not supported as well.
+We plan to cover all those features in the future and if you need some functionality that is not covered yet
+you may facilitate its appearing via creating a feature request [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).
 
 ### Usage
 
-You need to copy and paste the following configuration into the `<plugins>` section of
-your `pom.xml` file:
+If you have a plain Java SE application, you need to copy and paste the following configuration into the `<plugins>`
+section of your `pom.xml` file:
 
 ```xml
 <plugin>
@@ -62,6 +66,10 @@ set the `<mainClass>` parameter, and use the following command line to build the
 ```
 mvn jet:build
 ```
+
+For Tomcat web applications `<mainClass>` parameter is not needed but you would need to configure `<tomcatHome>` parameter
+referencing a clean Tomcat installation which copy will be used for your web application deployment.
+See [Building Tomcat Web Applications](#building-tomcat-web-applications) section below for more details.
 
 ### Excelsior JET Installation Directory Lookup
 
@@ -215,7 +223,6 @@ that has the following configuration parameters:
 * `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
 
 #### Creating OS X application bundles and installers
-**New in 0.5.0:**
 
 The plugin supports the creation of OS X application bundles and installers.
 
@@ -508,6 +515,128 @@ to be visible in the resulting executable, enable data protection by specifying 
 For more details on data protection, refer to the "Data Protection" section of
 the "Intellectual Property Protection" chapter of the Excelsior JET User's Guide.
 
+### Building Tomcat Web Applications
+**New in 0.6.0:**
+
+The plugin enables you to optimize Apache Tomcat Web applications with Excelsior JET.
+You may achieve with it:
+
+* a more predictable lattency for your application as there is no unpredictable de-optimizations
+  that may occur when you run your application on a conventional JRE
+
+* better startup time, that may be important if you launch a bunch of microservices on your application system update
+
+* better initial performance that remains stable later on, that can be important for load balancing
+  inside of an application cluster
+
+* the security and IP protection, as the sensitive code gets protected from reverse engineering
+  and the exposure of security vulnerabilities is reduced
+
+#### Tomcat versions supported
+Excelsior JET 11 supports Apache Tomcat 5.0.x (Starting from version 5.0.1), 5.5.x, 6.0.x,
+and 7.0.x up to version 7.0.62.
+The next version of Excelsior JET will support Tomcat 8 and Tomcat 7.0.63+ versions.
+For now, please stick to Tomcat 7.0.62 or earlier.
+
+#### Usage
+The plugin will treat your Maven project as Tomcat web application project if it has `war` `<packaging>` type.
+To build a Tomcat web application you need to copy and paste the following configuration into the `<plugins>`
+section of your `pom.xml` file:
+
+```xml
+<plugin>
+	<groupId>com.excelsiorjet</groupId>
+	<artifactId>excelsior-jet-maven-plugin</artifactId>
+	<version>0.5.1</version>
+	<configuration>
+        <tomcatConfiguration>
+             <tomcatHome></tomcatHome>
+        </tomcatConfiguration>
+	</configuration>
+</plugin>
+```
+
+and set the `<tomcatHome>` parameter, pointing to a clean installation of Tomcat application server.
+Please note that binary distributions of Tomcat that are available from http://tomcat.apache.org/ usually contain
+a set of standard examples in `webapps` folder that most likely are not needed in your own application distribution.
+So it is safe to remove them from `webapps` folder keeping it empty.
+
+You may also set the above parameter passing pass the `tomcat.home` system property on the Maven command line as follows:
+
+```
+mvn jet:build -Dtomcat.home=[Tomcat-Home]
+```
+
+or set `TOMCAT_HOME` or `CATALINA_HOME` environment variables.
+
+#### Build process
+During build of your application the Tomcat server at `<tomcatHome>` is copied to `jet/build` directory.
+Then your main project artifact (.war file) is copied to `webapps` folder of that copy
+and compiled along with Tomcat into a native executable.
+
+Upon success, it creates a directory structure similar to original Tomcat installation in the `jet/app` directory,
+where the executable is placed into `jet/app/bin` subdirectory. It also copies the required Excelsior JET Runtime files
+into the `jet/app` directory and binds the resulting executable to that copy of the Runtime.
+
+> Your natively compiled Tomcat application is ready for distribution at this point: you may copy
+> the contents of the `jet/app` directory to another computer that has neither Excelsior JET nor
+> the Oracle JRE installed, and the executable should work as expected.
+> You may also run your application using standard Tomcat scripts that are placed into the resulting
+> `jet/app/bin` folder by default.
+
+Finally, the plugin packs the contents of the `jet/app` directory into
+a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
+Other packaging types that are available for plain Java SE applications are supported for Tomcat as well (see above).
+
+#### Tomcat configuration parameters
+The most of configuration parameters that are available for Plain Java SE applications listed above
+are also available for Tomcat web applications. However there are a few Tomcat specific configuration parameters that
+you may set under `<tomcatConfiguration>` parameters block:
+
+* `<warDeployName>` - the name of war to be deployed into Tomcat.
+   By default, Tomcat uses name of war as context path of respective web application.
+   If you need for your web application to be on "/" context path, set `<warDeployName>` to `ROOT` value.
+
+* `<hideConfig>` - if you do not want your end users to inspect or modify the Tomcat configuration files,
+  those located in `Tomcat-home/conf/`, you may set this plugin parameter to `true`
+  to place them into the executable so the files will not appear in `conf/` subdirectory
+  of end user installations of your Web application.
+
+* `<genScripts>` - if you use standard Tomcat scripts from `Tomcat-home/bin/`, such as `startup`, `shutdown`, etc.,
+  you may continue using them with the compiled Tomcat, as by default the scripts working with the compiled Tomcat
+  will be created in `jet/app/bin` along with the executable.
+  However, if you are going to launch the created executable directly, you may set the parameter to `false`.
+
+#### Multiple web applications and Tomcat installation configuration
+If your final distribution requires multiple web applications to be deployed into Tomcat,
+all of them can be compiled with Excelsior JET.
+
+To do this with the help of this plugin you need to do the following:
+
+* Determine what is the last web application in your build process and configure its Maven project with this plugin
+  configuration.
+
+* All previous web applications builds should copy their final `.war` artifacts into Tomcats `webapps` folder
+  that you specify for the last web application Excelsior JET Maven plugin configuration.
+
+This way Excelsior JET AOT compiler will pickup all your web applications and compile into the same executable.
+
+You may also need to have some specific to your application Tomcat configuration such as a DB configurations.
+You may perform such a configuration in the Tomcat installation that you specify for the plugin.
+And finally, if you need some additional files in the resulting installation package, please place
+them to the Tomcat installation as well: the plugin will copy them into the final package automatically.
+
+#### Test Run of a Tomcat web application
+
+You can launch your Tomcat web application on Excelsior JET JVM using a JIT compiler
+before pre-compiling it to native code using `jet:testrun` Mojo the same way as for Plain Java SE applications.
+
+However, please note, that the running Tomcat does not exit itself until you call a standard Tomcat's `shutdown` script.
+You can also terminate its execution with "Ctrl-C" keyboard combination, but it will terminate Maven first
+that will terminate Tomcat subsequently but this will not be correct Tomcat termination.
+So it is recommended to use a standard Tomcat's `shutdown` script for correct Tomcat termination in Test Run execution.
+You may launch it from any standard Tomcat installation.
+
 ## Sample Project
 
 To demonstrate the process and result of plugin usage, we have forked the [JavaFX VNC Client](https://github.com/comtel2000/jfxvnc) project on GitHub, added the Excelsior JET plugin to its `pom.xml` file, and run it through Maven to build native binaries for three platforms.
@@ -527,6 +656,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.6.0 (??-May-2016)
+
+* Tomcat web applications compilation is supported
 
 Version 0.5.1 (13-Apr-2016)
 
@@ -594,11 +727,10 @@ and placing it into a separate directory with required Excelsior JET runtime fil
 Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
 So the next few releases will add the following features:
 
-* Tomcat Web Applications support.
 * Windows services support.
-* Code signing.
 * Multi-component support: building dependencies into separate native libraries
                            to reuse them across multiple Maven project builds
                            so as to reduce overall compilation time
+* Code signing.
 
 Note that the order of appearance of these features is not fixed and can be adjusted based on your feedback.

@@ -21,10 +21,7 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.JetHome;
-import com.excelsiorjet.JetHomeException;
-import com.excelsiorjet.Txt;
-import com.excelsiorjet.Utils;
+import com.excelsiorjet.*;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -166,6 +163,14 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected JetHome checkPrerequisites() throws MojoFailureException {
         Txt.log = getLog();
 
+        // check jet home
+        JetHome jetHomeObj;
+        try {
+            jetHomeObj = Utils.isEmpty(jetHome)? new JetHome() : new JetHome(jetHome);
+
+        } catch (JetHomeException e) {
+            throw new MojoFailureException(e.getMessage());
+        }
 
         switch (project.getPackaging().toLowerCase()) {
             case "jar":
@@ -179,6 +184,16 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                 }
                 break;
             case "war":
+                JetEdition edition;
+                try {
+                    edition = jetHomeObj.getEdition();
+                } catch (JetHomeException e) {
+                    throw new MojoFailureException(e.getMessage());
+                }
+                if ((edition != JetEdition.EVALUATION) && (edition != JetEdition.ENTERPRISE)) {
+                    throw new MojoFailureException(s("JetMojo.TomcatNotSupported.Failure"));
+                }
+
                 if (!mainWar.exists()) {
                     throw new MojoFailureException(s("JetMojo.MainWarNotFound.Failure", mainWar.getAbsolutePath()));
                 }
@@ -191,15 +206,6 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                 throw new MojoFailureException(s("JetMojo.BadPackaging.Failure", project.getPackaging()));
         }
 
-
-        // check jet home
-        JetHome jetHomeObj;
-        try {
-            jetHomeObj = Utils.isEmpty(jetHome)? new JetHome() : new JetHome(jetHome);
-
-        } catch (JetHomeException e) {
-            throw new MojoFailureException(e.getMessage());
-        }
 
         return jetHomeObj;
     }
