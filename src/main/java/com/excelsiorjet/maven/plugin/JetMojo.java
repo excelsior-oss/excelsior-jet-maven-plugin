@@ -867,11 +867,16 @@ public class JetMojo extends AbstractJetMojo {
         }
 
         try {
-            if (appType == ApplicationType.PLAIN) {
-                compile(jetHome, buildDir, copyDependencies(buildDir, mainJar));
-            } else {
-                copyTomcatAndWar();
-                compile(jetHome, buildDir, Collections.emptyList());
+            switch (appType) {
+                case PLAIN:
+                    compile(jetHome, buildDir, copyDependencies(buildDir, mainJar));
+                    break;
+                case TOMCAT:
+                    copyTomcatAndWar();
+                    compile(jetHome, buildDir, Collections.emptyList());
+                    break;
+                default:
+                    throw new AssertionError("Unknown application type");
             }
 
             createAppDir(jetHome, buildDir, appDir);

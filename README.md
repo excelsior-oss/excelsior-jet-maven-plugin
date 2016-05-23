@@ -40,7 +40,7 @@ Excelsior JET runtime files. In addition, it can either pack that directory into
 (all platforms), create an Excelsior Installer setup (Windows and Linux only)
 or an OS X application bundle/installer.
     
-The plugin unlike Excelsior JET itself does note yet support building Eclipse RCP applications
+The plugin unlike Excelsior JET itself does not yet support building Eclipse RCP applications
 and some advanced features are not supported as well.
 We plan to cover all those features in the future and if you need some functionality that is not covered yet
 you may facilitate its appearing via creating a feature request [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).

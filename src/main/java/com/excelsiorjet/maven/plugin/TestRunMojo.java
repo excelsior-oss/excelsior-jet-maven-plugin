@@ -88,7 +88,7 @@ public class TestRunMojo extends AbstractJetMojo {
         }
     }
 
-    public String getTomcatClassPath(File tomcatBin) throws MojoExecutionException {
+    public String getTomcatClassPath(JetHome jetHome, File tomcatBin) throws MojoExecutionException {
         File f = new File(tomcatBin, BOOTSTRAP_JAR);
         if (!f.exists()) {
             throw new MojoExecutionException(Txt.s("TestRunMojo.Tomcat.NoBootstrapJar.Failure", tomcatBin.getAbsolutePath()));
@@ -106,14 +106,10 @@ public class TestRunMojo extends AbstractJetMojo {
 
         String bootstrapJarCP = bootManifest.getMainAttributes().getValue("CLASS-PATH");
         if (bootstrapJarCP != null) {
-            StringTokenizer strtok = new StringTokenizer(bootstrapJarCP);
-            while (strtok.hasMoreTokens()){
-                String cpe = strtok.nextToken();
-                classPath.add(cpe);
-            }
+            classPath.addAll(Arrays.asList(bootstrapJarCP.split("\\s+")));
         }
 
-        classPath.add(jetHome + File.separator + "lib" + File.separator + "tomcat" + File.separator + "TomcatSupport.jar");
+        classPath.add(jetHome.getJetHome() + File.separator + "lib" + File.separator + "tomcat" + File.separator + "TomcatSupport.jar");
         return String.join(File.pathSeparator, classPath);
     }
 
@@ -155,7 +151,7 @@ public class TestRunMojo extends AbstractJetMojo {
             case TOMCAT:
                 copyTomcatAndWar();
                 workingDirectory = new File(getTomcatInBuildDir(), "bin");
-                classpath = getTomcatClassPath(workingDirectory);
+                classpath = getTomcatClassPath(jetHome, workingDirectory);
                 additionalVMArgs = getTomcatVMArgs();
                 mainClass = TOMCAT_MAIN_CLASS;
                 break;

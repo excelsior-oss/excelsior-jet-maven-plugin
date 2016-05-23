@@ -177,11 +177,12 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                 if (!mainJar.exists()) {
                     throw new MojoFailureException(s("JetMojo.MainJarNotFound.Failure", mainJar.getAbsolutePath()));
                 }
-                appType = ApplicationType.PLAIN;
                 // check main class
                 if (Utils.isEmpty(mainClass)) {
                     throw new MojoFailureException(s("JetMojo.MainNotSpecified.Failure"));
                 }
+
+                appType = ApplicationType.PLAIN;
                 break;
             case "war":
                 JetEdition edition;
