@@ -15,37 +15,37 @@ public class TomcatConfig {
     static final String WEBAPPS_DIR = "webapps";
 
     /**
-     * The location of Tomcat application server installation
-     * that is required parameter for Web applications native compilation.
-     * Your .war artifact will be deployed into a copy of the Tomcat and compiled together with it.
+     * The location of the master Tomcat application server installation,
+     * a required parameter for Web application projects.
+     * Your .war artifact will be deployed into a copy of the master Tomcat installation and compiled together with it.
      *
-     * You may use the tomcat.home system property or either TOMCAT_HOME or CATALINA_HOME environment variables
-     * to set the parameter.
+     * You may also use the tomcat.home system property, or one of TOMCAT_HOME and CATALINA_HOME environment variables
+     * to set this parameter.
      */
     public String tomcatHome;
 
     /**
-     * The name of war to be deployed into Tomcat.
-     * Default value is the name of your main artifact that should be war file.
+     * The name of the war file to be deployed into Tomcat.
+     * Default value is the name of your main artifact, which should be a war file.
      * <p>
-     * By default, Tomcat uses name of war as context path of respective web application.
-     * If you need for your web application to be on "/" context path,
+     * By default, Tomcat uses the war file name as the context path of the respective Web application.
+     * If you need your Web application to be on the "/" context path,
      * set warDeployName to "ROOT" value.
      * </p>
      */
     public String warDeployName;
 
     /**
-     * If you do not want your end users to inspect or modify the Tomcat configuration files,
-     * those located in Tomcat-home/conf/, you may set this plugin parameter to {@code true}
-     * to place them into the executable so the files will not appear in conf/ subdirectory
+     * If you do not want your end users to inspect or modify the Tomcat configuration files
+     * located in &lt;tomcatHome&gt;/conf/, set this plugin parameter to {@code true}
+     * to have them placed into the executable and not appear in the conf/ subdirectory
      * of end user installations of your Web application.
      */
     public boolean hideConfig;
 
     /**
-     * If you use standard Tomcat scripts from Tomcat-home/bin/, such as startup, shutdown, etc.,
-     * and wish to continue using them with the compiled Tomcat, set this plugin parameter to {@code true} (default),
+     * If you want to continue using standard Tomcat scripts such as {@code startup} and {@code shutdown},
+     * with the natively compiled Tomcat, set this plugin parameter to {@code true} (default).
      * As a result, the scripts working with the compiled Tomcat will be created in "target/jet/app/bin"
      * along with the executable.
      */

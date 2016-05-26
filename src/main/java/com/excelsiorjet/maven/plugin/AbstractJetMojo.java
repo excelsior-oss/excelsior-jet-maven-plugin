@@ -282,8 +282,8 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     }
 
     /**
-     * Copies Tomcat server to the build directory and main project artifact (.war) to
-     * "webapps" folder of copied Tomcat.
+     * Copies the master Tomcat server to the build directory and main project artifact (.war)
+     * to the "webapps" folder of copied Tomcat.
      *
      * @throws MojoExecutionException
      */
