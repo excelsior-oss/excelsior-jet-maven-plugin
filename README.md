@@ -60,7 +60,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.5.1</version>
+	<version>0.6.0</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -613,6 +613,20 @@ you may set within the `<tomcatConfiguration>` parameters block:
   located in `<tomcatHome>/conf/`, set this plugin parameter to `true`
   to have those files placed inside the executable, so they will not appear in the `conf/` subdirectory
   of end user installations of your Web application.
+  **Note:**  To hide configuration files, make `conf/tomcat-users.xml` file READONLY or move it from `conf/`.
+  You can do that by adding attribute `readonly="true"` or modifiyng attribute `pathname` in tag
+  `Resource name="UserDatabase"` in `conf/server.xml` of master Tomcat installation. For example:
+  ```
+  <Resource name="UserDatabase" auth="Container"
+   type="org.apache.catalina.UserDatabase"
+   description="User database that can be updated and saved"
+   factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+   pathname="conf/tomcat-users.xml"
+   readonly="true"/>
+   ```
+   Also you would likely need to deploy XML-descriptors of the Web applications to `/conf/<Engine>/<Host>`.
+   Otherwise, the Tomcat Server will recreate the XML-files at run time in the directory,
+   thus negating the effect of configuration hiding.
 
 * `<genScripts>` - you may continue to use the standard Tomcat scripts such as `bin/startup`
   and `bin/shutdown` with the natively compiled Tomcat, as by default
@@ -671,7 +685,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.6.0 (??-May-2016)
+Version 0.6.0 (30-May-2016)
 
 * Compilation of Tomcat Web applications is supported
 
