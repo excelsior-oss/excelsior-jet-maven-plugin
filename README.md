@@ -613,20 +613,26 @@ you may set within the `<tomcatConfiguration>` parameters block:
   located in `<tomcatHome>/conf/`, set this plugin parameter to `true`
   to have those files placed inside the executable, so they will not appear in the `conf/` subdirectory
   of end user installations of your Web application.
-  **Note:**  To hide configuration files, make `conf/tomcat-users.xml` file READONLY or move it from `conf/`.
-  You can do that by adding attribute `readonly="true"` or modifiyng attribute `pathname` in tag
-  `Resource name="UserDatabase"` in `conf/server.xml` of master Tomcat installation. For example:
-  ```
-  <Resource name="UserDatabase" auth="Container"
-   type="org.apache.catalina.UserDatabase"
-   description="User database that can be updated and saved"
-   factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
-   pathname="conf/tomcat-users.xml"
-   readonly="true"/>
-   ```
-   Also you would likely need to deploy XML-descriptors of the Web applications to `/conf/<Engine>/<Host>`.
-   Otherwise, the Tomcat Server will recreate the XML-files at run time in the directory,
-   thus negating the effect of configuration hiding.
+  
+    **Important:**  For Tomcat to start your Web applications with hidden configuration files,
+    you need to either mark the `conf/tomcat-users.xml` file read-only, or move it away from
+    the `conf/` directory. If you opt for the latter, that file would remain visible, of course.
+    
+    You can do the above respectively by adding the attribute `readonly="true"` to the tag
+    `<Resource name="UserDatabase">` in the `conf/server.xml` file of the master Tomcat installation,
+    or modifying the `pathname` attribute of that tag. For example:
+```
+<Resource name="UserDatabase" auth="Container"
+ type="org.apache.catalina.UserDatabase"
+ description="User database that can be updated and saved"
+ factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+ pathname="conf/tomcat-users.xml"
+ readonly="true"/>
+```
+  Also, you would likely want to pre-deploy the XML descriptors of your Web applications
+  to `conf/<Engine>/<Host>`. Otherwise, Tomcat will extract those XML files
+  from applications and place them in the `conf/` directory on startup,
+  thus negating the effect of hiding.
 
 * `<genScripts>` - you may continue to use the standard Tomcat scripts such as `bin/startup`
   and `bin/shutdown` with the natively compiled Tomcat, as by default
