@@ -21,34 +21,24 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.*;
+import com.excelsiorjet.api.AbstractJetTaskConfig;
+import com.excelsiorjet.api.AbstractLog;
+import com.excelsiorjet.api.Artifact;
+import com.excelsiorjet.api.TomcatConfig;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.excelsiorjet.Txt.s;
-import static com.excelsiorjet.maven.plugin.TomcatConfig.WEBAPPS_DIR;
+import java.util.stream.Stream;
 
 /**
  * Parent of Excelsior JET Maven Plugin mojos.
  *
  * @author Nikita Lipsky
  */
-public abstract class AbstractJetMojo extends AbstractMojo {
+public abstract class AbstractJetMojo extends AbstractMojo implements AbstractJetTaskConfig {
 
-    public enum ApplicationType {
-        PLAIN,
-        TOMCAT
-    }
-
-    protected ApplicationType appType;
 
     /**
      * The Maven Project Object.
@@ -158,144 +148,101 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected String execProfilesName;
 
     protected static final String BUILD_DIR = "build";
-    protected static final String LIB_DIR = "lib";
 
-    protected JetHome checkPrerequisites() throws MojoFailureException {
-        Txt.log = getLog();
-
-        // check jet home
-        JetHome jetHomeObj;
-        try {
-            jetHomeObj = Utils.isEmpty(jetHome)? new JetHome() : new JetHome(jetHome);
-
-        } catch (JetHomeException e) {
-            throw new MojoFailureException(e.getMessage());
-        }
-
-        switch (project.getPackaging().toLowerCase()) {
-            case "jar":
-                if (!mainJar.exists()) {
-                    throw new MojoFailureException(s("JetMojo.MainJarNotFound.Failure", mainJar.getAbsolutePath()));
-                }
-                // check main class
-                if (Utils.isEmpty(mainClass)) {
-                    throw new MojoFailureException(s("JetMojo.MainNotSpecified.Failure"));
-                }
-
-                appType = ApplicationType.PLAIN;
-                break;
-            case "war":
-                JetEdition edition;
-                try {
-                    edition = jetHomeObj.getEdition();
-                } catch (JetHomeException e) {
-                    throw new MojoFailureException(e.getMessage());
-                }
-                if ((edition != JetEdition.EVALUATION) && (edition != JetEdition.ENTERPRISE)) {
-                    throw new MojoFailureException(s("JetMojo.TomcatNotSupported.Failure"));
-                }
-
-                if (!mainWar.exists()) {
-                    throw new MojoFailureException(s("JetMojo.MainWarNotFound.Failure", mainWar.getAbsolutePath()));
-                }
-
-                tomcatConfiguration.fillDefaults();
-
-                appType = ApplicationType.TOMCAT;
-                break;
-            default:
-                throw new MojoFailureException(s("JetMojo.BadPackaging.Failure", project.getPackaging()));
-        }
-
-
-        return jetHomeObj;
-    }
-
-    protected void mkdir(File dir) throws MojoExecutionException {
-        if (!dir.exists() && !dir.mkdirs()) {
-            if (!dir.exists()) {
-                throw new MojoExecutionException(s("JetMojo.DirCreate.Error", dir.getAbsolutePath()));
-            }
-            getLog().warn(s("JetMojo.DirCreate.Warning", dir.getAbsolutePath()));
-        }
-    }
-
-    protected File getBuildDir() {
+    public File buildDir() {
         return new File(jetOutputDir, BUILD_DIR);
     }
 
-    protected File createBuildDir() throws MojoExecutionException {
-        File buildDir = getBuildDir();
-        mkdir(buildDir);
-        return buildDir;
-    }
-
-    protected File getTomcatHome() {
+    public File tomcatHome() {
         return new File(tomcatConfiguration.tomcatHome);
     }
 
-    protected File getTomcatInBuildDir() {
-        return new File(getBuildDir(), getTomcatHome().getName());
+    public File tomcatInBuildDir() {
+        return new File(buildDir(), tomcatHome().getName());
     }
 
-    protected static class Dependency {
-        final String dependency;
-        final boolean isLib;
-
-        public Dependency(String dependency, boolean isLib) {
-            this.dependency = dependency;
-            this.isLib = isLib;
-        }
+    @Override
+    public String groupId() {
+        return project.getGroupId();
     }
 
-    private void copyDependency(File from, File to, File buildDir, List<Dependency> dependencies, boolean isLib) {
-        try {
-            Utils.copyFile(from.toPath(), to.toPath());
-            dependencies.add(new Dependency(buildDir.toPath().relativize(to.toPath()).toString(), isLib));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    public Stream<Artifact> getArtifacts() {
+        return project.getArtifacts().stream().map(MavenArtifact::new);
     }
 
-    /**
-     * Copies project dependencies.
-     *
-     * @return list of dependencies relative to buildDir
-     */
-    protected List<Dependency> copyDependencies(File buildDir, File mainJar) throws MojoExecutionException {
-        File libDir = new File(buildDir, LIB_DIR);
-        mkdir(libDir);
-        ArrayList<Dependency> dependencies = new ArrayList<>();
-        try {
-            copyDependency(mainJar, new File(buildDir, mainJar.getName()), buildDir, dependencies, false);
-            project.getArtifacts().stream()
-                    .filter(a -> a.getFile().isFile())
-                    .forEach(a ->
-                            copyDependency(a.getFile(), new File(libDir, a.getFile().getName()), buildDir,
-                                    dependencies, !a.getGroupId().equals(project.getGroupId()))
-                    )
-            ;
-            return dependencies;
-        } catch (Exception e) {
-            throw new MojoExecutionException(s("JetMojo.ErrorCopyingDependency.Exception"), e);
-        }
+    @Override
+    public TomcatConfig tomcatConfiguration() {
+        return tomcatConfiguration;
     }
 
-    /**
-     * Copies the master Tomcat server to the build directory and main project artifact (.war)
-     * to the "webapps" folder of copied Tomcat.
-     *
-     * @throws MojoExecutionException
-     */
-    protected void copyTomcatAndWar() throws MojoExecutionException {
-        try {
-            Utils.copyDirectory(getTomcatHome().toPath(), getTomcatInBuildDir().toPath());
-            String warName = (Utils.isEmpty(tomcatConfiguration.warDeployName))? mainWar.getName() : tomcatConfiguration.warDeployName;
-            Utils.copyFile(mainWar.toPath(), new File(getTomcatInBuildDir(), WEBAPPS_DIR + File.separator + warName).toPath());
-        } catch (IOException e) {
-            throw new MojoExecutionException(s("JetMojo.ErrorCopyingTomcat.Exception"), e);
-        }
+    @Override
+    public String mainClass() {
+        return mainClass;
     }
 
+    @Override
+    public void setMainClass(String mainClass) {
+        this.mainClass = mainClass;
+    }
 
+    @Override
+    public File mainJar() {
+        return mainJar;
+    }
+
+    @Override
+    public String packaging() {
+        return project.getPackaging();
+    }
+
+    @Override
+    public String jetHome() {
+        return jetHome;
+    }
+
+    @Override
+    public AbstractLog log() {
+        return AbstractLog.instance();
+    }
+
+    @Override
+    public File mainWar() {
+        return mainWar;
+    }
+
+    @Override
+    public String warDeployName() {
+        return tomcatConfiguration.warDeployName;
+    }
+
+    @Override
+    public File basedir() {
+        return project.getBasedir();
+    }
+
+    @Override
+    public String finalName() {
+        return project.getBuild().getFinalName();
+    }
+
+    @Override
+    public File execProfilesDir() {
+        return execProfilesDir;
+    }
+
+    @Override
+    public String execProfilesName() {
+        return execProfilesName;
+    }
+
+    @Override
+    public File packageFilesDir() {
+        return packageFilesDir;
+    }
+
+    @Override
+    public String[] jvmArgs() {
+        return jvmArgs;
+    }
 }

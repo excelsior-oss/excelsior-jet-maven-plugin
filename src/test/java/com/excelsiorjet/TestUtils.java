@@ -1,5 +1,9 @@
 package com.excelsiorjet;
 
+import com.excelsiorjet.api.JetCompiler;
+import com.excelsiorjet.api.JetPackager;
+import com.excelsiorjet.api.Utils;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;

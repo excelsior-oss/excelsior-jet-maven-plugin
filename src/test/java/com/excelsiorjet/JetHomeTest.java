@@ -1,5 +1,7 @@
 package com.excelsiorjet;
 
+import com.excelsiorjet.api.JetHome;
+import com.excelsiorjet.api.JetHomeException;
 import org.junit.After;
 import org.junit.Test;
 

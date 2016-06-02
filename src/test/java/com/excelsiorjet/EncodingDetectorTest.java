@@ -1,5 +1,6 @@
 package com.excelsiorjet;
 
+import com.excelsiorjet.api.EncodingDetector;
 import org.junit.Test;
 
 import java.io.File;

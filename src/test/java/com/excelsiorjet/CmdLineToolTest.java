@@ -1,12 +1,15 @@
 package com.excelsiorjet;
 
-import org.apache.maven.plugin.logging.Log;
+import com.excelsiorjet.api.AbstractLog;
+import com.excelsiorjet.api.CmdLineTool;
+import com.excelsiorjet.api.CmdLineToolException;
+import com.excelsiorjet.api.Utils;
 import org.junit.Test;
 
 import java.io.File;
-import java.net.URISyntaxException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -14,7 +17,7 @@ import static org.mockito.Mockito.*;
  */
 public class CmdLineToolTest {
 
-    private Log log = mock(Log.class);
+    private AbstractLog log = mock(AbstractLog.class);
 
     @Test(expected = CmdLineToolException.class)
     public void executeNotExist() throws CmdLineToolException {

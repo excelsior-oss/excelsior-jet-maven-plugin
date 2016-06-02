@@ -1,5 +1,6 @@
 package com.excelsiorjet;
 
+import com.excelsiorjet.api.*;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Test;
 
@@ -15,7 +16,7 @@ import static org.mockito.Mockito.verify;
  */
 public class JetCompilerTest {
 
-    private Log log = mock(Log.class);
+    private AbstractLog log = mock(AbstractLog.class);
 
     @Test
     public void printUsage() throws CmdLineToolException, JetHomeException {

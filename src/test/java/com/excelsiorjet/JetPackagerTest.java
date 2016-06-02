@@ -1,6 +1,6 @@
 package com.excelsiorjet;
 
-import org.apache.maven.plugin.logging.Log;
+import com.excelsiorjet.api.*;
 import org.junit.Test;
 
 import java.io.File;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
  */
 public class JetPackagerTest {
 
-    private Log log = mock(Log.class);
+    private AbstractLog log = mock(AbstractLog.class);
 
     @Test
     public void testPackHelloWorld() throws CmdLineToolException, JetHomeException, IOException {
@@ -38,7 +38,6 @@ public class JetPackagerTest {
         Utils.cleanDirectory(targetDir);
     }
 
-    @Test
     public void createAndTestFakeJC() throws CmdLineToolException, JetHomeException, IOException {
         try {
             File classesDir = TestUtils.classesDir();

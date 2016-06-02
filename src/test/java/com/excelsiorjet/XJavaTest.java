@@ -1,6 +1,6 @@
 package com.excelsiorjet;
 
-import org.apache.maven.plugin.logging.Log;
+import com.excelsiorjet.api.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
  */
 public class XJavaTest {
 
-    private Log log = mock(Log.class);
+    private AbstractLog log = mock(AbstractLog.class);
     private JetHome jetHome;
 
     public XJavaTest() throws JetHomeException {
