@@ -1,6 +1,6 @@
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.AbstractLog;
+import com.excelsiorjet.api.log.AbstractLog;
 import org.apache.maven.plugin.logging.Log;
 
 public class MavenLog extends AbstractLog {
@@ -9,6 +9,10 @@ public class MavenLog extends AbstractLog {
 
     public MavenLog(Log mavenLog) {
         this.mavenLog = mavenLog;
+    }
+
+    @Override public void debug(String msg, Throwable t) {
+       mavenLog.debug(msg, t);
     }
 
     @Override

@@ -21,19 +21,13 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.*;
+import com.excelsiorjet.api.log.AbstractLog;
+import com.excelsiorjet.api.tasks.AbstractJetTaskConfig;
+import com.excelsiorjet.api.tasks.ExcelsiorJetApiException;
+import com.excelsiorjet.api.tasks.TestRunTask;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.*;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Mojo for performing a Test Run before building the application.

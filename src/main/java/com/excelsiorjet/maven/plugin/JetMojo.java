@@ -21,7 +21,8 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.*;
+import com.excelsiorjet.api.log.AbstractLog;
+import com.excelsiorjet.api.tasks.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;

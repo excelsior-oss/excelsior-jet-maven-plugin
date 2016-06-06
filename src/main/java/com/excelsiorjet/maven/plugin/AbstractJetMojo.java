@@ -21,10 +21,10 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.AbstractJetTaskConfig;
-import com.excelsiorjet.api.AbstractLog;
-import com.excelsiorjet.api.Artifact;
-import com.excelsiorjet.api.TomcatConfig;
+import com.excelsiorjet.api.tasks.AbstractJetTaskConfig;
+import com.excelsiorjet.api.log.AbstractLog;
+import com.excelsiorjet.api.tasks.ClasspathEntry;
+import com.excelsiorjet.api.tasks.TomcatConfig;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -167,8 +167,9 @@ public abstract class AbstractJetMojo extends AbstractMojo implements AbstractJe
     }
 
     @Override
-    public Stream<Artifact> getArtifacts() {
-        return project.getArtifacts().stream().map(MavenArtifact::new);
+    public Stream<ClasspathEntry> getArtifacts() {
+        return project.getArtifacts().stream().map(artifact ->
+                new ClasspathEntry(artifact.getFile(), groupId().equals(artifact.getGroupId())));
     }
 
     @Override

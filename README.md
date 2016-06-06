@@ -613,11 +613,11 @@ you may set within the `<tomcatConfiguration>` parameters block:
   located in `<tomcatHome>/conf/`, set this plugin parameter to `true`
   to have those files placed inside the executable, so they will not appear in the `conf/` subdirectory
   of end user installations of your Web application.
-  
+
     **Important:**  For Tomcat to start your Web applications with hidden configuration files,
     you need to either mark the `conf/tomcat-users.xml` file read-only, or move it away from
     the `conf/` directory. If you opt for the latter, that file would remain visible, of course.
-    
+
     You can do the above respectively by adding the attribute `readonly="true"` to the tag
     `<Resource name="UserDatabase">` in the `conf/server.xml` file of the master Tomcat installation,
     or modifying the `pathname` attribute of that tag. For example:
