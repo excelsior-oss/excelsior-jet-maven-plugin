@@ -16,22 +16,22 @@ public class MavenLog extends AbstractLog {
     }
 
     @Override
-    public void info(CharSequence msg) {
+    public void info(String msg) {
         mavenLog.info(msg);
     }
 
     @Override
-    public void warn(CharSequence msg) {
+    public void warn(String msg) {
         mavenLog.warn(msg);
     }
 
     @Override
-    public void warn(CharSequence msg, Throwable t) {
+    public void warn(String msg, Throwable t) {
         mavenLog.warn(msg, t);
     }
 
     @Override
-    public void error(CharSequence msg) {
+    public void error(String msg) {
         mavenLog.error(msg);
     }
 }

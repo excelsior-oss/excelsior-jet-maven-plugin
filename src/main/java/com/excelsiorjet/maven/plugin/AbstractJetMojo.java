@@ -21,10 +21,9 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.tasks.AbstractJetTaskConfig;
-import com.excelsiorjet.api.log.AbstractLog;
+import com.excelsiorjet.api.tasks.config.AbstractJetTaskConfig;
 import com.excelsiorjet.api.tasks.ClasspathEntry;
-import com.excelsiorjet.api.tasks.TomcatConfig;
+import com.excelsiorjet.api.tasks.config.TomcatConfig;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -153,14 +152,6 @@ public abstract class AbstractJetMojo extends AbstractMojo implements AbstractJe
         return new File(jetOutputDir, BUILD_DIR);
     }
 
-    public File tomcatHome() {
-        return new File(tomcatConfiguration.tomcatHome);
-    }
-
-    public File tomcatInBuildDir() {
-        return new File(buildDir(), tomcatHome().getName());
-    }
-
     @Override
     public String groupId() {
         return project.getGroupId();
@@ -203,18 +194,8 @@ public abstract class AbstractJetMojo extends AbstractMojo implements AbstractJe
     }
 
     @Override
-    public AbstractLog log() {
-        return AbstractLog.instance();
-    }
-
-    @Override
     public File mainWar() {
         return mainWar;
-    }
-
-    @Override
-    public String warDeployName() {
-        return tomcatConfiguration.warDeployName;
     }
 
     @Override

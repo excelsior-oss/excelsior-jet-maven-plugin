@@ -23,13 +23,12 @@ package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.log.AbstractLog;
 import com.excelsiorjet.api.tasks.*;
+import com.excelsiorjet.api.tasks.config.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
-
-import static org.apache.commons.compress.archivers.ArchiveStreamFactory.ZIP;
 
 /**
  * Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -264,7 +263,7 @@ public class JetMojo extends AbstractJetMojo implements JetTaskConfig {
 
     @Override
     public void setAddWindowsVersionInfo(boolean addWindowsVersionInfoFlag) {
-        addWindowsVersionInfoFlag = addWindowsVersionInfoFlag;
+        this.addWindowsVersionInfo = addWindowsVersionInfoFlag;
     }
 
     @Override

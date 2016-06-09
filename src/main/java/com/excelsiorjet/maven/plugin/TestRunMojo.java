@@ -22,7 +22,7 @@
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.log.AbstractLog;
-import com.excelsiorjet.api.tasks.AbstractJetTaskConfig;
+import com.excelsiorjet.api.tasks.config.AbstractJetTaskConfig;
 import com.excelsiorjet.api.tasks.ExcelsiorJetApiException;
 import com.excelsiorjet.api.tasks.TestRunTask;
 import org.apache.maven.plugin.MojoExecutionException;
