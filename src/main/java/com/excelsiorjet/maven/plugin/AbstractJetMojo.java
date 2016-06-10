@@ -21,7 +21,6 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.tasks.config.AbstractJetTaskConfig;
 import com.excelsiorjet.api.tasks.ClasspathEntry;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
 import org.apache.maven.plugin.AbstractMojo;
@@ -36,7 +35,7 @@ import java.util.stream.Stream;
  *
  * @author Nikita Lipsky
  */
-public abstract class AbstractJetMojo extends AbstractMojo implements AbstractJetTaskConfig {
+public abstract class AbstractJetMojo extends AbstractMojo {
 
 
     /**
@@ -148,83 +147,8 @@ public abstract class AbstractJetMojo extends AbstractMojo implements AbstractJe
 
     protected static final String BUILD_DIR = "build";
 
-    public File buildDir() {
-        return new File(jetOutputDir, BUILD_DIR);
-    }
-
-    @Override
-    public String groupId() {
-        return project.getGroupId();
-    }
-
-    @Override
     public Stream<ClasspathEntry> getArtifacts() {
-        return project.getArtifacts().stream().map(artifact ->
-                new ClasspathEntry(artifact.getFile(), groupId().equals(artifact.getGroupId())));
+        return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId())));
     }
 
-    @Override
-    public TomcatConfig tomcatConfiguration() {
-        return tomcatConfiguration;
-    }
-
-    @Override
-    public String mainClass() {
-        return mainClass;
-    }
-
-    @Override
-    public void setMainClass(String mainClass) {
-        this.mainClass = mainClass;
-    }
-
-    @Override
-    public File mainJar() {
-        return mainJar;
-    }
-
-    @Override
-    public String packaging() {
-        return project.getPackaging();
-    }
-
-    @Override
-    public String jetHome() {
-        return jetHome;
-    }
-
-    @Override
-    public File mainWar() {
-        return mainWar;
-    }
-
-    @Override
-    public File basedir() {
-        return project.getBasedir();
-    }
-
-    @Override
-    public String finalName() {
-        return project.getBuild().getFinalName();
-    }
-
-    @Override
-    public File execProfilesDir() {
-        return execProfilesDir;
-    }
-
-    @Override
-    public String execProfilesName() {
-        return execProfilesName;
-    }
-
-    @Override
-    public File packageFilesDir() {
-        return packageFilesDir;
-    }
-
-    @Override
-    public String[] jvmArgs() {
-        return jvmArgs;
-    }
 }

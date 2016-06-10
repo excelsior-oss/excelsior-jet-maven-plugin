@@ -22,12 +22,17 @@
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.log.AbstractLog;
-import com.excelsiorjet.api.tasks.config.AbstractJetTaskConfig;
 import com.excelsiorjet.api.tasks.ExcelsiorJetApiException;
 import com.excelsiorjet.api.tasks.TestRunTask;
+import com.excelsiorjet.api.tasks.config.AbstractJetTaskConfig;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.*;
+import org.apache.maven.plugins.annotations.Execute;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+
+import java.io.File;
 
 /**
  * Mojo for performing a Test Run before building the application.
@@ -65,13 +70,16 @@ import org.apache.maven.plugins.annotations.*;
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo( name = "testrun", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class TestRunMojo extends AbstractJetMojo implements AbstractJetTaskConfig {
+public class TestRunMojo extends AbstractJetMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             AbstractLog.setInstance(new MavenLog(getLog()));
-            new TestRunTask(this).execute();
+            new TestRunTask(new AbstractJetTaskConfig(mainWar, jetHome, project.getPackaging(), mainJar, mainClass, tomcatConfiguration,
+                    getArtifacts(), project.getGroupId(), new File(jetOutputDir, BUILD_DIR), project.getBuild().getFinalName(),
+                    project.getBasedir(), packageFilesDir, execProfilesDir, execProfilesName, jvmArgs)).
+                    execute();
         } catch (ExcelsiorJetApiException e) {
             throw new MojoExecutionException("TestRunMojo execution exception", e);
         }

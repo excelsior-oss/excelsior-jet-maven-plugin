@@ -22,13 +22,16 @@
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.log.AbstractLog;
-import com.excelsiorjet.api.tasks.*;
+import com.excelsiorjet.api.tasks.ExcelsiorJetApiException;
+import com.excelsiorjet.api.tasks.JetTask;
 import com.excelsiorjet.api.tasks.config.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
+
+import static com.excelsiorjet.api.tasks.config.JetTaskConfig.ZIP;
 
 /**
  * Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -37,7 +40,7 @@ import java.io.File;
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo(name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class JetMojo extends AbstractJetMojo implements JetTaskConfig {
+public class JetMojo extends AbstractJetMojo {
 
     /**
      * Target executable name. If not set, the main class name is used.
@@ -247,213 +250,19 @@ public class JetMojo extends AbstractJetMojo implements JetTaskConfig {
 
 
     @Override
-    public void setMainClass(String mainClass) {
-        this.mainClass = mainClass;
-    }
-
-    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             AbstractLog.setInstance(new MavenLog(getLog()));
-            new JetTask(this).execute();
+            new JetTask(new JetTaskConfig(
+                    mainWar, jetHome, project.getPackaging(), mainJar, mainClass, tomcatConfiguration, getArtifacts(), project.getGroupId(), new File(jetOutputDir, BUILD_DIR), project.getBuild().getFinalName(),
+                    project.getBasedir(), packageFilesDir, execProfilesDir, execProfilesName, jvmArgs, addWindowsVersionInfo, packaging,
+                    vendor, product, project.getArtifactId(), winVIVersion, winVICopyright, project.getInceptionYear(), winVIDescription, globalOptimizer,
+                    javaRuntimeSlimDown, trialVersion, excelsiorInstallerConfiguration, version, osxBundleConfiguration, outputName,
+                    multiApp, profileStartup, protectData, cryptSeed, icon, hideConsole, profileStartupTimeout, optRtFiles, jetOutputDir)
+            ).execute();
         } catch (ExcelsiorJetApiException e) {
             throw new MojoFailureException("JetMojo failure exception", e);
         }
-    }
-
-    @Override
-    public void setAddWindowsVersionInfo(boolean addWindowsVersionInfoFlag) {
-        this.addWindowsVersionInfo = addWindowsVersionInfoFlag;
-    }
-
-    @Override
-    public boolean isAddWindowsVersionInfo() {
-        return addWindowsVersionInfo;
-    }
-
-    @Override
-    public String excelsiorJetPackaging() {
-        return packaging;
-    }
-
-    @Override
-    public void setExcelsiorJetPackaging(String excelsiorJetPackaging) {
-        packaging = excelsiorJetPackaging;
-    }
-
-    @Override
-    public String vendor() {
-        return vendor;
-    }
-
-    @Override
-    public void setVendor(String vendor) {
-        this.vendor = vendor;
-    }
-
-    @Override
-    public String product() {
-        return product;
-    }
-
-    @Override
-    public String artifactId() {
-        return project.getArtifactId();
-    }
-
-    @Override
-    public void setProduct(String product) {
-        this.product = product;
-    }
-
-    @Override
-    public String winVIVersion() {
-        return winVIVersion;
-    }
-
-    @Override
-    public void setWinVIVersion(String winVIVersion) {
-        this.winVIVersion = winVIVersion;
-    }
-
-    @Override
-    public String winVICopyright() {
-        return winVICopyright;
-    }
-
-    @Override
-    public void setWinVICopyright(String winVICopyright) {
-        this.winVICopyright = winVICopyright;
-    }
-
-    @Override
-    public String inceptionYear() {
-        return project.getInceptionYear();
-    }
-
-    @Override
-    public String winVIDescription() {
-        return winVIDescription;
-    }
-
-    @Override
-    public void setWinVIDescription(String winVIDescription) {
-        this.winVIDescription = winVIDescription;
-    }
-
-    @Override
-    public boolean globalOptimizer() {
-        return globalOptimizer;
-    }
-
-    @Override
-    public void setGlobalOptimizer(boolean globalOptimizer) {
-        this.globalOptimizer = globalOptimizer;
-    }
-
-    @Override
-    public SlimDownConfig javaRuntimeSlimDown() {
-        return javaRuntimeSlimDown;
-    }
-
-    @Override
-    public void setJavaRuntimeSlimDown(SlimDownConfig slimDownConfig) {
-        this.javaRuntimeSlimDown = slimDownConfig;
-    }
-
-    @Override
-    public TrialVersionConfig trialVersion() {
-        return trialVersion;
-    }
-
-    @Override
-    public void setTrialVersion(TrialVersionConfig trialVersionConfig) {
-        this.trialVersion = trialVersionConfig;
-    }
-
-    @Override
-    public ExcelsiorInstallerConfig excelsiorInstallerConfiguration() {
-        return excelsiorInstallerConfiguration;
-    }
-
-    @Override
-    public String version() {
-        return version;
-    }
-
-    @Override
-    public OSXAppBundleConfig osxBundleConfiguration() {
-        return osxBundleConfiguration;
-    }
-
-    @Override
-    public String outputName() {
-        return outputName;
-    }
-
-    @Override
-    public void setOutputName(String outputName) {
-        this.outputName = outputName;
-    }
-
-    @Override
-    public boolean multiApp() {
-        return multiApp;
-    }
-
-    @Override
-    public void setMultiApp(boolean multiApp) {
-        this.multiApp = multiApp;
-    }
-
-    @Override
-    public boolean profileStartup() {
-        return profileStartup;
-    }
-
-    @Override
-    public void setProfileStartup(boolean profileStartup) {
-        this.profileStartup = profileStartup;
-    }
-
-    @Override
-    public boolean protectData() {
-        return protectData;
-    }
-
-    @Override
-    public String cryptSeed() {
-        return cryptSeed;
-    }
-
-    @Override
-    public void setCryptSeed(String cryptSeed) {
-        this.cryptSeed = cryptSeed;
-    }
-
-    @Override
-    public File icon() {
-        return icon;
-    }
-
-    @Override
-    public boolean hideConsole() {
-        return hideConsole;
-    }
-
-    @Override
-    public int profileStartupTimeout() {
-        return profileStartupTimeout;
-    }
-
-    @Override
-    public String[] optRtFiles() {
-        return optRtFiles;
-    }
-
-    @Override
-    public File jetOutputDir() {
-        return jetOutputDir;
     }
 
 }
