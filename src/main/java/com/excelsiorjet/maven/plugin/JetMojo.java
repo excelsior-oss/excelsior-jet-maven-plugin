@@ -22,8 +22,9 @@
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.log.AbstractLog;
-import com.excelsiorjet.api.tasks.ExcelsiorJetApiException;
 import com.excelsiorjet.api.tasks.JetTask;
+import com.excelsiorjet.api.tasks.JetTaskFailureException;
+import com.excelsiorjet.api.tasks.JetTaskParams;
 import com.excelsiorjet.api.tasks.config.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -253,15 +254,51 @@ public class JetMojo extends AbstractJetMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             AbstractLog.setInstance(new MavenLog(getLog()));
-            new JetTask(new JetTaskConfig(
-                    mainWar, jetHome, project.getPackaging(), mainJar, mainClass, tomcatConfiguration, getArtifacts(), project.getGroupId(), new File(jetOutputDir, BUILD_DIR), project.getBuild().getFinalName(),
-                    project.getBasedir(), packageFilesDir, execProfilesDir, execProfilesName, jvmArgs, addWindowsVersionInfo, packaging,
-                    vendor, product, project.getArtifactId(), winVIVersion, winVICopyright, project.getInceptionYear(), winVIDescription, globalOptimizer,
-                    javaRuntimeSlimDown, trialVersion, excelsiorInstallerConfiguration, version, osxBundleConfiguration, outputName,
-                    multiApp, profileStartup, protectData, cryptSeed, icon, hideConsole, profileStartupTimeout, optRtFiles, jetOutputDir)
-            ).execute();
-        } catch (ExcelsiorJetApiException e) {
-            throw new MojoFailureException("JetMojo failure exception", e);
+            JetTaskConfig jetTaskConfig = new JetTaskParams()
+                    .setMainWar(mainWar)
+                    .setJetHome(jetHome)
+                    .setPackaging(project.getPackaging())
+                    .setMainJar(mainJar)
+                    .setMainClass(mainClass)
+                    .setTomcatConfiguration(tomcatConfiguration)
+                    .setArtifacts(getArtifacts())
+                    .setGroupId(project.getGroupId())
+                    .setBuildDir(new File(jetOutputDir, BUILD_DIR))
+                    .setFinalName(project.getBuild().getFinalName())
+                    .setBasedir(project.getBasedir())
+                    .setPackageFilesDir(packageFilesDir)
+                    .setExecProfilesDir(execProfilesDir)
+                    .setExecProfilesName(execProfilesName)
+                    .setJvmArgs(jvmArgs)
+                    .setAddWindowsVersionInfo(addWindowsVersionInfo)
+                    .setExcelsiorJetPackaging(packaging)
+                    .setVendor(vendor)
+                    .setProduct(product)
+                    .setArtifactId(project.getArtifactId())
+                    .setWinVIVersion(winVIVersion)
+                    .setWinVICopyright(winVICopyright)
+                    .setInceptionYear(project.getInceptionYear())
+                    .setWinVIDescription(winVIDescription)
+                    .setGlobalOptimizer(globalOptimizer)
+                    .setJavaRuntimeSlimDown(javaRuntimeSlimDown)
+                    .setTrialVersion(trialVersion)
+                    .setExcelsiorInstallerConfiguration(excelsiorInstallerConfiguration)
+                    .setVersion(version)
+                    .setOsxBundleConfiguration(osxBundleConfiguration)
+                    .setOutputName(outputName)
+                    .setMultiApp(multiApp)
+                    .setProfileStartup(profileStartup)
+                    .setProtectData(protectData)
+                    .setCryptSeed(cryptSeed)
+                    .setIcon(icon)
+                    .setHideConsole(hideConsole)
+                    .setProfileStartupTimeout(profileStartupTimeout)
+                    .setOptRtFiles(optRtFiles)
+                    .setJetOutputDir(jetOutputDir)
+                    .createJetTaskConfig();
+            new JetTask(jetTaskConfig).execute();
+        } catch (JetTaskFailureException e) {
+            throw new MojoFailureException(e.getMessage());
         }
     }
 

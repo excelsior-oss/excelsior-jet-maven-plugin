@@ -22,7 +22,8 @@
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.log.AbstractLog;
-import com.excelsiorjet.api.tasks.ExcelsiorJetApiException;
+import com.excelsiorjet.api.tasks.BaseJetTaskParams;
+import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.TestRunTask;
 import com.excelsiorjet.api.tasks.config.AbstractJetTaskConfig;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -76,12 +77,26 @@ public class TestRunMojo extends AbstractJetMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             AbstractLog.setInstance(new MavenLog(getLog()));
-            new TestRunTask(new AbstractJetTaskConfig(mainWar, jetHome, project.getPackaging(), mainJar, mainClass, tomcatConfiguration,
-                    getArtifacts(), project.getGroupId(), new File(jetOutputDir, BUILD_DIR), project.getBuild().getFinalName(),
-                    project.getBasedir(), packageFilesDir, execProfilesDir, execProfilesName, jvmArgs)).
-                    execute();
-        } catch (ExcelsiorJetApiException e) {
-            throw new MojoExecutionException("TestRunMojo execution exception", e);
+            AbstractJetTaskConfig abstractJetTaskConfig = new BaseJetTaskParams()
+                    .setMainWar(mainWar)
+                    .setJetHome(jetHome)
+                    .setPackaging(project.getPackaging())
+                    .setMainJar(mainJar)
+                    .setMainClass(mainClass)
+                    .setTomcatConfiguration(tomcatConfiguration)
+                    .setDependencies(getArtifacts())
+                    .setGroupId(project .getGroupId())
+                    .setBuildDir(new File(jetOutputDir, BUILD_DIR))
+                    .setFinalName(project.getBuild().getFinalName())
+                    .setBasedir(project.getBasedir())
+                    .setPackageFilesDir(packageFilesDir)
+                    .setExecProfilesDir(execProfilesDir)
+                    .setExecProfilesName(execProfilesName)
+                    .setJvmArgs(jvmArgs)
+                    .createAbstractJetTaskConfig();
+            new TestRunTask(abstractJetTaskConfig). execute();
+        } catch (JetTaskFailureException e) {
+            throw new MojoExecutionException(e.getMessage());
         }
     }
 }
