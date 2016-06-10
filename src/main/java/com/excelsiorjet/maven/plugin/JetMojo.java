@@ -25,14 +25,18 @@ import com.excelsiorjet.api.log.AbstractLog;
 import com.excelsiorjet.api.tasks.JetTask;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.JetTaskParams;
-import com.excelsiorjet.api.tasks.config.*;
+import com.excelsiorjet.api.tasks.JetTaskParamsBuilder;
+import com.excelsiorjet.api.tasks.config.ExcelsiorInstallerConfig;
+import com.excelsiorjet.api.tasks.config.OSXAppBundleConfig;
+import com.excelsiorjet.api.tasks.config.SlimDownConfig;
+import com.excelsiorjet.api.tasks.config.TrialVersionConfig;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
 
-import static com.excelsiorjet.api.tasks.config.JetTaskConfig.ZIP;
+import static com.excelsiorjet.api.tasks.JetTaskParams.ZIP;
 
 /**
  * Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -254,7 +258,7 @@ public class JetMojo extends AbstractJetMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             AbstractLog.setInstance(new MavenLog(getLog()));
-            JetTaskConfig jetTaskConfig = new JetTaskParams()
+            JetTaskParams jetTaskParams = new JetTaskParamsBuilder()
                     .setMainWar(mainWar)
                     .setJetHome(jetHome)
                     .setPackaging(project.getPackaging())
@@ -296,7 +300,7 @@ public class JetMojo extends AbstractJetMojo {
                     .setOptRtFiles(optRtFiles)
                     .setJetOutputDir(jetOutputDir)
                     .createJetTaskConfig();
-            new JetTask(jetTaskConfig).execute();
+            new JetTask(jetTaskParams).execute();
         } catch (JetTaskFailureException e) {
             throw new MojoFailureException(e.getMessage());
         }

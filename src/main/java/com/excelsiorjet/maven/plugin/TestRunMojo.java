@@ -23,9 +23,9 @@ package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.log.AbstractLog;
 import com.excelsiorjet.api.tasks.BaseJetTaskParams;
+import com.excelsiorjet.api.tasks.BaseJetTaskParamsBuilder;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.TestRunTask;
-import com.excelsiorjet.api.tasks.config.AbstractJetTaskConfig;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
@@ -77,7 +77,7 @@ public class TestRunMojo extends AbstractJetMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             AbstractLog.setInstance(new MavenLog(getLog()));
-            AbstractJetTaskConfig abstractJetTaskConfig = new BaseJetTaskParams()
+            BaseJetTaskParams abstractJetTaskConfig = new BaseJetTaskParamsBuilder()
                     .setMainWar(mainWar)
                     .setJetHome(jetHome)
                     .setPackaging(project.getPackaging())
