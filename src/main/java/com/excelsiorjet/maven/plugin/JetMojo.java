@@ -21,6 +21,7 @@
 */
 package com.excelsiorjet.maven.plugin;
 
+import com.excelsiorjet.api.cmd.CmdLineToolException;
 import com.excelsiorjet.api.log.AbstractLog;
 import com.excelsiorjet.api.tasks.JetTask;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
@@ -35,6 +36,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
+import java.io.IOException;
 
 import static com.excelsiorjet.api.tasks.JetTaskParams.ZIP;
 
@@ -303,6 +305,10 @@ public class JetMojo extends AbstractJetMojo {
             new JetTask(jetTaskParams).execute();
         } catch (JetTaskFailureException e) {
             throw new MojoFailureException(e.getMessage());
+        } catch (CmdLineToolException | IOException e) {
+            AbstractLog.instance().debug("JetTask execution error", e);
+            AbstractLog.instance().error(e.getMessage());
+            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 

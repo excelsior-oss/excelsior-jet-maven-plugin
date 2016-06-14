@@ -21,6 +21,7 @@
 */
 package com.excelsiorjet.maven.plugin;
 
+import com.excelsiorjet.api.cmd.CmdLineToolException;
 import com.excelsiorjet.api.log.AbstractLog;
 import com.excelsiorjet.api.tasks.BaseJetTaskParams;
 import com.excelsiorjet.api.tasks.BaseJetTaskParamsBuilder;
@@ -34,6 +35,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Mojo for performing a Test Run before building the application.
@@ -96,6 +98,8 @@ public class TestRunMojo extends AbstractJetMojo {
                     .createAbstractJetTaskConfig();
             new TestRunTask(abstractJetTaskConfig). execute();
         } catch (JetTaskFailureException e) {
+            throw new MojoFailureException(e.getMessage());
+        } catch (IOException | CmdLineToolException e) {
             throw new MojoExecutionException(e.getMessage());
         }
     }
