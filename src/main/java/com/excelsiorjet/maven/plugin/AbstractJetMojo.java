@@ -22,6 +22,7 @@
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.tasks.ClasspathEntry;
+import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -36,7 +37,6 @@ import java.util.stream.Stream;
  * @author Nikita Lipsky
  */
 public abstract class AbstractJetMojo extends AbstractMojo {
-
 
     /**
      * The Maven Project Object.
@@ -151,4 +151,22 @@ public abstract class AbstractJetMojo extends AbstractMojo {
         return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId())));
     }
 
+    protected JetProject getJetProject() {
+        return new JetProject()
+                        .mainWar(mainWar)
+                        .jetHome(jetHome)
+                        .packaging(project.getPackaging())
+                        .mainJar(mainJar)
+                        .mainClass(mainClass)
+                        .tomcatConfiguration(tomcatConfiguration)
+                        .dependencies(getArtifacts())
+                        .groupId(project .getGroupId())
+                        .buildDir(new File(jetOutputDir, BUILD_DIR))
+                        .finalName(project.getBuild().getFinalName())
+                        .basedir(project.getBasedir())
+                        .packageFilesDir(packageFilesDir)
+                        .execProfilesDir(execProfilesDir)
+                        .execProfilesName(execProfilesName)
+                        .jvmArgs(jvmArgs);
+    }
 }

@@ -23,10 +23,9 @@ package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.cmd.CmdLineToolException;
 import com.excelsiorjet.api.log.AbstractLog;
-import com.excelsiorjet.api.tasks.JetTask;
+import com.excelsiorjet.api.tasks.JetBuildTask;
+import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
-import com.excelsiorjet.api.tasks.JetTaskParams;
-import com.excelsiorjet.api.tasks.JetTaskParamsBuilder;
 import com.excelsiorjet.api.tasks.config.ExcelsiorInstallerConfig;
 import com.excelsiorjet.api.tasks.config.OSXAppBundleConfig;
 import com.excelsiorjet.api.tasks.config.SlimDownConfig;
@@ -38,7 +37,7 @@ import org.apache.maven.plugins.annotations.*;
 import java.io.File;
 import java.io.IOException;
 
-import static com.excelsiorjet.api.tasks.JetTaskParams.ZIP;
+import static com.excelsiorjet.api.tasks.JetProject.ZIP;
 
 /**
  * Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -260,49 +259,33 @@ public class JetMojo extends AbstractJetMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             AbstractLog.setInstance(new MavenLog(getLog()));
-            JetTaskParams jetTaskParams = new JetTaskParamsBuilder()
-                    .setMainWar(mainWar)
-                    .setJetHome(jetHome)
-                    .setPackaging(project.getPackaging())
-                    .setMainJar(mainJar)
-                    .setMainClass(mainClass)
-                    .setTomcatConfiguration(tomcatConfiguration)
-                    .setArtifacts(getArtifacts())
-                    .setGroupId(project.getGroupId())
-                    .setBuildDir(new File(jetOutputDir, BUILD_DIR))
-                    .setFinalName(project.getBuild().getFinalName())
-                    .setBasedir(project.getBasedir())
-                    .setPackageFilesDir(packageFilesDir)
-                    .setExecProfilesDir(execProfilesDir)
-                    .setExecProfilesName(execProfilesName)
-                    .setJvmArgs(jvmArgs)
-                    .setAddWindowsVersionInfo(addWindowsVersionInfo)
-                    .setExcelsiorJetPackaging(packaging)
-                    .setVendor(vendor)
-                    .setProduct(product)
-                    .setArtifactId(project.getArtifactId())
-                    .setWinVIVersion(winVIVersion)
-                    .setWinVICopyright(winVICopyright)
-                    .setInceptionYear(project.getInceptionYear())
-                    .setWinVIDescription(winVIDescription)
-                    .setGlobalOptimizer(globalOptimizer)
-                    .setJavaRuntimeSlimDown(javaRuntimeSlimDown)
-                    .setTrialVersion(trialVersion)
-                    .setExcelsiorInstallerConfiguration(excelsiorInstallerConfiguration)
-                    .setVersion(version)
-                    .setOsxBundleConfiguration(osxBundleConfiguration)
-                    .setOutputName(outputName)
-                    .setMultiApp(multiApp)
-                    .setProfileStartup(profileStartup)
-                    .setProtectData(protectData)
-                    .setCryptSeed(cryptSeed)
-                    .setIcon(icon)
-                    .setHideConsole(hideConsole)
-                    .setProfileStartupTimeout(profileStartupTimeout)
-                    .setOptRtFiles(optRtFiles)
-                    .setJetOutputDir(jetOutputDir)
-                    .createJetTaskConfig();
-            new JetTask(jetTaskParams).execute();
+            JetProject jetProject = getJetProject()
+                    .addWindowsVersionInfo(addWindowsVersionInfo)
+                    .excelsiorJetPackaging(packaging)
+                    .vendor(vendor)
+                    .product(product)
+                    .artifactId(project.getArtifactId())
+                    .winVIVersion(winVIVersion)
+                    .winVICopyright(winVICopyright)
+                    .inceptionYear(project.getInceptionYear())
+                    .winVIDescription(winVIDescription)
+                    .globalOptimizer(globalOptimizer)
+                    .javaRuntimeSlimDown(javaRuntimeSlimDown)
+                    .trialVersion(trialVersion)
+                    .excelsiorInstallerConfiguration(excelsiorInstallerConfiguration)
+                    .version(version)
+                    .osxBundleConfiguration(osxBundleConfiguration)
+                    .outputName(outputName)
+                    .multiApp(multiApp)
+                    .profileStartup(profileStartup)
+                    .protectData(protectData)
+                    .cryptSeed(cryptSeed)
+                    .icon(icon)
+                    .hideConsole(hideConsole)
+                    .profileStartupTimeout(profileStartupTimeout)
+                    .optRtFiles(optRtFiles)
+                    .jetOutputDir(jetOutputDir);
+            new JetBuildTask(jetProject).execute();
         } catch (JetTaskFailureException e) {
             throw new MojoFailureException(e.getMessage());
         } catch (CmdLineToolException | IOException e) {

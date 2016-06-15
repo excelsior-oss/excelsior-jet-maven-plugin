@@ -23,8 +23,6 @@ package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.cmd.CmdLineToolException;
 import com.excelsiorjet.api.log.AbstractLog;
-import com.excelsiorjet.api.tasks.BaseJetTaskParams;
-import com.excelsiorjet.api.tasks.BaseJetTaskParamsBuilder;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.TestRunTask;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -34,7 +32,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -79,28 +76,12 @@ public class TestRunMojo extends AbstractJetMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             AbstractLog.setInstance(new MavenLog(getLog()));
-            BaseJetTaskParams abstractJetTaskConfig = new BaseJetTaskParamsBuilder()
-                    .setMainWar(mainWar)
-                    .setJetHome(jetHome)
-                    .setPackaging(project.getPackaging())
-                    .setMainJar(mainJar)
-                    .setMainClass(mainClass)
-                    .setTomcatConfiguration(tomcatConfiguration)
-                    .setDependencies(getArtifacts())
-                    .setGroupId(project .getGroupId())
-                    .setBuildDir(new File(jetOutputDir, BUILD_DIR))
-                    .setFinalName(project.getBuild().getFinalName())
-                    .setBasedir(project.getBasedir())
-                    .setPackageFilesDir(packageFilesDir)
-                    .setExecProfilesDir(execProfilesDir)
-                    .setExecProfilesName(execProfilesName)
-                    .setJvmArgs(jvmArgs)
-                    .createAbstractJetTaskConfig();
-            new TestRunTask(abstractJetTaskConfig). execute();
+            new TestRunTask(getJetProject()). execute();
         } catch (JetTaskFailureException e) {
             throw new MojoFailureException(e.getMessage());
         } catch (IOException | CmdLineToolException e) {
             throw new MojoExecutionException(e.getMessage());
         }
     }
+
 }
