@@ -3,7 +3,7 @@ package com.excelsiorjet.maven.plugin;
 import com.excelsiorjet.api.log.Log;
 
 /**
- * Implementation of {@code AbstractLog} that redirects logs into maven system log
+ * Implementation of {@code Log} that redirects logs into maven logging system
  */
 class MavenLog extends Log {
 
