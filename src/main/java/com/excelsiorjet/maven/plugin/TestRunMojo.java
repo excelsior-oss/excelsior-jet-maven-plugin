@@ -22,7 +22,7 @@
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.cmd.CmdLineToolException;
-import com.excelsiorjet.api.log.AbstractLog;
+import com.excelsiorjet.api.log.Log;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.TestRunTask;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -75,7 +75,7 @@ public class TestRunMojo extends AbstractJetMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            AbstractLog.setInstance(new MavenLog(getLog()));
+            Log.logger = new MavenLog(getLog());
             new TestRunTask(getJetProject()). execute();
         } catch (JetTaskFailureException e) {
             throw new MojoFailureException(e.getMessage());

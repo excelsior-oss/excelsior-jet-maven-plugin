@@ -21,8 +21,10 @@
 */
 package com.excelsiorjet.maven.plugin;
 
+import com.excelsiorjet.api.tasks.ApplicationType;
 import com.excelsiorjet.api.tasks.ClasspathEntry;
 import com.excelsiorjet.api.tasks.JetProject;
+import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -30,6 +32,8 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.util.stream.Stream;
+
+import static com.excelsiorjet.api.util.Txt.s;
 
 /**
  * Parent of Excelsior JET Maven Plugin mojos.
@@ -151,11 +155,11 @@ public abstract class AbstractJetMojo extends AbstractMojo {
         return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId())));
     }
 
-    protected JetProject getJetProject() {
+    protected JetProject getJetProject() throws JetTaskFailureException {
         return new JetProject()
                         .mainWar(mainWar)
                         .jetHome(jetHome)
-                        .packaging(project.getPackaging())
+                        .appType(getPackaging())
                         .mainJar(mainJar)
                         .mainClass(mainClass)
                         .tomcatConfiguration(tomcatConfiguration)
@@ -168,5 +172,14 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .execProfilesDir(execProfilesDir)
                         .execProfilesName(execProfilesName)
                         .jvmArgs(jvmArgs);
+    }
+
+    private ApplicationType getPackaging() throws JetTaskFailureException {
+        switch (project.getPackaging()) {
+            case "jar": return ApplicationType.PLAIN;
+            case "war": return ApplicationType.TOMCAT;
+            default:
+                throw new JetTaskFailureException(s("JetApi.BadPackaging.Failure", project.getPackaging()));
+        }
     }
 }

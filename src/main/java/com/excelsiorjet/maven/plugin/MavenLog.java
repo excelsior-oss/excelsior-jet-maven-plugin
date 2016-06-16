@@ -1,16 +1,15 @@
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.log.AbstractLog;
-import org.apache.maven.plugin.logging.Log;
+import com.excelsiorjet.api.log.Log;
 
 /**
  * Implementation of {@code AbstractLog} that redirects logs into maven system log
  */
-class MavenLog extends AbstractLog {
+class MavenLog extends Log {
 
-    private final Log mavenLog;
+    private final org.apache.maven.plugin.logging.Log mavenLog;
 
-    MavenLog(Log mavenLog) {
+    MavenLog(org.apache.maven.plugin.logging.Log mavenLog) {
         this.mavenLog = mavenLog;
     }
 
