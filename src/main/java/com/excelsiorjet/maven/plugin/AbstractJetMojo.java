@@ -31,7 +31,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.excelsiorjet.api.util.Txt.s;
 
@@ -48,6 +49,9 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(defaultValue="${project}", readonly=true, required=true)
     protected MavenProject project;
 
+    @Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
+    private File targetDir;
+
     /**
      * The main application class.
      */
@@ -58,14 +62,14 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * The main application jar.
      * The default is the main project artifact, if it is a jar file.
      */
-    @Parameter(property = "mainJar", defaultValue = "${project.build.directory}/${project.build.finalName}.jar")
+    @Parameter(property = "mainJar")
     protected File mainJar;
 
     /**
      * The main web application archive.
      * The default is the main project artifact, if it is a war file.
      */
-    @Parameter(property = "mainWar", defaultValue = "${project.build.directory}/${project.build.finalName}.war")
+    @Parameter(property = "mainWar")
     protected File mainWar;
 
     /**
@@ -88,9 +92,11 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * of {@code jetOutputDir}. You may deploy it to other systems using a simple copy operation.
      * For convenience, the plugin will also create a ZIP archive {@code ${project.build.finalName}.zip}
      * with the same content, if the {@code packaging} parameter is set to {@code zip}.
+     *
+     * Default value is ${project.build.directory}/jet
      * </p>
      */
-    @Parameter(property = "jetOutputDir", defaultValue = "${project.build.directory}/jet")
+    @Parameter(property = "jetOutputDir")
     protected File jetOutputDir;
 
     /**
@@ -105,15 +111,25 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected TomcatConfig tomcatConfiguration;
 
     /**
+     * Directory containing Excelsior JET specific resource files such as application icons, installer splash,  etc.
+     * It is recommended to place the directory in the source root directory.
+     * The default value is "src/main/jetresources" subdirectory of the Maven project.
+     */
+    @Parameter(property = "jetResourcesDir", defaultValue = "${project.basedir}/src/main/jetresources")
+    protected File jetResourcesDir;
+
+
+    /**
      * Directory containing additional package files - README, license, media, help files, native libraries, and the like.
      * The plugin will copy its contents recursively to the final application package.
      * <p>
-     * By default, the plugin assumes that those files reside in the "src/main/jetresources/packagefiles" subdirectory
-     * of your project, but you may also dynamically generate the contents of the package files directory
-     * by means of other Maven plugins such as {@code maven-resources-plugin}.
+     * By default, the plugin assumes that those files reside in the {@code packagefiles} subdirectory of
+     * (@link #jetResourcesDir} of your project, but you may also dynamically generate the contents
+     * of the package files directory by means of other Maven plugins such as {@code maven-resources-plugin}.
+     *
      * </p>
      */
-    @Parameter(property = "packageFilesDir", defaultValue = "${project.basedir}/src/main/jetresources/packagefiles")
+    @Parameter(property = "packageFilesDir")
     protected File packageFilesDir;
 
     /**
@@ -134,47 +150,45 @@ public abstract class AbstractJetMojo extends AbstractMojo {
 
     /**
      * The target location for application execution profiles gathered during Test Run.
-     * By default, they are placed into the "src/main/jetresources" subdirectory of your project.
+     * By default, they are placed into the {@link #jetResourcesDir} directory.
      * It is recommended to commit the collected profiles (.usg, .startup) to VCS to enable the plugin
      * to re-use them during subsequent builds without performing a Test Run.
      *
      * @see TestRunMojo
      */
-    @Parameter(property = "execProfilesDir", defaultValue = "${project.basedir}/src/main/jetresources")
+    @Parameter(property = "execProfilesDir")
     protected File execProfilesDir;
 
     /**
      * The base file name of execution profiles. By default, ${project.artifactId} is used.
+     *
+     * Default value is ${project.artifactId}
      */
-    @Parameter(property = "execProfilesName", defaultValue = "${project.artifactId}")
+    @Parameter(property = "execProfilesName")
     protected String execProfilesName;
 
-    protected static final String BUILD_DIR = "build";
-
-    public Stream<ClasspathEntry> getArtifacts() {
-        return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId())));
+    public List<ClasspathEntry> getArtifacts() {
+        return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId()))).collect(Collectors.toList());
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
-        return new JetProject()
-                        .mainWar(mainWar)
+        return new JetProject(project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
+                targetDir, jetResourcesDir)
                         .jetHome(jetHome)
-                        .appType(getPackaging())
                         .mainJar(mainJar)
+                        .mainWar(mainWar)
                         .mainClass(mainClass)
                         .tomcatConfiguration(tomcatConfiguration)
                         .dependencies(getArtifacts())
-                        .groupId(project .getGroupId())
-                        .buildDir(new File(jetOutputDir, BUILD_DIR))
-                        .finalName(project.getBuild().getFinalName())
-                        .basedir(project.getBasedir())
+                        .artifactName(project.getBuild().getFinalName())
+                        .jetOutputDir(jetOutputDir)
                         .packageFilesDir(packageFilesDir)
                         .execProfilesDir(execProfilesDir)
                         .execProfilesName(execProfilesName)
                         .jvmArgs(jvmArgs);
     }
 
-    private ApplicationType getPackaging() throws JetTaskFailureException {
+    private ApplicationType getAppType() throws JetTaskFailureException {
         switch (project.getPackaging()) {
             case "jar": return ApplicationType.PLAIN;
             case "war": return ApplicationType.TOMCAT;

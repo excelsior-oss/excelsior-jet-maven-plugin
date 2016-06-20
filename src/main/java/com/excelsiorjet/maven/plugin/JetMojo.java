@@ -56,8 +56,10 @@ public class JetMojo extends AbstractJetMojo {
 
     /**
      * (Windows) .ico file to associate with the resulting executable file.
+     *
+     * Default value is "icon.ico" of {@link #jetResourcesDir} directory.
      */
-    @Parameter(property = "icon", defaultValue = "${project.basedir}/src/main/jetresources/icon.ico")
+    @Parameter(property = "icon")
     protected File icon;
 
     /**
@@ -214,7 +216,7 @@ public class JetMojo extends AbstractJetMojo {
      *
      * @see #version version
      */
-    @Parameter(property = "winVIVersion", defaultValue = "${project.version}")
+    @Parameter(property = "winVIVersion")
     protected String winVIVersion;
 
     /**
@@ -264,7 +266,6 @@ public class JetMojo extends AbstractJetMojo {
                     .excelsiorJetPackaging(packaging)
                     .vendor(vendor)
                     .product(product)
-                    .artifactId(project.getArtifactId())
                     .winVIVersion(winVIVersion)
                     .winVICopyright(winVICopyright)
                     .inceptionYear(project.getInceptionYear())
@@ -283,8 +284,7 @@ public class JetMojo extends AbstractJetMojo {
                     .icon(icon)
                     .hideConsole(hideConsole)
                     .profileStartupTimeout(profileStartupTimeout)
-                    .optRtFiles(optRtFiles)
-                    .jetOutputDir(jetOutputDir);
+                    .optRtFiles(optRtFiles);
             new JetBuildTask(jetProject).execute();
         } catch (JetTaskFailureException e) {
             throw new MojoFailureException(e.getMessage());

@@ -76,7 +76,7 @@ public class TestRunMojo extends AbstractJetMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             Log.logger = new MavenLog(getLog());
-            new TestRunTask(getJetProject()). execute();
+            new TestRunTask(getJetProject()).execute();
         } catch (JetTaskFailureException e) {
             throw new MojoFailureException(e.getMessage());
         } catch (IOException | CmdLineToolException e) {
