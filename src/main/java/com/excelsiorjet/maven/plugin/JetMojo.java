@@ -260,7 +260,6 @@ public class JetMojo extends AbstractJetMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            logger = new MavenLog(getLog());
             JetProject jetProject = getJetProject()
                     .addWindowsVersionInfo(addWindowsVersionInfo)
                     .excelsiorJetPackaging(packaging)

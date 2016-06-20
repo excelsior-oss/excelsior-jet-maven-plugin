@@ -32,6 +32,8 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static com.excelsiorjet.api.util.Txt.s;
@@ -172,6 +174,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
+        JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("Strings", Locale.ENGLISH));
         return new JetProject(project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
                 targetDir, jetResourcesDir)
                         .jetHome(jetHome)
