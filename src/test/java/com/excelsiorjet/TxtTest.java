@@ -15,7 +15,7 @@ public class TxtTest {
 
     @Before
     public void setUp() {
-        JetProject.configureEnvironment(new StdOutLog(), ResourceBundle.getBundle("Strings"));
+        JetProject.configureEnvironment(new StdOutLog(), ResourceBundle.getBundle("MavenStrings"));
     }
 
     @Test
@@ -29,4 +29,5 @@ public class TxtTest {
         String validKey = "JetHome.JetNotFound.Error";
         assertTrue(Txt.s(validKey).contains("maven"));
     }
+
 }

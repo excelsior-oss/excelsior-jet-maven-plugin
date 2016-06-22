@@ -174,7 +174,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
-        JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("Strings", Locale.ENGLISH));
+        JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
         return new JetProject(project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
                 targetDir, jetResourcesDir)
                         .jetHome(jetHome)
