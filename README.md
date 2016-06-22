@@ -691,6 +691,14 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
+Version 0.7.0 (22-June-2016)
+
+* Massive refactoring that introduces `excelsior-jet-api` module: a common part between Maven and Gradle
+  Excelsior JET plugins
+
+* `<jetResourcesDir>` parameter introduced to set a directory containing Excelsior JET specific resource files
+   such as application icons, installer splash, etc.
+
 Version 0.6.0 (30-May-2016)
 
 * Compilation of Tomcat Web applications is supported
