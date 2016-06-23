@@ -60,7 +60,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.6.0</version>
+	<version>0.7.0</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
