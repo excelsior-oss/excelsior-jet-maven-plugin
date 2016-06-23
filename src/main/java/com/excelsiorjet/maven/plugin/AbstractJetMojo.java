@@ -126,7 +126,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * The plugin will copy its contents recursively to the final application package.
      * <p>
      * By default, the plugin assumes that those files reside in the {@code packagefiles} subdirectory of
-     * (@link #jetResourcesDir} of your project, but you may also dynamically generate the contents
+     * {@link #jetResourcesDir} of your project, but you may also dynamically generate the contents
      * of the package files directory by means of other Maven plugins such as {@code maven-resources-plugin}.
      *
      * </p>
