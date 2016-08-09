@@ -6,7 +6,10 @@ exeFile = new File( basedir, "target/jet/app/HelloWorld" + ext)
 assert exeFile.exists()
 String cmd = exeFile.getAbsolutePath();
 
-//check java.lang.Void in stack trace
+//check tiny-methods only inline
+assert new File(basedir, "target/jet/build/HelloWorld.prj").text.contains("-inline-")
+
+//check Unknown in stack trace
 assert (cmd.execute().text.trim().equals("Hello World"))
 
 //check splash in .rsp
