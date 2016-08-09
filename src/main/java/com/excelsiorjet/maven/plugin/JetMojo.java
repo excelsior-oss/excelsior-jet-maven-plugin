@@ -62,11 +62,11 @@ public class JetMojo extends AbstractJetMojo {
     protected File icon;
 
     /**
-     * Splash file to show on start up of the executable.
+     * Splash image to display upon application start up.
      *
-     * By default, "splash.png" of {@link #jetResourcesDir} folder is used.  If it does not exist but
-     * the splash image has been specified in the manifest of the application's JAR file,
-     * the respective image will be obtained automatically.
+     * By default, the file "splash.png" from the {@link #jetResourcesDir} folder is used.
+     * If it does not exist, but a splash image is specified in the manifest
+     * of the application JAR file, that image will be used automatically.
      */
     @Parameter(property = "splash")
     private File splash;
@@ -75,18 +75,18 @@ public class JetMojo extends AbstractJetMojo {
      * The JET Runtime supports three modes of stack trace printing: {@code minimal}, {@code full}, and {@code none}.
      * <p>
      * In the {@code minimal} mode (default), line numbers and names of some methods are omitted in call stack entries,
-     * but class names are exact.
+     * but the class names are exact.
      * </p>
      * <p>
      * In the {@code full} mode, the stack trace info includes all line numbers and method names.
-     * However, enabling the full stack trace has a side effect of substantial growth of the resulting
-     * executable size by approximately 30%.
+     * However, enabling the full stack trace has a side effect - substantial growth of the resulting
+     * executable size, approximately by 30%.
      * </p>
-     * <p
+     * <p>
      * In the {@code none} mode, Throwable.printStackTrace() methods print a few fake elements.
-     * It may result in performance improvement, if the application throws and catches exceptions repeatedly.
-     * Note, however, that some third-party APIs may rely on stack trace printing, for example,
-     * Log4J API that provides logging services.
+     * It may result in performance improvement if the application throws and catches exceptions repeatedly.
+     * Note, however, that some third-party APIs may rely on stack trace printing. One example
+     * is the Log4J API that provides logging services.
      * </p>
      */
     @Parameter(property = "stackTraceSupport")
@@ -95,7 +95,7 @@ public class JetMojo extends AbstractJetMojo {
     /**
      * Controls the aggressiveness of method inlining.
      * Available values are:
-     *   {@code aggressive} (default), {@code very-aggressive}, {@code medium}, {@code low}, {@code tiny-methods-only}
+     *   {@code aggressive} (default), {@code very-aggressive}, {@code medium}, {@code low}, {@code tiny-methods-only}.
      * <p>
      * If you need to reduce the size of the executable,
      * set the {@code low} or {@code tiny-methods-only} option. Note that it does not necessarily worsen application performance.
@@ -188,7 +188,7 @@ public class JetMojo extends AbstractJetMojo {
 
     /**
      * Add optional JET Runtime components to the package.
-     * By default only {@code jce} component (Java Crypto Extension) is added.
+     * By default, only the {@code jce} component (Java Crypto Extension) is added.
      * You may pass a special value {@code all} to include all available optional components at once
      * or {@code none} to not include any of them.
      * Available optional components:
