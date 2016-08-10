@@ -635,7 +635,7 @@ You may enumerate such options using the `<compilerOptions>` configuration, for 
 ```xml
 <compilerOptions>
   <compilerOption>-disablestacktrace+</compilerOption>
-  <compileOption>-inlinetolimit=200</compileOption>
+  <compilerOption>-inlinetolimit=200</compilerOption>
 </compilerOptions>
 ```
 
