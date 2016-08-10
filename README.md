@@ -159,16 +159,36 @@ and [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/m
 classes. Most of them have default values derived from your `pom.xml` project
 such as `<outputName>` parameter specifying resulting executable name.
 
+#### Application appearance
+**New in 0.7.1:**
+
+If the startup of your client application takes longer than you would have liked,
+the thumb rule is to show a splash screen.
+A splash screen provides visial feedback about the loading process the end user, and
+gives you an opportunity to display information about your product and company.
+The splash screen functionality appeared in Java API since Java SE 6. For more details, see
+http://docs.oracle.com/javase/tutorial/uiswing/misc/splashscreen.html
+
+If the splash image has been specified in the manifest of the application's JAR file,
+the respective image will be obtained automatically,
+otherwise, you may assign a splash screen image to the application manually:
+
+`<splash>`*splash-file*`</splash>`
+
+It is recommended to place the splash image in a VCS, and if you place it at
+`${project.basedir}/src/main/jetresources/splash.png`, you won't need to specify it
+in the configuration explicitly. The plugin uses the location `${project.basedir}/src/main/jetresources`
+for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
+
 There are also two useful Windows-specific configuration parameters:
 
 `<hideConsole>true</hideConsole>` – hide console
 
 `<icon>`*icon-file*`</icon>` – set executable icon (in Windows .ico format)
 
-It is recommended to place the executable icon into a VCS, and if you place it to
-`${project.basedir}/src/main/jetresources/icon.ico`, you do not need to explicitly specify it
-in the configuration. The plugin uses the location `${project.basedir}/src/main/jetresources`
-for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
+Just as it works for the splash image, if you place the icon file at
+`${project.basedir}/src/main/jetresources/icon.ico`, you won't need to specify it
+in the configuration explicitly.
 
 #### Customizing Package Content
 
@@ -299,6 +319,42 @@ other defaults can be changed using the following configuration parameters:
 * `<winVICopyright>`*legal-copyright*`</winVICopyright>` - `LegalCopyright` string, with default value derived from other parameters
 
 * `<winVIDescription>`*executable-description*`</winVIDescription>` - `FileDescription` string, default is `${project.name}`
+
+#### Stack trace support
+**New in 0.7.1:**
+
+The Excelsior JET Runtime supports three modes of stack trace printing: `minimal`, `full`, and `none`.
+
+In the `minimal` mode (default), line numbers and names of some methods are omitted in call stack entries,
+but class names are exact.
+
+In the `full` mode, the stack trace info includes all line numbers and method names.
+However, enabling the full stack trace has a side effect &mdash; substantial growth of the resulting executable in size, approximately by 30%.
+
+In the `none` mode, `Throwable.printStackTrace()` methods print a few fake elements.
+It may result in a performance improvement, if the application throws and catches exceptions repeatedly.
+Note, however, that certain third-party APIs rely on stack trace printing. One example is the Log4J API that provides logging services.
+
+To set the stack trace support mode, use the `<stackTraceSupport>` configuration parameter:
+
+`<stackTraceSupport>`*stack-trace-mode*`</stackTraceSupport>`
+
+#### Method Inlining
+**New in 0.7.1:**
+
+When optimizing a Java program, the compiler often replaces method call statements with bodies of the methods
+that would be called at run time. This optimization, known as method inlining, improves application performance,
+especially when tiny methods, such as get/set accessors, are inlined.
+However, inlining of larger methods increases code size and its impact on performance may be uncertain.
+To control the aggressiveness of method inlining, use the `<inlineExpansion>` plugin parameter:
+
+`<inlineExpansion>`*inline-expasnion-mode*`</inlineExpansion>`
+
+The available modes are:
+  `aggressive` (default), `very-aggressive`, `medium`, `low`, and `tiny-methods-only`
+
+If you need to reduce the size of the executable, opt for the `low` or `tiny-methods-only` setting.
+Note that it does not necessarily worsen application performance.
 
 #### Multi-app Executables
 
@@ -432,6 +488,51 @@ To enable the Global Optimizer, add the following configuration parameter:
 
 **Note:** performing a Test Run is mandatory if the Global Optimizer is enabled.
 
+#### Optional Runtime Components Configurations
+
+##### Locales and charsets
+**New in 0.7.1:**
+
+Additional locales and character encoding sets that may potentially be in use in the regions
+where you distribute your application can be added to the package with the following configuration:
+
+```xml
+<locales>
+  <locale>Locale1</locale>
+  <locale>Locale2</locale>
+<locales>
+```
+
+You may specify `all` as the value of `<locale>` to add all locales and charsets at once or
+`none` to not include any of them.
+The available sets of locales and encodings are:
+
+`European`, `Indonesian`, `Malay`, `Hebrew`, `Arabic`, `Chinese`, `Japanese`, `Korean`, `Thai`,
+`Vietnamese`, `Hindi`, `Extended_Chinese`, `Extended_Japanese`, `Extended_Korean`, `Extended_Thai`,
+`Extended_IBM`, `Extended_Macintosh`, `Latin_3`
+
+By default, only the `European` locales are added.
+
+##### Optional components
+To include optional JET Runtime components in the package, use the following configuration:
+
+```xml
+<optRtFiles>
+  <optRtFile>optRtFile1</optRtFile>
+  <optRtFile>optRtFile2</optRtFile>
+</optRtFiles>
+```
+
+You may specify `all` as the value of `<optRtFile>` to add all components at once or
+`none` to not include any of them.
+
+The available optional components are:
+
+`runtime_utilities, fonts, awt_natives, api_classes, jce, accessibility, javafx, javafx-webkit, nashorn, cldr`
+
+*Note:* by default, the plugin automatically includes the optional components which the compiler detected
+   as used when building the executable(s).
+
 #### Java Runtime Slim-Down Configurations
 
 The 32-bit versions of Excelsior JET feature Java Runtime Slim-Down, a unique
@@ -512,7 +613,7 @@ Typically, you would set the hard expiration date somewhat beyond the planned re
 date of the next version of your application. This way, you would ensure that nobody uses
 an outdated trial copy for evaluation.
 
-#### Data protection
+#### Data Protection
 
 If you do not wish constant data, such as reflection info, Java string literals, or packed resource files,
 to be visible in the resulting executable, enable data protection by specifying the following configuration:
@@ -522,9 +623,28 @@ to be visible in the resulting executable, enable data protection by specifying 
 For more details on data protection, refer to the "Data Protection" section of
 the "Intellectual Property Protection" chapter of the Excelsior JET User's Guide.
 
-### Building Tomcat Web Applications
-**New in 0.6.0:**
+#### Additional Compiler Options and Equations
+**New in 0.7.1:**
 
+The commonly used compiler options and equations are mapped to the parameters of the plugin.
+However the compiler has some advanced options and equations that you may find in the
+Excelsior JET User's Guide, plus some troubleshooting settings that the Excelsior JET Support
+team may suggest you to use.
+You may enumerate such options using the `<compilerOptions>` configuration, for instance:
+
+```xml
+<compilerOptions>
+  <compilerOption>-disablestacktrace+</compilerOption>
+  <compileOption>-inlinetolimit=200</compileOption>
+</compilerOptions>
+```
+
+These options will be appended to Excelsior JET project generated by the plugin.
+
+**Notice:** Care must be taken with using this parameter to avoid conflicts 
+with other project parameters.
+
+### Building Tomcat Web Applications
 The plugin enables you to compile Apache Tomcat together with your Web applications down
 to a native binary using Excelsior JET. Compared to running your
 application on a conventional JVM, this has the following benefits:
@@ -691,6 +811,17 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
+Version 0.7.1 (??-Aug-2016)
+
+This release covers most of the compiler options that are available in the JET Control Panel UI,
+and all options of the `xpack` utility as of Excelsior JET 11.0 release:
+
+  * `<splash>` parameter introduced to control the appearance of your application on startup
+  * `<inlineExpansion>` parameter introduced to control aggressiveness of methods inlining
+  * `<stackTraceSupport>` parameter introduced to set stack trace support level
+  * `<compilerOptions>` parameter introduced to set advanced compiler options and equations
+  * `<locales>` parameter introduced to add additional locales and charsets to the resulting package
+
 Version 0.7.0 (22-June-2016)
 
 * Massive refactoring that introduces `excelsior-jet-api` module: a common part between Maven and Gradle
@@ -769,7 +900,8 @@ and placing it into a separate directory with required Excelsior JET runtime fil
 Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
 So the next few releases will add the following features:
 
-* Windows services support.
+* Advanced dependencies management
+* Dynamic libraries and Windows services support.
 * Multi-component support: building dependencies into separate native libraries
                            to reuse them across multiple Maven project builds
                            so as to reduce overall compilation time
