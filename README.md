@@ -60,7 +60,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.7.0</version>
+	<version>0.7.1</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -811,7 +811,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.7.1 (??-Aug-2016)
+Version 0.7.1 (10-Aug-2016)
 
 This release covers most of the compiler options that are available in the JET Control Panel UI,
 and all options of the `xpack` utility as of Excelsior JET 11.0 release:
