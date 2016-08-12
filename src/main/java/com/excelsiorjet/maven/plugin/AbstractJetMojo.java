@@ -26,6 +26,7 @@ import com.excelsiorjet.api.tasks.ClasspathEntry;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
+import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -169,12 +170,22 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "execProfilesName")
     protected String execProfilesName;
 
+    @Parameter(property = "programArgs")
+    protected String[] programArgs;
+
     public List<ClasspathEntry> getArtifacts() {
         return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId()))).collect(Collectors.toList());
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
         JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
+
+        // Override program args from system property
+        String programArgs = System.getProperty("excelsiorJet.programArgs");
+        if (programArgs != null) {
+            this.programArgs = Utils.parseProgramArgs(programArgs);
+        }
+
         return new JetProject(project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
                 targetDir, jetResourcesDir)
                         .jetHome(jetHome)
@@ -188,7 +199,8 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .packageFilesDir(packageFilesDir)
                         .execProfilesDir(execProfilesDir)
                         .execProfilesName(execProfilesName)
-                        .jvmArgs(jvmArgs);
+                        .jvmArgs(jvmArgs)
+                        .programArgs(this.programArgs);
     }
 
     private ApplicationType getAppType() throws JetTaskFailureException {
