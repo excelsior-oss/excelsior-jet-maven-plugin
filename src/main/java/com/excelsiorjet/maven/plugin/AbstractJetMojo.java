@@ -170,8 +170,14 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "execProfilesName")
     protected String execProfilesName;
 
-    @Parameter(property = "programArgs")
-    protected String[] programArgs;
+    /**
+     * Command line arguments, that will be passed to the application while startup accelerator profiling run and test run.
+     * You may also set the parameter via the {@code jet.runArgs} system property, where arguments
+     * are comma separated (use "\" to echo comma itself,
+     * i.e. {@code -Djet.runArgs="arg1,Hello\, World"} will be passed to your application as {@code arg1 "Hello, World"})
+     */
+    @Parameter(property = "runArgs")
+    protected String[] runArgs;
 
     public List<ClasspathEntry> getArtifacts() {
         return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId()))).collect(Collectors.toList());
@@ -179,12 +185,6 @@ public abstract class AbstractJetMojo extends AbstractMojo {
 
     protected JetProject getJetProject() throws JetTaskFailureException {
         JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
-
-        // Override program args from system property
-        String programArgs = System.getProperty("excelsiorJet.programArgs");
-        if (programArgs != null) {
-            this.programArgs = Utils.parseProgramArgs(programArgs);
-        }
 
         return new JetProject(project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
                 targetDir, jetResourcesDir)
@@ -200,7 +200,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .execProfilesDir(execProfilesDir)
                         .execProfilesName(execProfilesName)
                         .jvmArgs(jvmArgs)
-                        .programArgs(this.programArgs);
+                        .runArgs(this.runArgs);
     }
 
     private ApplicationType getAppType() throws JetTaskFailureException {

@@ -23,9 +23,10 @@
               <configuration>
                   <packaging>none</packaging>
                   <mainClass>HelloWorld</mainClass>
-                  <programArgs>
-                      <programArg>World</programArg>
-                  </programArgs>
+                  <runArgs>
+                      <runArg>arg1</runArg>
+                      <runArg>arg2.1, arg2.2</runArg>
+                  </runArgs>
               </configuration>
           </plugin>
       </plugins>
