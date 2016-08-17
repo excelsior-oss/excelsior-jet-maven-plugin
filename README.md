@@ -151,15 +151,14 @@ Note: During a Test Run, the application executes in a special profiling mode,
       so disregard its modest start-up time and performance.
 
 **New in 0.7.2:**
-Your application may require command line arguments to run. If this is the case, set `runArgs` plugin parameter as:
+Your application may require command line arguments to run. If that is the case, set the `runArgs` plugin parameter as follows:
 ```xml
 <runArgs>
    <runArg>arg1</runArg>
    <runArg>arg2</runArg>
 </runArgs>
 ```
-You may also pass the arguments via the {@code jet.runArgs} system property, where arguments are comma separated (use "\" 
-to echo comma itself, i.e. {@code -Djet.runArgs="arg1,Hello\, World"} will be passed to your application as {@code arg1 "Hello, World"})
+You may also pass the arguments via the `jet.runArgs` system property, where arguments are comma separated (use "`\`" to escape commas within arguments, i.e. `-Djet.runArgs="arg1,Hello\, World"` will be passed to your application as `arg1 "Hello, World"`)
 
 ### Configurations other than `<mainClass>`
 
@@ -466,7 +465,7 @@ so ensure that the timeout value is large enough to capture all actions the appl
 during startup. (It is safe to close the application manually if the profiling period proves to be excessively long.)
 
 **New in 0.7.2:**
-If your application requires command line arguments to run then set `runArgs` plugin parameter the same way as for [Test Run](#performing-a-test-run).
+If your application requires command line arguments to run, set the `runArgs` plugin parameter in the same way as for the [Test Run](#performing-a-test-run).
 
 #### Global Optimizer
 
@@ -817,7 +816,8 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 Version 0.7.2 (??-Aug-2016)
 
-This release adds possibility to specify run arguments for startup profiling run and test run.
+This release adds the capability to pass command-line arguments to the application during startup profiling
+and the test run.
 
 Version 0.7.1 (10-Aug-2016)
 
