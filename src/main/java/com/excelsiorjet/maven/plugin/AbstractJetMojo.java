@@ -26,6 +26,7 @@ import com.excelsiorjet.api.tasks.ClasspathEntry;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
+import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -169,12 +170,23 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "execProfilesName")
     protected String execProfilesName;
 
+    /**
+     * Command line arguments that will be passed to the application during startup accelerator profiling
+     * and the test run.
+     * You may also set the parameter via the {@code jet.runArgs} system property, where arguments
+     * are comma separated (use "\" to escape commas within arguments,
+     * i.e. {@code -Djet.runArgs="arg1,Hello\, World"} will be passed to your application as {@code arg1 "Hello, World"})
+     */
+    @Parameter(property = "runArgs")
+    protected String[] runArgs;
+
     public List<ClasspathEntry> getArtifacts() {
         return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId()))).collect(Collectors.toList());
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
         JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
+
         return new JetProject(project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
                 targetDir, jetResourcesDir)
                         .jetHome(jetHome)
@@ -188,7 +200,8 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .packageFilesDir(packageFilesDir)
                         .execProfilesDir(execProfilesDir)
                         .execProfilesName(execProfilesName)
-                        .jvmArgs(jvmArgs);
+                        .jvmArgs(jvmArgs)
+                        .runArgs(this.runArgs);
     }
 
     private ApplicationType getAppType() throws JetTaskFailureException {

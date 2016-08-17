@@ -150,6 +150,16 @@ The profiles will be used by the Startup Optimizer and the Global Optimizer (see
 Note: During a Test Run, the application executes in a special profiling mode,
       so disregard its modest start-up time and performance.
 
+**New in 0.7.2:**
+Your application may require command line arguments to run. If that is the case, set the `runArgs` plugin parameter as follows:
+```xml
+<runArgs>
+   <runArg>arg1</runArg>
+   <runArg>arg2</runArg>
+</runArgs>
+```
+You may also pass the arguments via the `jet.runArgs` system property, where arguments are comma separated (use "`\`" to escape commas within arguments, i.e. `-Djet.runArgs="arg1,Hello\, World"` will be passed to your application as `arg1 "Hello, World"`)
+
 ### Configurations other than `<mainClass>`
 
 For a complete list of parameters, look into the Javadoc of `@Parameter` field declarations
@@ -160,8 +170,6 @@ classes. Most of them have default values derived from your `pom.xml` project
 such as `<outputName>` parameter specifying resulting executable name.
 
 #### Application appearance
-**New in 0.7.1:**
-
 If the startup of your client application takes longer than you would have liked,
 the thumb rule is to show a splash screen.
 A splash screen provides visial feedback about the loading process the end user, and
@@ -321,8 +329,6 @@ other defaults can be changed using the following configuration parameters:
 * `<winVIDescription>`*executable-description*`</winVIDescription>` - `FileDescription` string, default is `${project.name}`
 
 #### Stack trace support
-**New in 0.7.1:**
-
 The Excelsior JET Runtime supports three modes of stack trace printing: `minimal`, `full`, and `none`.
 
 In the `minimal` mode (default), line numbers and names of some methods are omitted in call stack entries,
@@ -340,8 +346,6 @@ To set the stack trace support mode, use the `<stackTraceSupport>` configuration
 `<stackTraceSupport>`*stack-trace-mode*`</stackTraceSupport>`
 
 #### Method Inlining
-**New in 0.7.1:**
-
 When optimizing a Java program, the compiler often replaces method call statements with bodies of the methods
 that would be called at run time. This optimization, known as method inlining, improves application performance,
 especially when tiny methods, such as get/set accessors, are inlined.
@@ -460,6 +464,9 @@ As soon as the specified period elapses, profiling stops and the application is 
 so ensure that the timeout value is large enough to capture all actions the application nomrally carries out
 during startup. (It is safe to close the application manually if the profiling period proves to be excessively long.)
 
+**New in 0.7.2:**
+If your application requires command line arguments to run, set the `runArgs` plugin parameter in the same way as for the [Test Run](#performing-a-test-run).
+
 #### Global Optimizer
 
 The 32-bit versions of Excelsior JET feature the Global Optimizer - a powerful facility that has several
@@ -491,8 +498,6 @@ To enable the Global Optimizer, add the following configuration parameter:
 #### Optional Runtime Components Configurations
 
 ##### Locales and charsets
-**New in 0.7.1:**
-
 Additional locales and character encoding sets that may potentially be in use in the regions
 where you distribute your application can be added to the package with the following configuration:
 
@@ -624,8 +629,6 @@ For more details on data protection, refer to the "Data Protection" section of
 the "Intellectual Property Protection" chapter of the Excelsior JET User's Guide.
 
 #### Additional Compiler Options and Equations
-**New in 0.7.1:**
-
 The commonly used compiler options and equations are mapped to the parameters of the plugin.
 However the compiler has some advanced options and equations that you may find in the
 Excelsior JET User's Guide, plus some troubleshooting settings that the Excelsior JET Support
@@ -810,6 +813,11 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.7.2 (??-Aug-2016)
+
+This release adds the capability to pass command-line arguments to the application during startup profiling
+and the test run.
 
 Version 0.7.1 (10-Aug-2016)
 
