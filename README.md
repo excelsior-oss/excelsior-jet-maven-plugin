@@ -271,7 +271,16 @@ By default, the plugin detects the hint automatically using the following strate
 it treats all dependencies sharing the same `groupId` with your main artifact as your application classes
 while all other dependencies are treated as third-party dependencies.
 So if some of your application classes reside in a dependency with a different `groupId` make sure to set `<isLibrary>`
-hint to `false` for such `groupId` to enable maximum protection and optimization level for it.
+hint to `false` for such `groupId` to enable maximum protection and optimization level for it, such as:
+
+```xml
+<dependencies>
+    <dependency>
+    	<groupId>my.company.project.group</groupId>
+    	<isLibrary>false</isLibrary>
+    </dependency>
+</dependencies>
+```
 
 ##### Resource packing
 
@@ -290,13 +299,29 @@ Setting the `<pack>` parameter to `all` for such a dependency resolves the probl
 
 You may also opt to not pack a dependency to the executable at all using `none` value for the `<pack>` parameter.
 This way the dependency will be copied to the final package as is instead.
-To control the placement of the dependency in the package use `<packagePath>` plugin parameter.
+To control the placement of the dependency in the package use `<packagePath>` parameter of the `<dependency>` configuration.
 By default, non-packed jar files are copied to `lib` subfolder of the package while directories
 (referenced by `<path>` parameter) are copied to the root of the package.
 
 Finally, if you are sure that a certain dependency does not contain any resources and all classes of it were compiled,
 you can disable copying of such a (non-packed) dependency to the package
-setting `<disableCopyToPackage>` parameter to `true`.
+via setting `<disableCopyToPackage>` dependency's parameter to `true`.
+
+Example of an additional dependency configuration:
+
+```xml
+<dependencies>
+    <dependency>
+    	<path>${basedir}/target/extra-resources</path>
+    	<packagePath>my-extra-files</packagePath>
+    </dependency>
+</dependencies>
+```
+
+Here we add `extra-resources` folder to the application classpath telling the plugin to just copy it to the
+`my-extra-files` folder of the package (thus `extra-resources` folder will appear in the `my-extra-files` folder
+of the final package). Note, that the only available option for `<pack>` property for directories is `none`, so there
+is no need to set it in this `<dependency>` configuration.
 
 ##### Ignoring project dependencies
 
@@ -308,7 +333,6 @@ For such a case you may set the `<ignoreProjectDependencies>` plugin parameter t
 to disable compilation of project dependencies.
 This way you may set `protect/optimize/pack` properties for your main artifact only and for entries described with `<path>`
 parameter of `<dependencies>` section of the plugin.
-It gives you a complete freedom to specify what will be compiled by the plugin.
 
 #### Customizing Package Content
 
