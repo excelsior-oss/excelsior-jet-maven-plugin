@@ -334,6 +334,11 @@ to disable compilation of project dependencies.
 This way you may set `protect/optimize/pack` properties for your main artifact only and for entries described with `<path>`
 parameter of `<dependencies>` section of the plugin.
 
+##### Tomcat web application dependencies
+
+You may set the above properties for Tomcat web application dependencies as well, but please note that `<path>`,
+`<packagePath>`, `<disableCopyToPackage>` parameters are not available for them.
+
 #### Customizing Package Content
 
 By default, the final package contains just the resulting executable and the necessary Excelsior JET Runtime files.
