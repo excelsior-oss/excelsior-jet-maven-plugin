@@ -25,13 +25,19 @@ Excelsior JET runtime files. In addition, it can either pack that directory into
 (all platforms), create an Excelsior Installer setup (Windows and Linux only)
 or an OS X application bundle/installer.
 
-The current version of the plugin can handle two types of applications:
+The current version of the plugin can handle four types of applications:
 
 * **Plain Java SE applications**, i.e. applications that have a main class
 and have all their dependencies explicitly listed in the JVM classpath at launch time, and
 
 * **Tomcat Web applications** &mdash; `.war` files that can be deployed to the
   Apache Tomcat application server.
+
+* **Invocation Dynamic Libraries**, dynamic library (e.g. Windows DLL) callable
+  from applications written in another language
+
+* **Windows Services**, is a special long-running process that may be launched
+   during operating system bootstrap (for Windows only)
 
 In other words, if your application can be launched using a command line
 of the following form:
@@ -43,10 +49,11 @@ java -cp [dependencies-list] [main class]
 and loads classes mostly from jars that are present
 in the `dependencies-list`, *or* if it is packaged into a `.war` file that can be deployed
 to a Tomcat application server instance, then you can use this plugin.
+Invocation Dynamic Libraries and Windows Services is essentially a special build mode of Plain Java SE applications
+to a special executable types: dynamic libraries and windows services.
 
-Excelsior JET can also compile Eclipse RCP applications and create dynamic libraries (e.g. Windows DLLs)
-callable via the Invocation API.
-The plugin does not yet support projects of these types nor some advanced Excelsior JET features.
+Excelsior JET can also compile Eclipse RCP applications.
+The plugin does not yet support Eclsipe RCP projects nor some advanced Excelsior JET features.
 We plan to cover all that functionality in the future, but if you need the plugin to support
 a particular feature sooner rather than later, you can help us prioritize the roadmap
 by creating a feature request [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).
@@ -77,6 +84,11 @@ For a Tomcat Web application, the `<mainClass>` parameter is not needed. Instead
 the `<tomcatHome>` parameter pointing to a *clean* Tomcat installation, a copy of which will be used
 for the deployment of your Web application at build time.
 See [Building Tomcat Web Applications](#building-tomcat-web-applications) section below for more details.
+
+[Invocation Dynamic Library](#invocation-dynamic-libraries) does not need main class as well,
+
+and main class of [Windows Service](#windows-services) must extend a special class `com.excelsior.service.WinService`
+of Excelsior WinService API.
 
 ### Excelsior JET Installation Directory Lookup
 
@@ -995,6 +1007,142 @@ Technically, you can terminate it using <key>Ctrl-C</key>, but that would termin
 So it is recommended to use the standard Tomcat `shutdown` script for correct Tomcat termination at the end of a Test Run.
 You may launch it from any standard Tomcat installation.
 
+### Invocation Dynamic Libraries
+To create a dynamic library callable from applications written in another language instead of a runnable executable,
+add the following Excelsior JET Maven plugin configuration:
+
+```xml
+<plugin>
+	<groupId>com.excelsiorjet</groupId>
+	<artifactId>excelsior-jet-maven-plugin</artifactId>
+	<version>0.9.0</version>
+	<configuration>
+        <appType>invocation-dynamic-library</appType>
+	</configuration>
+</plugin>
+```
+
+Using Invocation DLLs is a bit tricky.
+Like any other JVM, Excelsior JET executes Java code in a special isolated context
+to correctly support exception handling, garbage collection, and so on.
+That is why Java methods cannot be directly invoked from a foreign environment.
+Instead, you have to use the standard Java 2 platform APIs, specifically the Invocation API and Java Native Interface (JNI).
+See samples/Invocation in your JET installation directory for detailed examples.
+
+#### Test Run for Dynamic Libraries
+To test your application even if you are going to build it as a dynamic library, you may still set
+a "test" `<main>` class in the plugin configuration that will in turn call methods
+that are subject for usage from another language.
+
+### Windows Services
+
+A Windows service, formerly known as NT service, is a special long-running process that may be launched during
+operating system bootstrap.
+An essential feature of a service is the ability to run even if no user is logged on to the system.
+Examples of services are FTP/HTTP servers, print spoolers, file sharing, etc.
+Typically, Windows services have not a user interface but are managed through
+the Services applet of the Windows Control Panel, or a separate application or applet.
+Using the standard Services applet, a user can start/stop, and, optionally, pause/continue a previously installed service.
+The common way for a service to report a warning or error is recording an event into the system event log.
+The log can be inspected using the Event Viewer from Administrative Tools.
+A service program is a conventional Windows executable associated with a unique system name
+using which it can be installed to/removed from the system. A service can be installed as automatic
+(to be launched at system bootstrap) or manual (to be activated later by a user
+through the start button in the Windows Control Panel/Services).
+
+Windows service program must register a callback routine (so called control handler)
+that is invoked by the system on service initialization, interruption, resume, etc.
+With Excelsior JET, you achieve this functionality by implementing a subclass of
+`com.excelsior.service.WinService` of Excelsior WinService API and specifying it as the main class of the plugin configuration.
+The JET Runtime will instantiate that class on startup and translate calls to the callback routine into calls
+of its respective methods, collectively called handler methods. For more details, refer to the
+"Windows services" section of the Excelsior JET User's Guide.
+
+#### Windows Service Configuration
+
+To create a Windows Service add the following Excelsior JET Maven plugin configuration:
+
+```xml
+<plugin>
+	<groupId>com.excelsiorjet</groupId>
+	<artifactId>excelsior-jet-maven-plugin</artifactId>
+	<version>0.9.0</version>
+	<configuration>
+        <appType>windows-service</appType>
+        <main>*service-main*</main>
+        <windowsServiceConfiguration>
+            <name></name>
+            <displayName></displayName>
+            <description></description>
+            <arguments>
+                <argument></argument>
+            </arguments>
+            <logOnType></logOnType>
+            <allowDesktopInteraction></allowDesktopInteraction>
+            <startupType></startupType>
+            <startServiceAfterInstall></startServiceAfterInstall>
+            <dependencies>
+                 <dependency></dependency>
+            </dependencies>
+        </windowsServiceConfiguration>
+	</configuration>
+</plugin>
+```
+
+Where:
+
+* `<main>` - must extend `com.excelsior.service.WinService` of Excelsior WinService API.
+
+* `<name>` -  the system name of the service. It is used to install, remove and otherwise manage the service.
+  It can also be used to recognize messages from this service in the system event log.
+  This name is set during the creation of the service executable.
+  By default, `<outputName>` parameter is used for the name.
+
+* `<displayName>` - the descriptive name of the service.
+  It is shown in the Event Viewer system tool and in the Services applet of the Windows Control Panel.
+  By default, `<name>` of `<windowsServiceConfiguration>` parameter is used for the dispaly name.
+
+
+* `<description>` - the user description of the service. It must not exceed 1000 characters.
+
+* `<arguments>` - the command line arguments passed to the service upon startup.
+
+* `<logOnType>` - specifies an account to be used by the service.
+  Valid values are: `local-system-account` (default), `user-account`.
+  - `local-system-account` - run the service under the built-in system account.
+  - `user-account` - run the service under a user account.
+     When installing the package, the user will be prompted for an account name
+     and password necessary to run the service.
+
+* `<allowDesktopInteraction>` - specifies if the service needs to interact with the system desktop,
+  e.g. open/close other windows, etc. This option is only available under the `local-system-account`.
+
+* `<startupType>` -  specifies how to start the service. Valid values are `automatic` (default), `manual`, `disabled`.
+  - `automatic` - specifies that the service should start automatically when the system starts.
+  - `manual` - specifies that a user or a dependent service can start the service.
+     Services with Manual startup type do not start automatically when the system starts.
+  - `disabled` - prevents the service from being started by the system, a user, or any dependent service.
+
+* `<startServiceAfterInstall>` -  specifies if the service should be started immediately after installation.
+   Available only for `excelsior-instaler` `<packaging>` parameter.
+
+*  `<dependencies>` - List of other service names on which the service depends.
+
+The plugin will create the `install.bat`/`uninstall.bat` scripts in the `target/jet/app` to install/uninstall
+the service manually based on provided parameters above to test it.
+If you opt for `excelsior-installer` packaging type, the service will be installed automatically
+after the package installation.
+
+**Note:** The plugin does not support creation of Excelsior Installer packages for Windows Services
+for Excelsior JET 11.0 version due to a missing respective functionality in `xpack` utility.
+However it works for [Excelsior JET 11.3](http://www.excelsiorjet.com/beta) and above.
+
+#### Test Run of Windows Services
+
+Unfortunately, the service cannot be installed to the system before its compilation, so basically a fully functional
+Test Run is not available for Windows Services. However it is recommended to add `public static void main(String args[])`
+method to your Windows Service main class to test your basic application functionality with Test Run.
+
 ## Sample Project
 
 To demonstrate the process and result of plugin usage, we have forked the [JavaFX VNC Client](https://github.com/comtel2000/jfxvnc) project on GitHub, added the Excelsior JET plugin to its `pom.xml` file, and run it through Maven to build native binaries for three platforms.
@@ -1014,6 +1162,9 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.9.0 (??-Nov-2016)
+Invocation dynamic libraries and Windows services support.
 
 Version 0.8.1 (28-Oct-2016)
 
