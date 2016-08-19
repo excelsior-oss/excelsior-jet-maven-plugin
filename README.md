@@ -60,7 +60,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.7.1</version>
+	<version>0.7.2</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -679,7 +679,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.6.0</version>
+	<version>0.7.2</version>
 	<configuration>
         <tomcatConfiguration>
              <tomcatHome></tomcatHome>
@@ -814,7 +814,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.7.2 (??-Aug-2016)
+Version 0.7.2 (19-Aug-2016)
 
 This release adds the capability to pass command-line arguments to the application during startup profiling
 and the test run.
