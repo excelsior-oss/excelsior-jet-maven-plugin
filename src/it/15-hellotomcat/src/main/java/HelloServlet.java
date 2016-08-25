@@ -1,3 +1,8 @@
+import java.io.IOException;
+import java.io.StringReader;
+import java.lang.System;
+
+import org.apache.commons.io.IOUtils;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +17,7 @@ public class HelloServlet extends HttpServlet {
                          HttpServletResponse response) throws ServletException, IOException {
         // Very simple - just return some plain text
         response.setContentType("text/html");
+        System.out.println(IOUtils.toString(new StringReader("HelloWorld")));
         PrintWriter writer = response.getWriter();
         writer.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 " +
                 "Transitional//EN\">\n" +

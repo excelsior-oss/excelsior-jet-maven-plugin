@@ -22,22 +22,21 @@
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.tasks.ApplicationType;
-import com.excelsiorjet.api.tasks.ClasspathEntry;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
+import com.excelsiorjet.api.tasks.config.DependencySettings;
+import com.excelsiorjet.api.tasks.config.ProjectDependency;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
-import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.excelsiorjet.api.util.Txt.s;
+import static java.util.Collections.emptyList;
 
 /**
  * Parent of Excelsior JET Maven Plugin mojos.
@@ -180,28 +179,48 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "runArgs")
     protected String[] runArgs;
 
-    public List<ClasspathEntry> getArtifacts() {
-        return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId()))).collect(Collectors.toList());
+    /**
+     * List of external dependencies (that which have path and do not have groupId, artifactId and version)
+     * and dependency settings (that which have no path, but have groupId or artifactId or version).
+     */
+    @Parameter(property = "dependencies")
+    protected DependencySettings[] dependencies;
+
+    /**
+     * If set to {@code true} project dependencies is ignored.
+     */
+    @Parameter(property = "ignoreProjectDependencies")
+    protected boolean ignoreProjectDependencies;
+
+    public List<ProjectDependency> getDependencies() {
+        if (ignoreProjectDependencies) {
+            return Collections.emptyList();
+        } else {
+            return project.getArtifacts().stream().
+                    map(artifact -> new ProjectDependency(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getFile(), false)).
+                    collect(Collectors.toList());
+        }
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
         JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
+        validateSettings();
 
         return new JetProject(project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
                 targetDir, jetResourcesDir)
-                        .jetHome(jetHome)
                         .mainJar(mainJar)
                         .mainWar(mainWar)
                         .mainClass(mainClass)
                         .tomcatConfiguration(tomcatConfiguration)
-                        .dependencies(getArtifacts())
+                        .projectDependencies(getDependencies())
                         .artifactName(project.getBuild().getFinalName())
                         .jetOutputDir(jetOutputDir)
                         .packageFilesDir(packageFilesDir)
                         .execProfilesDir(execProfilesDir)
                         .execProfilesName(execProfilesName)
                         .jvmArgs(jvmArgs)
-                        .runArgs(this.runArgs);
+                        .runArgs(this.runArgs)
+                .dependencies(Arrays.asList(dependencies));
     }
 
     private ApplicationType getAppType() throws JetTaskFailureException {
@@ -210,6 +229,14 @@ public abstract class AbstractJetMojo extends AbstractMojo {
             case "war": return ApplicationType.TOMCAT;
             default:
                 throw new JetTaskFailureException(s("JetApi.BadPackaging.Failure", project.getPackaging()));
+        }
+    }
+
+    private void validateSettings() throws JetTaskFailureException {
+        if (getAppType() == ApplicationType.TOMCAT) {
+            if (ignoreProjectDependencies) {
+                throw new JetTaskFailureException(s("JetApi.IgnoreProjectDependenciesShouldNotBeSetForTomcatApplications"));
+            }
         }
     }
 }
