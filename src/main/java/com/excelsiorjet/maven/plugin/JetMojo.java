@@ -21,6 +21,7 @@
 */
 package com.excelsiorjet.maven.plugin;
 
+import com.excelsiorjet.api.ExcelsiorJet;
 import com.excelsiorjet.api.cmd.CmdLineToolException;
 import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
@@ -365,7 +366,8 @@ public class JetMojo extends AbstractJetMojo {
                     .compilerOptions(compilerOptions)
                     .locales(locales)
                     .optRtFiles(optRtFiles);
-            new JetBuildTask(jetProject).execute();
+            ExcelsiorJet excelsiorJet = new ExcelsiorJet(createJetHome());
+            new JetBuildTask(excelsiorJet, jetProject).execute();
         } catch (JetTaskFailureException e) {
             throw new MojoFailureException(e.getMessage());
         } catch (CmdLineToolException | IOException e) {

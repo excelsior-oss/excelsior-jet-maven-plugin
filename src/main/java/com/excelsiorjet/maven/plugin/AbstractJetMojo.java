@@ -21,10 +21,12 @@
 */
 package com.excelsiorjet.maven.plugin;
 
+import com.excelsiorjet.api.cmd.JetHome;
+import com.excelsiorjet.api.cmd.JetHomeException;
 import com.excelsiorjet.api.tasks.ApplicationType;
-import com.excelsiorjet.api.tasks.ClasspathEntry;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
+import com.excelsiorjet.api.tasks.config.Dependency;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
 import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
@@ -180,8 +182,9 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "runArgs")
     protected String[] runArgs;
 
-    public List<ClasspathEntry> getArtifacts() {
-        return project.getArtifacts().stream().map(artifact -> new ClasspathEntry(artifact.getFile(), project.getGroupId().equals(artifact.getGroupId()))).collect(Collectors.toList());
+    public List<Dependency> getArtifacts() {
+        return project.getArtifacts().stream().map(artifact -> new Dependency(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(),
+                artifact.getFile(), project.getGroupId().equals(artifact.getGroupId()))).collect(Collectors.toList());
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
@@ -189,7 +192,6 @@ public abstract class AbstractJetMojo extends AbstractMojo {
 
         return new JetProject(project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
                 targetDir, jetResourcesDir)
-                        .jetHome(jetHome)
                         .mainJar(mainJar)
                         .mainWar(mainWar)
                         .mainClass(mainClass)
@@ -212,4 +214,16 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                 throw new JetTaskFailureException(s("JetApi.BadPackaging.Failure", project.getPackaging()));
         }
     }
+
+    protected JetHome createJetHome() throws JetTaskFailureException {
+        // check jet home
+        JetHome jetHomeObj;
+        try {
+            jetHomeObj = Utils.isEmpty(jetHome) ? new JetHome() : new JetHome(jetHome);
+        } catch (JetHomeException e) {
+            throw new JetTaskFailureException(e.getMessage());
+        }
+        return jetHomeObj;
+    }
+
 }
