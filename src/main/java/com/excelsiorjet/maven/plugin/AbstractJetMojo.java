@@ -30,14 +30,17 @@ import com.excelsiorjet.api.tasks.config.Dependency;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
 import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.excelsiorjet.api.util.Txt.s;
 
@@ -182,6 +185,9 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "runArgs")
     protected String[] runArgs;
 
+    @Parameter(property = "dependencies")
+    protected Dependency[] dependencies;
+
     public List<Dependency> getArtifacts() {
         return project.getArtifacts().stream().map(artifact -> new Dependency(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(),
                 artifact.getFile(), project.getGroupId().equals(artifact.getGroupId()))).collect(Collectors.toList());
@@ -203,7 +209,9 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .execProfilesDir(execProfilesDir)
                         .execProfilesName(execProfilesName)
                         .jvmArgs(jvmArgs)
-                        .runArgs(this.runArgs);
+                        .runArgs(this.runArgs)
+                        .externalDependencies(Stream.of(dependencies).filter(d -> d.path != null).collect(Collectors.toList()))
+                        .dependencyDescriptors(Stream.of(dependencies).filter(d -> d.path == null).collect(Collectors.toList()));
     }
 
     private ApplicationType getAppType() throws JetTaskFailureException {
