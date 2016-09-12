@@ -189,8 +189,11 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected Dependency[] dependencies;
 
     public List<Dependency> getArtifacts() {
-        return project.getArtifacts().stream().map(artifact -> new Dependency(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(),
-                artifact.getFile(), project.getGroupId().equals(artifact.getGroupId()))).collect(Collectors.toList());
+        return project.getArtifacts().stream().map(artifact -> {
+            Dependency dependency = new Dependency(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getFile());
+            dependency.isLibrary = project.getGroupId().equals(artifact.getGroupId());
+            return dependency;
+        }).collect(Collectors.toList());
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
