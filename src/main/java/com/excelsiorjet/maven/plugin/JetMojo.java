@@ -23,6 +23,7 @@ package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.ExcelsiorJet;
 import com.excelsiorjet.api.cmd.CmdLineToolException;
+import com.excelsiorjet.api.cmd.JetHomeException;
 import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
@@ -366,9 +367,9 @@ public class JetMojo extends AbstractJetMojo {
                     .compilerOptions(compilerOptions)
                     .locales(locales)
                     .optRtFiles(optRtFiles);
-            ExcelsiorJet excelsiorJet = new ExcelsiorJet(createJetHome());
+            ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
             new JetBuildTask(excelsiorJet, jetProject).execute();
-        } catch (JetTaskFailureException e) {
+        } catch (JetTaskFailureException | JetHomeException  e) {
             throw new MojoFailureException(e.getMessage());
         } catch (CmdLineToolException | IOException e) {
             logger.debug("JetTask execution error", e);

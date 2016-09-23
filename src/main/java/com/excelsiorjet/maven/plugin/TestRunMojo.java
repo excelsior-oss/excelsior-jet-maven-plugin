@@ -23,6 +23,7 @@ package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.ExcelsiorJet;
 import com.excelsiorjet.api.cmd.CmdLineToolException;
+import com.excelsiorjet.api.cmd.JetHomeException;
 import com.excelsiorjet.api.log.Log;
 import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
@@ -78,10 +79,10 @@ public class TestRunMojo extends AbstractJetMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
-            ExcelsiorJet excelsiorJet = new ExcelsiorJet(createJetHome());
+            ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
             JetProject jetProject = getJetProject();
             new TestRunTask(excelsiorJet, jetProject).execute();
-        } catch (JetTaskFailureException e) {
+        } catch (JetTaskFailureException | JetHomeException e) {
             throw new MojoFailureException(e.getMessage());
         } catch (IOException | CmdLineToolException e) {
             throw new MojoExecutionException(e.getMessage());

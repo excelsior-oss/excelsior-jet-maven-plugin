@@ -21,28 +21,21 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.cmd.JetHome;
-import com.excelsiorjet.api.cmd.JetHomeException;
 import com.excelsiorjet.api.tasks.ApplicationType;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.Dependency;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
-import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.excelsiorjet.api.util.Txt.s;
+import static java.util.Collections.emptyList;
 
 /**
  * Parent of Excelsior JET Maven Plugin mojos.
@@ -185,13 +178,27 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "runArgs")
     protected String[] runArgs;
 
+    /**
+     * List of external dependencies (that which have path and do not have groupId, artifactId and version)
+     * and dependency settings (that which have no path, but have groupId or artifactId or version).
+     */
     @Parameter(property = "dependencies")
     protected Dependency[] dependencies;
 
-    public List<Dependency> getArtifacts() {
-        return project.getArtifacts().stream().
-                map(artifact -> new Dependency(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getFile())).
-                collect(Collectors.toList());
+    /**
+     * If set to to {@code true} project dependencies is ignored.
+     */
+    @Parameter(property = "ignoreProjectDependencies")
+    protected Boolean ignoreProjectDependencies;
+
+    public List<Dependency> getDependencies() {
+        if (ignoreProjectDependencies != null && ignoreProjectDependencies) {
+            return emptyList();
+        } else {
+            return project.getArtifacts().stream().
+                    map(artifact -> new Dependency(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getFile())).
+                    collect(Collectors.toList());
+        }
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
@@ -203,7 +210,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .mainWar(mainWar)
                         .mainClass(mainClass)
                         .tomcatConfiguration(tomcatConfiguration)
-                        .dependencies(getArtifacts())
+                        .dependencies(getDependencies())
                         .artifactName(project.getBuild().getFinalName())
                         .jetOutputDir(jetOutputDir)
                         .packageFilesDir(packageFilesDir)
@@ -211,8 +218,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .execProfilesName(execProfilesName)
                         .jvmArgs(jvmArgs)
                         .runArgs(this.runArgs)
-                        .externalDependencies(Stream.of(dependencies).filter(d -> d.path != null).collect(Collectors.toList()))
-                        .dependencyDescriptors(Stream.of(dependencies).filter(d -> d.path == null).collect(Collectors.toList()));
+                        .dependencySettingsAndExternalDependencies(Arrays.asList(dependencies));
     }
 
     private ApplicationType getAppType() throws JetTaskFailureException {
@@ -222,17 +228,6 @@ public abstract class AbstractJetMojo extends AbstractMojo {
             default:
                 throw new JetTaskFailureException(s("JetApi.BadPackaging.Failure", project.getPackaging()));
         }
-    }
-
-    protected JetHome createJetHome() throws JetTaskFailureException {
-        // check jet home
-        JetHome jetHomeObj;
-        try {
-            jetHomeObj = Utils.isEmpty(jetHome) ? new JetHome() : new JetHome(jetHome);
-        } catch (JetHomeException e) {
-            throw new JetTaskFailureException(e.getMessage());
-        }
-        return jetHomeObj;
     }
 
 }
