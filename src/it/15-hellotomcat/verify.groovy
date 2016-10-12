@@ -9,14 +9,16 @@ File commonsIo = new File(basedir, "target/jet/build/HelloTomcat_jetpdb/tmpres/R
 File prj = new File(basedir, "target/jet/build/HelloTomcat.prj")
 
 assert commonsIo.exists()
-assert prj.text.contains("""!classloaderentry webapp webapps/ROOT:/WEB-INF/lib/commons-io-1.3.2.jar
+
+def prjText = prj.text.replaceAll("\r\n", "\n")
+assert prjText.contains("""!classloaderentry webapp webapps/ROOT:/WEB-INF/lib/commons-io-1.3.2.jar
   -optimize=autodetect
   -protect=nomatter
   -pack=all
 !end""")
 
 
-assert prj.text.contains("""!classloaderentry webapp webapps/ROOT:/WEB-INF/classes
+assert prjText.contains("""!classloaderentry webapp webapps/ROOT:/WEB-INF/classes
   -optimize=all
   -protect=nomatter
 !end""")

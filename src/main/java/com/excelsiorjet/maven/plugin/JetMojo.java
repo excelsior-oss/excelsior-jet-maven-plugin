@@ -23,7 +23,7 @@ package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.ExcelsiorJet;
 import com.excelsiorjet.api.cmd.CmdLineToolException;
-import com.excelsiorjet.api.cmd.JetHomeException;
+import com.excelsiorjet.api.JetHomeException;
 import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
