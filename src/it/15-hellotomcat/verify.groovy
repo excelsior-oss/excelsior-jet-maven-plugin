@@ -10,6 +10,7 @@ File prj = new File(basedir, "target/jet/build/HelloTomcat.prj")
 
 assert commonsIo.exists()
 
+//replace line separators to Unix as Groovy """ multiline strings produce Unix line separators
 def prjText = prj.text.replaceAll("\r\n", "\n")
 assert prjText.contains("""!classloaderentry webapp webapps/ROOT:/WEB-INF/lib/commons-io-1.3.2.jar
   -optimize=autodetect

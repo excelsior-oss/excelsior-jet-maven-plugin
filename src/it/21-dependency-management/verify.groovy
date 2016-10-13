@@ -15,6 +15,7 @@ File extDirCpContent= new File(basedir, "target/jet/build/extDirCp/extDir/test.t
 
 assert dep.exists()
 
+//replace line separators to Unix as Groovy """ multiline strings produce Unix line separators
 String prjText = prj.text.replaceAll("\r\n", "\n")
 assert prjText.contains("""!classpathentry lib/commons-io-1.3.2.jar
   -optimize=autodetect
