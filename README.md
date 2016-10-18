@@ -198,6 +198,148 @@ Just as it works for the splash image, if you place the icon file at
 `${project.basedir}/src/main/jetresources/icon.ico`, you won't need to specify it
 in the configuration explicitly.
 
+#### Dependencies Management
+
+As mentioned [above](#build-process) the plugin automatically picks up and compiles runtime dependencies
+of your Maven project.
+In addition, the plugin allows you to select how to compile your application at discretion of
+the dependencies. That is, for each dependency, you can enable/disable:
+
+- code protection for all classes
+- selective compilation of classes
+- packing resource files into executable
+
+##### Dependencies configuration
+
+If you need to set a certain property to a certain dependency add the following section to the plugin configuration
+section:
+
+```xml
+<dependencies>
+    <dependency>
+    	<groupId>groupId</groupId>
+    	<artifactId>artifactId</artifactId>
+    	<version>version</version>
+    	<protect></protect>
+    	<optimize></optimize>
+    	<pack></pack>
+    </dependency>
+</dependencies>
+```
+
+where `groupId`, `artifactId`, `version` describes the dependency in the same way as you describe the dependency in
+a respective global `<dependencies>` section of the Maven project,
+and `<protect>`, `<optimize>`, `<pack>` are Excelsior JET specific properties for the dependency described below.
+You may omit `groupId` or/and `version` from the configuration, if you are sure that there is the only dependency with a certain
+`artifactId` in the project else the plugin will issue ambiguous dependency resolution error.
+You may also set the `<groupId>` parameter only to set the same properties to all dependencies sharing the same `groupId`
+at once.
+Finally, if you need some additional dependencies to appear in the application classpath that are not listed
+in the project explicitly (for example, you need to access some resources in a directory via `ResourceBundle.getResource()`)
+set the `<path>` parameter instead of `groupId/artifactId/version` pointing to a directory or jar/zip.
+You may also use `<path>` parameter for identifying project dependencies that are described with `<systemPath>` parameter.
+
+##### Code protection
+
+If you need to protect your classes from decompilers,
+make sure that the respective dependency have the `<protect>` property set to `all` value.
+If you do not need to protect classes for a certain dependency (f.i. it is a third-party library),
+set the `not-required` value. It may reduce compilation time and the size of the resulting executable in some cases.
+
+##### Selective optimization
+
+To optimize all classes and all methods of every class of a dependency for performance, set the `<optimize>` parameter
+to `all` value. The other option for the parameter is `auto-detect`.
+It means that the Optimizer detects which classes from the dependency are used by the application
+and compiles the dependency selectively leaving a part of classes in the bytecode form or not optimized.
+It helps reduce compilation time and download size of the application.
+You may enable selective optimization for third-party dependencies, if your application uses
+a small part of their implementing classes. However, it is not recommended to choose the `auto-detect` option
+for your own classes, because, in general, the Excelsior JET Optimizer cannot detect an exact set of used classes due to
+possible access via Reflection API (though you can significantly help it to detect used classes performing
+the [Test Run](#performing-a-test-run) prior to the build).
+
+##### isLibrary hint
+
+As mentioned above, it is recommended to set `<optimize>` parameter to `auto-detect` value
+and `<protect>` parameter to `not-required` value for third party dependencies  while
+it is better to set both parameters to `all` for your own classes.
+You may provide a hint to the plugin if a dependency is a third party library setting `<isLibrary>` parameter to `true`.
+This way the plugin will set `<protect>` to `not-required` and `<optimize>` to `auto-detect` automatically.
+Consequently if you set `<isLibrary>` to `false` both parameters will be set to `all`.
+
+By default, the plugin detects the hint automatically using the following strategy:
+it treats all dependencies sharing the same `groupId` with your main artifact as your application classes
+while all other dependencies are treated as third-party dependencies.
+So if some of your application classes reside in a dependency with a different `groupId` make sure to set `<isLibrary>`
+hint to `false` for such `groupId` to enable maximum protection and optimization level for it, such as:
+
+```xml
+<dependencies>
+    <dependency>
+    	<groupId>my.company.project.group</groupId>
+    	<isLibrary>false</isLibrary>
+    </dependency>
+</dependencies>
+```
+
+##### Resource packing
+
+Dependencies often contain resource files such as images, icons, media files, etc.
+By default, the JET Optimizer packs such files into the resulting executable.
+If selective optimization is enabled for a dependency and protection is also disabled,
+the classes not compiled are also packed into the executable and will be handled by the JIT compiler at run time
+on attempt to load them. As a result, original jar files are no longer needed for the running application.
+This is the default option for `<pack>` parameter named `auto-detect`.
+
+Some third-party components may require presence of the original class files at run time.
+For instance, third party security providers such as Bouncy Castle check the sizes of their class files during execution.
+In such cases, the class files serve as both program code and resources.
+Therefore, despite all the classes are pre-compiled, you have to make them available to the running application.
+Setting the `<pack>` parameter to `all` for such a dependency resolves the problem.
+
+You may also opt to not pack a dependency to the executable at all using `none` value for the `<pack>` parameter.
+This way the dependency will be copied to the final package as is instead.
+To control the placement of the dependency in the package use `<packagePath>` parameter of the `<dependency>` configuration.
+By default, non-packed jar files are copied to `lib` subfolder of the package while directories
+(referenced by `<path>` parameter) are copied to the root of the package.
+
+Finally, if you are sure that a certain dependency does not contain any resources and all classes of it were compiled,
+you can disable copying of such a (non-packed) dependency to the package
+via setting `<disableCopyToPackage>` dependency's parameter to `true`.
+
+Example of an additional dependency configuration:
+
+```xml
+<dependencies>
+    <dependency>
+    	<path>${basedir}/target/extra-resources</path>
+    	<packagePath>my-extra-files</packagePath>
+    </dependency>
+</dependencies>
+```
+
+Here we add `extra-resources` folder to the application classpath telling the plugin to just copy it to the
+`my-extra-files` folder of the package (thus `extra-resources` folder will appear in the `my-extra-files` folder
+of the final package). Note, that the only available option for `<pack>` property for directories is `none`, so there
+is no need to set it in this `<dependency>` configuration.
+
+##### Ignoring project dependencies
+
+If you build your main artifact as so called fat jar
+(using `maven-assembly-plugin` with `jar-with-dependencies` for example) so all your project dependencies are packed
+into your main artifact then the most-likely you do not need separate dependencies to be compiled with Excelsior JET
+because all needed classes and resources are already inside of your main artifact.
+For such a case you may set the `<ignoreProjectDependencies>` plugin parameter to `true`
+to disable compilation of project dependencies.
+This way you may set `protect/optimize/pack` properties for your main artifact only and for entries described with `<path>`
+parameter of `<dependencies>` section of the plugin.
+
+##### Tomcat web application dependencies
+
+You may set the above properties for Tomcat web application dependencies as well, but please note that `<path>`,
+`<packagePath>`, `<disableCopyToPackage>` parameters are not available for them.
+
 #### Customizing Package Content
 
 By default, the final package contains just the resulting executable and the necessary Excelsior JET Runtime files.
@@ -814,6 +956,11 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
+Version 0.8.0 (??-Sep-2016)
+
+The release adds the capability to set Excelsior JET specific properties for project dependencies such as
+code protection, selective optimization and resource packing.
+
 Version 0.7.2 (19-Aug-2016)
 
 This release adds the capability to pass command-line arguments to the application during startup profiling
@@ -908,7 +1055,6 @@ and placing it into a separate directory with required Excelsior JET runtime fil
 Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
 So the next few releases will add the following features:
 
-* Advanced dependencies management
 * Dynamic libraries and Windows services support.
 * Multi-component support: building dependencies into separate native libraries
                            to reuse them across multiple Maven project builds
