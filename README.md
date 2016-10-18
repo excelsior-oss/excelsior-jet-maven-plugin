@@ -237,6 +237,7 @@ at once.
 Finally, if you need some additional dependencies to appear in the application classpath that are not listed
 in the project explicitly (for example, you need to access some resources in a directory via `ResourceBundle.getResource()`)
 set the `<path>` parameter instead of `groupId/artifactId/version` pointing to a directory or jar/zip.
+You may also use `<path>` parameter for identifying project dependencies that are described with `<systemPath>` parameter.
 
 ##### Code protection
 

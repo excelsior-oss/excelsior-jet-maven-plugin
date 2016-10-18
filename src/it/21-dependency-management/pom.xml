@@ -50,7 +50,7 @@
                             <pack>none</pack>
                         </dependency>
                         <dependency>
-                            <path>${project.basedir}/extDir</path>
+                            <path>${project.basedir}/extDir2</path>
                             <packagePath>extDirCp</packagePath>
                             <pack>none</pack>
                         </dependency>

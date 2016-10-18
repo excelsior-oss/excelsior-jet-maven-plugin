@@ -11,7 +11,7 @@ File junitLib = new File(basedir, "target/jet/build/lib/junit-4.8.2.jar")
 File jacksonDep = new File(basedir, "target/jet/build/lib/jackson-databind-2.8.0.jar")
 File log4jDep = new File(basedir, "target/jet/build/libs/log4j-1.2.17.jar")
 File extDirContent= new File(basedir, "target/jet/build/extDir/test.txt")
-File extDirCpContent= new File(basedir, "target/jet/build/extDirCp/extDir/test.txt")
+File extDirCpContent= new File(basedir, "target/jet/build/extDirCp/extDir2/test.txt")
 
 assert dep.exists()
 
