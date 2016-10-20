@@ -60,7 +60,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.7.2</version>
+	<version>0.8.0</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -882,7 +882,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.7.2</version>
+	<version>0.8.0</version>
 	<configuration>
         <tomcatConfiguration>
              <tomcatHome></tomcatHome>
@@ -1017,7 +1017,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.8.0 (??-Oct-2016)
+Version 0.8.0 (20-Oct-2016)
 
 The release adds the capability to set Excelsior JET-specific properties for project dependencies,
 such as code protection, selective optimization, and resource packing.
