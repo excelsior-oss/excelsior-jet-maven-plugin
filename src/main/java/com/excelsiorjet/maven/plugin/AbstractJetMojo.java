@@ -180,14 +180,20 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected String[] runArgs;
 
     /**
-     * List of external dependencies (that which have path and do not have groupId, artifactId and version)
-     * and dependency settings (that which have no path, but have groupId or artifactId or version).
+     * List of settings of project dependencies.
+     *
+     * @see DependencySettings#optimize
+     * @see DependencySettings#protect
+     * @see DependencySettings#pack
+     * @see DependencySettings#isLibrary
+     * @see DependencySettings#path
+     * @see DependencySettings#packagePath
      */
     @Parameter(property = "dependencies")
     protected DependencySettings[] dependencies;
 
     /**
-     * If set to {@code true} project dependencies is ignored.
+     * If set to {@code true}, project dependencies are ignored.
      */
     @Parameter(property = "ignoreProjectDependencies")
     protected boolean ignoreProjectDependencies;
