@@ -1,5 +1,6 @@
-boolean isWindows = System.properties['os.name'].contains("Windows");
-String ext = isWindows?".exe":""
+import com.excelsiorjet.TestUtils
+
+String ext = TestUtils.exeExt()
 File exeFile = new File( basedir, "target/jet/build/AppWithDep" + ext);
 assert exeFile.exists()
 exeFile = new File( basedir, "target/jet/app/AppWithDep" + ext)
@@ -55,6 +56,8 @@ assert prjText.contains("""!classpathentry libs/log4j-1.2.17.jar
 assert extDirContent.exists()
 assert extDirCpContent.exists()
 
-String cmd = exeFile.getAbsolutePath();
+if (!TestUtils.crossCompilation) {
+  String cmd = exeFile.getAbsolutePath();
 
-assert (cmd.execute().text.trim().equals("HelloWorld"))
+  assert (cmd.execute().text.trim().equals("HelloWorld"))
+}

@@ -1,16 +1,19 @@
-boolean isWindows = System.properties['os.name'].contains("Windows");
-String ext = isWindows?".exe":""
+import com.excelsiorjet.TestUtils
+
+String ext = TestUtils.exeExt()
 File exeFile = new File( basedir, "target/jet/build/HelloWorld" + ext);
 assert exeFile.exists()
 exeFile = new File( basedir, "target/jet/app/HelloWorld" + ext)
 assert exeFile.exists()
-String cmd = exeFile.getAbsolutePath();
 
 //check tiny-methods only inline
 assert new File(basedir, "target/jet/build/HelloWorld.prj").text.contains("-inline-")
 
-//check Unknown in stack trace
-assert (cmd.execute().text.trim().equals("Hello World"))
+if (!TestUtils.crossCompilation) {
+  String cmd = exeFile.getAbsolutePath();
+  //check Unknown in stack trace
+  assert (cmd.execute().text.trim().equals("Hello World"))
+}
 
 //check splash in .rsp
 assert new File(basedir, "target/jet/build/HelloWorld_jetpdb/HelloWorld.rsp").text.contains("splash.png")
