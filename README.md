@@ -199,8 +199,6 @@ in the configuration explicitly.
 
 #### Dependency-specific settings
 
-**New in 0.8.0:**
-
 As mentioned [above](#build-process), the plugin automatically picks up and compiles the run time dependencies
 of your Maven project.
 In addition, the plugin enables you to specify certain processing rules separately
@@ -1016,6 +1014,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.8.1 (??-Oct-2016)
+
+The release supports [Excelsior JET Embedded 11.3 for Linux/ARM](https://www.excelsiorjet.com/embedded/).
 
 Version 0.8.0 (20-Oct-2016)
 

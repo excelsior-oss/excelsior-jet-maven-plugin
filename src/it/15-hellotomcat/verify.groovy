@@ -1,4 +1,6 @@
-String ext = System.properties['os.name'].contains("Windows")?".exe":""
+import com.excelsiorjet.TestUtils
+
+String ext = TestUtils.exeExt()
 
 exeFile = new File( basedir, "target/jet/app/bin/HelloTomcat" + ext)
 assert exeFile.exists()

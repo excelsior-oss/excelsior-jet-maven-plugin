@@ -1,5 +1,7 @@
-boolean isWindows = System.properties['os.name'].contains("Windows");
-String ext = isWindows?".exe":""
+import com.excelsiorjet.TestUtils
+
+boolean isWindows = TestUtils.isWindows();
+String ext = TestUtils.exeExt()
 File exeFile = new File( basedir, "target/jet/build/HelloSwing" + ext);
 assert exeFile.exists()
 exeFile = new File( basedir, "target/jet/app/HelloSwing" + ext)
