@@ -30,6 +30,10 @@ public class TestUtils {
         return excelsiorJet.getTargetOS().getExeFileExtension();
     }
 
+    public static String mangleDllName(String dll) {
+        return excelsiorJet.getTargetOS().mangleDllName(dll);
+    }
+
     public static boolean isExcelsiorInstallerSupported() {
         return excelsiorJet.isExcelsiorInstallerSupported();
     }
