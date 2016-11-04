@@ -31,6 +31,20 @@
               <configuration>
                   <appType>windows-service</appType>
                   <mainClass>SampleService</mainClass>
+                  <windowsServiceConfiguration>
+                      <displayName>Sample Service</displayName>
+                      <description>Sample Service created with Excelsior JET</description>
+                      <arguments>
+                          <argument>arg</argument>
+                          <argument>arg with space</argument>
+                      </arguments>
+                      <logOnType>user-account</logOnType>
+                      <startupType>manual</startupType>
+                      <dependencies>
+                          <dependency>Dhcp</dependency>
+                          <dependency>Dnscache</dependency>
+                      </dependencies>
+                  </windowsServiceConfiguration>
                   <packaging>none</packaging>
               </configuration>
           </plugin>
