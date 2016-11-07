@@ -15,14 +15,16 @@ assert rspContents.equals(
 """-install SampleService.exe
 -displayname "Sample Service"
 -description "Sample Service created with Excelsior JET"
--auto
--args arg "arg with space"
+-manual
+-args arg1 arg2
 -dependency Dhcp
 -dependency Dnscache
 """
 )
 
-assert new File(basedir, "target/jet/app/install.bat").exists()
+File installBat = new File(basedir, "target/jet/app/install.bat");
+assert installBat.exists()
+assert installBat.text.contains("-user %name% -password %password")
 assert new File(basedir, "target/jet/app/uninstall.bat").exists()
-File zipFile = new File(basedir, "target/jet/SampleService-1.0-SNAPSHOT.zip")
-assert zipFile.exists()
+File installerFile = new File(basedir, "target/jet/SampleService-1.0-SNAPSHOT.exe")
+assert installerFile.exists()

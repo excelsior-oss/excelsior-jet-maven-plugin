@@ -38,4 +38,16 @@ public class TestUtils {
         return excelsiorJet.isExcelsiorInstallerSupported();
     }
 
+    public static boolean isWindowsServicesSupported() {
+        return excelsiorJet.isWindowsServicesSupported();
+    }
+
+    public static boolean isWindowsServicesInExcelsiorInstallerSupported() {
+        return excelsiorJet.isWindowsServicesInExcelsiorInstallerSupported();
+    }
+
+    public static String toUnixLineSeparators(String text) {
+        return text.replaceAll("\r\n", "\n");
+    }
+
 }
