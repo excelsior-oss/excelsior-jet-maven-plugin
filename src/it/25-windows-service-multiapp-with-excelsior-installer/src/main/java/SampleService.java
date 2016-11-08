@@ -47,6 +47,10 @@ public class SampleService extends com.excelsior.service.WinService {
 
         logInfoEvent("init() method called, initializing service...");
 
+        for (String arg: getArgs()) {
+            logInfoEvent(arg);
+        }
+
         // set timeouts...
 
         setInitTimeout(1000);

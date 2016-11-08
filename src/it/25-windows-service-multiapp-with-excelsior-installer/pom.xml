@@ -37,8 +37,10 @@
                       <displayName>Sample Service</displayName>
                       <description>Sample Service created with Excelsior JET</description>
                       <arguments>
-                          <argument>arg1</argument>
-                          <argument>arg2</argument>
+                          <argument>-args</argument>
+                          <argument>arg</argument>
+                          <argument>arg with space</argument>
+                          <argument>arg3 with space</argument>
                       </arguments>
                       <logOnType>user-account</logOnType>
                       <startupType>manual</startupType>

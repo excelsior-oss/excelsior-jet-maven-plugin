@@ -16,9 +16,11 @@ assert rspContents.equals(
 -displayname "Sample Service"
 -description "Sample Service created with Excelsior JET"
 -auto
--args arg "arg with space"
--dependency Dhcp
--dependency Dnscache
+-dependence Dhcp
+-dependence Dnscache
+-args
+arg
+arg with space
 """
 )
 
