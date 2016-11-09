@@ -50,10 +50,10 @@ and loads classes mostly from jars that are present
 in the `dependencies-list`, *or* if it is packaged into a `.war` file that can be deployed
 to a Tomcat application server instance, then you can use this plugin.
 Invocation Dynamic Libraries and Windows Services is essentially a special build mode of Plain Java SE applications
-to a special executable types: dynamic libraries and windows services.
+to special executable types: dynamic libraries and windows services.
 
 Excelsior JET can also compile Eclipse RCP applications.
-The plugin does not yet support Eclsipe RCP projects nor some advanced Excelsior JET features.
+The plugin does not yet support Eclipse RCP projects nor some advanced Excelsior JET features.
 We plan to cover all that functionality in the future, but if you need the plugin to support
 a particular feature sooner rather than later, you can help us prioritize the roadmap
 by creating a feature request [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).
@@ -88,7 +88,7 @@ See [Building Tomcat Web Applications](#building-tomcat-web-applications) sectio
 [Invocation Dynamic Library](#invocation-dynamic-libraries) does not need main class as well,
 
 and main class of [Windows Service](#windows-services) must extend a special class `com.excelsior.service.WinService`
-of Excelsior WinService API.
+of [Excelsior JET WinService API](https://github.com/excelsior-oss/excelsior-jet-winservice-api).
 
 ### Excelsior JET Installation Directory Lookup
 
@@ -879,9 +879,7 @@ application on a conventional JVM, this has the following benefits:
 
 #### Supported Tomcat versions
 Excelsior JET 11 supports Apache Tomcat 5.0.x (starting from version 5.0.1), 5.5.x, 6.0.x,
-and 7.0.x up to version 7.0.62.
-The next version of Excelsior JET will support Tomcat 8 and Tomcat 7.0.63+ versions.
-For now, please stick to Tomcat 7.0.62 or earlier.
+and 7.0.x up to version 7.0.62. Excelsior JET 11.3 adds support for Tomcat 8.0 and Tomcat 7.0.63+ versions.
 
 #### Usage
 The plugin will treat your Maven project as a Tomcat Web application project if its `<packaging>` type is `war`.
@@ -976,6 +974,13 @@ you may set within the `<tomcatConfiguration>` parameters block:
   However, if you are going to launch the created executable directly, you may set
   the `<genScripts>` parameter to `false`.
 
+* `<installWindowsService>` - if you opt `excelsior-installer` packaging for Tomcat on Windows then
+  by default, the installer registers the Tomcat executable as a Windows service.
+  You may set this parameter to `false` to disable that behavior.
+  Otherwise, you may configure Windows Service specific parameters for Tomcat service adding
+  `<windowsServiceConfiguration>` section as described [here](#windows-service-configuration).
+  The functionality is only available since 11.3 Excelsior JET version.
+
 #### Multiple Web applications and Tomcat installation configuration
 Excelsior JET can also compile multiple Web applications deployed onto a single Tomcat instance.
 
@@ -1050,13 +1055,27 @@ using which it can be installed to/removed from the system. A service can be ins
 (to be launched at system bootstrap) or manual (to be activated later by a user
 through the start button in the Windows Control Panel/Services).
 
+#### Adding dependency to Excelsior JET WinService API
+
 Windows service program must register a callback routine (so called control handler)
 that is invoked by the system on service initialization, interruption, resume, etc.
 With Excelsior JET, you achieve this functionality by implementing a subclass of
-`com.excelsior.service.WinService` of Excelsior WinService API and specifying it as the main class of the plugin configuration.
+`com.excelsior.service.WinService` of Excelsior JET WinService API and specifying it as the main class of the plugin configuration.
 The JET Runtime will instantiate that class on startup and translate calls to the callback routine into calls
 of its respective methods, collectively called handler methods. For more details, refer to the
 "Windows services" section of the Excelsior JET User's Guide.
+
+To compile your implementation of `WinService` to Java bytecode you will need to reference Excelsior JET WinService API
+from your Maven project. For that, add the following dependency to the `<dependencies>` section  of your `pom.xml` file:
+
+```xml
+<dependency>
+    <groupId>com.excelsiorjet</groupId>
+    <artifactId>excelsior-jet-winservice-api</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+</dependency>
+```                                                          ```
 
 #### Windows Service Configuration
 
@@ -1100,7 +1119,7 @@ Where:
 
 * `<displayName>` - the descriptive name of the service.
   It is shown in the Event Viewer system tool and in the Services applet of the Windows Control Panel.
-  By default, `<name>` of `<windowsServiceConfiguration>` parameter is used for the dispaly name.
+  By default, `<name>` of `<windowsServiceConfiguration>` parameter is used for the display name.
 
 
 * `<description>` - the user description of the service. It must not exceed 1000 characters.
@@ -1124,9 +1143,9 @@ Where:
   - `disabled` - prevents the service from being started by the system, a user, or any dependent service.
 
 * `<startServiceAfterInstall>` -  specifies if the service should be started immediately after installation.
-   Available only for `excelsior-instaler` `<packaging>` parameter.
+   Available only for `excelsior-installer` `<packaging>` parameter.
 
-*  `<dependencies>` - List of other service names on which the service depends.
+*  `<dependencies>` - list of other service names on which the service depends.
 
 The plugin will create the `install.bat`/`uninstall.bat` scripts in the `target/jet/app` to install/uninstall
 the service manually based on provided parameters above to test it.
@@ -1135,7 +1154,13 @@ after the package installation.
 
 **Note:** The plugin does not support creation of Excelsior Installer packages for Windows Services
 for Excelsior JET 11.0 version due to a missing respective functionality in `xpack` utility.
-However it works for [Excelsior JET 11.3](http://www.excelsiorjet.com/beta) and above.
+However it works for Excelsior JET 11.3 and above.
+
+**Note:** You may build a multi-app executable runnable as both plain application and Windows service.
+For that set `<appType>` parameter to "windows-service" and `<multiApp>` parameter to `true`.
+Please note that in this case, Windows Service arguments will have the syntax of multi-app executables,
+so if you would need to just pass usual arguments to your service and do not pass VM arguments, do not forget
+to add "-args" as first argument of your service `<arguments>` list.
 
 #### Test Run of Windows Services
 
