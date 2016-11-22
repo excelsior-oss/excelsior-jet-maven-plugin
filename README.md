@@ -1082,7 +1082,7 @@ to the `<dependencies>` section  of your `pom.xml` file:
     <version>1.0.0</version>
     <scope>provided</scope>
 </dependency>
-```                                                          ```
+```
 
 #### Windows Service Configuration
 
