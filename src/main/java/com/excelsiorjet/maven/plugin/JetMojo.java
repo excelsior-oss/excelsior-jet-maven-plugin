@@ -27,10 +27,7 @@ import com.excelsiorjet.api.JetHomeException;
 import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
-import com.excelsiorjet.api.tasks.config.ExcelsiorInstallerConfig;
-import com.excelsiorjet.api.tasks.config.OSXAppBundleConfig;
-import com.excelsiorjet.api.tasks.config.SlimDownConfig;
-import com.excelsiorjet.api.tasks.config.TrialVersionConfig;
+import com.excelsiorjet.api.tasks.config.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
@@ -291,6 +288,22 @@ public class JetMojo extends AbstractJetMojo {
     protected ExcelsiorInstallerConfig excelsiorInstallerConfiguration;
 
     /**
+     * Windows Service configuration parameters.
+     *
+     * @see WindowsServiceConfig#name
+     * @see WindowsServiceConfig#displayName
+     * @see WindowsServiceConfig#description
+     * @see WindowsServiceConfig#arguments
+     * @see WindowsServiceConfig#logOnType
+     * @see WindowsServiceConfig#allowDesktopInteraction
+     * @see WindowsServiceConfig#startupType
+     * @see WindowsServiceConfig#startServiceAfterInstall
+     * @see WindowsServiceConfig#dependencies
+     */
+    @Parameter(property = "windowsServiceConfiguration")
+    protected WindowsServiceConfig windowsServiceConfiguration;
+
+    /**
      * OS X Application Bundle configuration parameters.
      *
      * @see OSXAppBundleConfig#fileName
@@ -351,6 +364,7 @@ public class JetMojo extends AbstractJetMojo {
                     .javaRuntimeSlimDown(javaRuntimeSlimDown)
                     .trialVersion(trialVersion)
                     .excelsiorInstallerConfiguration(excelsiorInstallerConfiguration)
+                    .windowsServiceConfiguration(windowsServiceConfiguration)
                     .version(version)
                     .osxBundleConfiguration(osxBundleConfiguration)
                     .outputName(outputName)

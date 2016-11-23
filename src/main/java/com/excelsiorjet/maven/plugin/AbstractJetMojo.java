@@ -27,6 +27,7 @@ import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.DependencySettings;
 import com.excelsiorjet.api.tasks.config.ProjectDependency;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
+import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -53,6 +54,24 @@ public abstract class AbstractJetMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
     private File targetDir;
+
+    /**
+     * Application type. Permitted values are:
+     * <dl>
+     * <dt>plain</dt>
+     * <dd>plain Java application, that runs standalone,
+     * default type for {@code <packaging>jar</packaging>} packaging type</dd>
+     * <dt>invocation-dynamic-library</dt>
+     * <dd>dynamic library callable from a non-Java environment</dd>
+     * <dt>windows-service</dt>
+     * <dd>Windows service (Windows only)</dd>
+     * <dt>tomcat</dt>
+     * <dd>servlet-based Java application, that runs within Tomcat servlet container,
+     * default type for {@code <packaging>war</packaging>} packaging type</dd>
+     * </dl>
+     */
+    @Parameter(property = "appType")
+    protected String appType;
 
     /**
      * The main application class.
@@ -230,6 +249,9 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     }
 
     private ApplicationType getAppType() throws JetTaskFailureException {
+        if (!Utils.isEmpty(appType)) {
+            return JetProject.checkAndGetAppType(appType);
+        }
         switch (project.getPackaging()) {
             case "jar": return ApplicationType.PLAIN;
             case "war": return ApplicationType.TOMCAT;

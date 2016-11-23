@@ -40,6 +40,9 @@
                       <hideConfig>true</hideConfig>
                       <genScripts>false</genScripts>
                   </tomcatConfiguration>
+                  <windowsServiceConfiguration>
+                      <description>Jet Compiled Tomcat</description>
+                  </windowsServiceConfiguration>
                   <dependencies>
                         <dependency>
                             <artifactId>commons-io</artifactId>
@@ -49,7 +52,8 @@
                           <artifactId>HelloTomcat</artifactId>
                           <protect>not-required</protect>
                       </dependency>
-                    </dependencies>
+                  </dependencies>
+                  <packaging>excelsior-installer</packaging>
               </configuration>
           </plugin>
       </plugins>

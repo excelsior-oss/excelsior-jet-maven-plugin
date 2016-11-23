@@ -30,8 +30,25 @@ public class TestUtils {
         return excelsiorJet.getTargetOS().getExeFileExtension();
     }
 
+    public static String mangleDllName(String dll) {
+        return excelsiorJet.getTargetOS().mangleDllName(dll);
+    }
+
     public static boolean isExcelsiorInstallerSupported() {
         return excelsiorJet.isExcelsiorInstallerSupported();
+    }
+
+    public static boolean isWindowsServicesSupported() {
+        return excelsiorJet.isWindowsServicesSupported();
+    }
+
+    public static boolean isWindowsServicesInExcelsiorInstallerSupported() {
+        return excelsiorJet.isWindowsServicesInExcelsiorInstallerSupported();
+    }
+
+    //replace line separators to Unix as Groovy """ multiline strings produce Unix line separators
+    public static String toUnixLineSeparators(String text) {
+        return text.replaceAll("\r\n", "\n");
     }
 
 }
