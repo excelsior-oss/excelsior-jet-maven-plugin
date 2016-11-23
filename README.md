@@ -1025,7 +1025,7 @@ instead of a runnable executable, add the following Excelsior JET Maven plugin c
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
 	<version>0.9.0</version>
 	<configuration>
-        <appType>invocation-dynamic-library</appType>
+        <appType>dynamic-library</appType>
 	</configuration>
 </plugin>
 ```

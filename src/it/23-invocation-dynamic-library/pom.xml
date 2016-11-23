@@ -21,7 +21,7 @@
               <artifactId>excelsior-jet-maven-plugin</artifactId>
               <version>@project.version@</version>
               <configuration>
-                  <appType>invocation-dynamic-library</appType>
+                  <appType>dynamic-library</appType>
                   <packaging>none</packaging>
               </configuration>
           </plugin>
