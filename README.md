@@ -69,7 +69,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.8.1</version>
+	<version>0.9.0</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -891,7 +891,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.8.1</version>
+	<version>0.9.0</version>
 	<configuration>
         <tomcatConfiguration>
              <tomcatHome></tomcatHome>
@@ -1151,7 +1151,6 @@ Where:
   - `disabled` - prevents the service from being started by the system, a user, or any dependent service.
 
 * `<startServiceAfterInstall>` -  specifies if the service should be started immediately after installation.
-   Available only for the `excelsior-installer` `<packaging>` parameter.
 
 *  `<dependencies>` - list of other service names on which the service depends.
 
@@ -1172,7 +1171,7 @@ to add "-args" as the first argument of your service `<arguments>` list.
 
 #### Test Run of Windows Services
 
-Unfortunately, a service cannot be resistered in the system before its compilation,
+Unfortunately, a service cannot be registered in the system before its compilation,
 so a fully functional Test Run is not available for Windows Services. However, it is recommended
 to add a `public static void main(String args[])` method to your Windows Service main class
 to test your basic application functionality with Test Run.
@@ -1197,7 +1196,8 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.9.0 (??-Nov-2016)
+Version 0.9.0 (23-Nov-2016)
+
 Invocation dynamic libraries and Windows services support.
 
 Version 0.8.1 (28-Oct-2016)
