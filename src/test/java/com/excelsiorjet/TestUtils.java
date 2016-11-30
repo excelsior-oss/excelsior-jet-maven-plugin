@@ -46,6 +46,10 @@ public class TestUtils {
         return excelsiorJet.isWindowsServicesInExcelsiorInstallerSupported();
     }
 
+    public static boolean isCompactProfilesSupported() {
+        return excelsiorJet.isCompactProfilesSupported();
+    }
+
     //replace line separators to Unix as Groovy """ multiline strings produce Unix line separators
     public static String toUnixLineSeparators(String text) {
         return text.replaceAll("\r\n", "\n");
