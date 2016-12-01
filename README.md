@@ -782,8 +782,9 @@ classes implementing those APIs and the associated files, placing them in a sepa
 The detached package should be placed on a Web server so that the JET Runtime could download it
 if the deployed application attempts to use any of the detached components via JNI or the Reflection API.
 
-**Note:** This functionality is deprecated in Excelsior JET 11.3 and above
-          in favour of [Compact Profiles](#compact-profiles) feature added instead.
+**Note:** This functionality is deprecated in Excelsior JET 11.3
+          in favor of the newly added [Compact Profiles](#compact-profiles) feature,
+          and will be removed in future versions.
 
 To enable Java Runtime Slim-Down, copy and paste the following plugin configuration:
 
