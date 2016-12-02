@@ -132,6 +132,20 @@ public class JetMojo extends AbstractJetMojo {
     protected SlimDownConfig javaRuntimeSlimDown;
 
     /**
+     * Java SE 8 defines three subsets of the standard Platform API called compact profiles.
+     * Excelsior JET enables you to deploy your application with one of those subsets.
+     * You may set this parameter to specify a particular profile.
+     * Valid values are: {@code auto} (default),  {@code compact1},  {@code compact2},  {@code compact3}, {@code full}
+     *  <p>
+     * {@code auto} value (default) forces Excelsior JET to detect which parts of the Java SE Platform API
+     * are referenced by the application and select the smallest compact profile that includes them all,
+     * or the entire Platform API if there is no such profile.
+     * </p>
+     */
+    @Parameter(property = "profile", defaultValue = "auto")
+    private String profile;
+
+    /**
      * If set to {@code true}, the multi-app mode is enabled for the resulting executable
      * (it mimicks the command line syntax of the conventional {@code java} launcher).
      */
@@ -380,7 +394,8 @@ public class JetMojo extends AbstractJetMojo {
                     .profileStartupTimeout(profileStartupTimeout)
                     .compilerOptions(compilerOptions)
                     .locales(locales)
-                    .optRtFiles(optRtFiles);
+                    .optRtFiles(optRtFiles)
+                    .compactProfile(profile);
             ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
             new JetBuildTask(excelsiorJet, jetProject).execute();
         } catch (JetTaskFailureException | JetHomeException  e) {
