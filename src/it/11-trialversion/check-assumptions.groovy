@@ -1,3 +1,3 @@
 import com.excelsiorjet.TestUtils
 
-return TestUtils.excelsiorInstallerSupported
+return TestUtils.trialSupported && TestUtils.excelsiorInstallerSupported

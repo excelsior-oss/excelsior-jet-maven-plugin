@@ -50,6 +50,26 @@ public class TestUtils {
         return excelsiorJet.isCompactProfilesSupported();
     }
 
+    public static boolean isMultiAppSupported() {
+        return excelsiorJet.isMultiAppSupported();
+    }
+
+    public static boolean isStartupProfileGenerationSupported() {
+        return excelsiorJet.isStartupProfileGenerationSupported();
+    }
+
+    public static boolean isTrialSupported() {
+        return excelsiorJet.isTrialSupported();
+    }
+
+    public static boolean isDataProtectionSupported() {
+        return excelsiorJet.isDataProtectionSupported();
+    }
+
+    public static boolean isTomcatSupported() {
+        return excelsiorJet.isTomcatSupported();
+    }
+
     //replace line separators to Unix as Groovy """ multiline strings produce Unix line separators
     public static String toUnixLineSeparators(String text) {
         return text.replaceAll("\r\n", "\n");
