@@ -69,7 +69,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -910,7 +910,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 	<configuration>
         <tomcatConfiguration>
              <tomcatHome></tomcatHome>
@@ -1042,7 +1042,7 @@ instead of a runnable executable, add the following Excelsior JET Maven plugin c
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 	<configuration>
         <appType>dynamic-library</appType>
 	</configuration>
@@ -1111,7 +1111,7 @@ To create a Windows Service, add the following Excelsior JET Maven plugin config
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.0</version>
+	<version>0.9.1</version>
 	<configuration>
         <appType>windows-service</appType>
         <main>*service-main*</main>
@@ -1215,7 +1215,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.9.1 (??-Dec-2016)
+Version 0.9.1 (02-Dec-2016)
 
 * Support for Compact Profiles
 * Not working Test Run for 7+ Tomcat versions fixed (#42 issue)
