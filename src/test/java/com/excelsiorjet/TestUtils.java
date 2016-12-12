@@ -50,6 +50,10 @@ public class TestUtils {
         return excelsiorJet.isCompactProfilesSupported();
     }
 
+    public static boolean isDiskFootprintReductionSupported() {
+        return excelsiorJet.isDiskFootprintReductionSupported();
+    }
+
     public static boolean isMultiAppSupported() {
         return excelsiorJet.isMultiAppSupported();
     }
