@@ -123,26 +123,29 @@ public class JetMojo extends AbstractJetMojo {
 
     /**
      * (32-bit only)
-     * Reduce disk footprint via compressing rarely used Java SE API classes in the resulting package.
+     * Reduce the disk footprint of the application by including the supposedly unused Java SE API
+     * classes in the resulting package in a compressed form.
      * Valid values are: {@code none},  {@code medium} (default),  {@code high-memory},  {@code high-disk}.
      * <p>
      * The feature is only available if {@link #globalOptimizer} is enabled.
-     * In this mode Java SE classes that were not compiled into the resulting executable are placed in bytecode form
-     * into the resulting package and can be compressed using the following modes:
+     * In this mode, the Java SE classes that were not compiled into the resulting executable are placed
+     * into the resulting package in bytecode form, possibly compressed depending on the mode:
+     * </p>
      * <dl>
      * <dt>none</dt>
-     * <dd>disable compression</dd>
+     * <dd>Disable compression</dd>
      * <dt>medium</dt>
-     * <dd>use simple compression with minimum overhead at runtime on decompression</dd>
+     * <dd>Use a simple compression algorithm that has minimal run time overheads and permits
+     * selective decompression.</dd>
      * <dt>high-memory</dt>
-     * <dd>Java SE API classes are compressed as a whole resulting into much better disk footprint reduction
-     * than medium compression. However if the compressed classes will be accessed at runtime the whole bundle
-     * must be decompressed to retrieve a necessary class. high-memory reduction mode decompresses the bundle
-     * into the heap (that can be garbage collected lately)</dd>
+     * <dd>Compress all unused Java SE API classes as a whole. This results in more significant disk
+     * footprint reduction compared to than medium compression. However, if one of the compressed classes
+     * is needed at run time, the entire bundle must be decompressed to retrieve it.
+     * In the {@code high-memory} reduction mode the bundle is decompressed 
+     * onto the heap and can be garbage collected later.</dd>
      * <dt>high-disk</dt>
-     * <dd>The same as high-memory but on demand decompression occurs to the temp directory.
+     * <dd>Same as {@code high-memory}, but decompress to the temp directory.</dd>
      * </dl>
-     * </p>
      */
     @Parameter(property = "diskFootprintReduction")
     private String diskFootprintReduction;
