@@ -769,23 +769,24 @@ The available optional components are:
 
 ##### Disk Footprint Reduction
 
-The 32-bit versions of Excelsior JET feature disk footprint reduction of Excelsior JET runtime
-when [Global Optimizer](#global-optimizer) is enabled via compressing rarely used Java SE API classes
-in the resulting package.
+The 32-bit versions of Excelsior JET are capable of reducing the disk footprint of an application
+compiled with the [Global Optimizer](#global-optimizer) enabled, by compressing the (supposedly) unused Java SE API
+classes.
 
-To enable the Disk Footprint Reduction, add the following configuration parameter:
+To enable disk footprint reduction, add the following configuration parameter:
 
 `<diskFootprintReduction>`*disk-footprint-reduction-mode*`</diskFootprintReduction>`
 
 The available modes are:
 
 * `none` - disable compression
-* `medium` - use simple compression with minimum overhead at runtime on decompression
-* `high-memory` - Java SE API classes are compressed as a whole resulting into much better disk footprint reduction
-                  than medium compression. However if the compressed classes will be accessed at runtime the whole bundle
-                  must be decompressed to retrieve a necessary class. `high-memory` reduction mode decompresses the bundle
-                  into the heap (that can be garbage collected lately)
-* `high-disk` - the same as `high-memory` but on demand decompression occurs to the temp directory
+* `medium` - use a simple compression with minimal run time overheads and selective decompression
+* `high-memory` - compress all class files as a whole, resulting in a more significant disk footprint reduction
+                  compared to medium compression. The downside is that the entire bundle
+                  has to be decompressed to retrieve a single class, if it turns out to be
+                  required at run time. In the `high-memory` mode, the bundle is decompressed
+                  onto the heap and can be garbage collected later.
+* `high-disk` - compress as in the `high-memory` mode, decompress to the temp directory
 
 #### Java Runtime Slim-Down Configurations
 
