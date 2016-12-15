@@ -28,6 +28,7 @@ import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.*;
+import com.excelsiorjet.api.util.Txt;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
@@ -36,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.excelsiorjet.api.log.Log.logger;
+import static com.excelsiorjet.api.util.Txt.*;
 
 /**
  * Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -278,7 +280,7 @@ public class JetMojo extends AbstractJetMojo {
     /**
      * Product version. Required for Excelsior Installer.
      * Note: To specify a different (more precise) version number for the Windows executable version-information resource,
-     * use the {@link #winVIVersion} Mojo parameter.
+     * use the {@link #windowsVersionInfoConfiguration} Mojo parameter.
      */
     @Parameter(property = "version", defaultValue = "${project.version}")
     protected String version;
@@ -286,38 +288,41 @@ public class JetMojo extends AbstractJetMojo {
     /**
      * (Windows) If set to {@code true}, a version-information resource will be added to the final executable.
      *
-     * @see #vendor vendor
-     * @see #product product
-     * @see #winVIVersion winVIVersion
-     * @see #winVICopyright winVICopyright
-     * @see #winVIDescription winVIDescription
+     * @see #windowsVersionInfoConfiguration
+     * @see WindowsVersionInfoConfig#company
+     * @see WindowsVersionInfoConfig#product
+     * @see WindowsVersionInfoConfig#version
+     * @see WindowsVersionInfoConfig#copyright
+     * @see WindowsVersionInfoConfig#description
      */
     @Parameter(property = "addWindowsVersionInfo", defaultValue = "true")
     protected boolean addWindowsVersionInfo;
 
     /**
-     * (Windows) Version number string for the version-information resource.
-     * (Both {@code ProductVersion} and {@code FileVersion} resource strings are set to the same value.)
-     * Must have {@code v1.v2.v3.v4} format where {@code vi} is a number.
-     * If not set, {@code ${project.version}} is used. If the value does not meet the required format,
-     * it is coerced. For instance, "1.2.3-SNAPSHOT" becomes "1.2.3.0"
-     *
-     * @see #version version
+     * Windows version-information resource description.
      */
+    @Parameter(property = "windowsVersionInfoConfiguration")
+    protected WindowsVersionInfoConfig windowsVersionInfoConfiguration;
+
+    /**
+     * Deprecated. Use {@link #windowsVersionInfoConfiguration} parameter instead.
+     */
+    @Deprecated
     @Parameter(property = "winVIVersion")
     protected String winVIVersion;
 
     /**
-     * (Windows) Legal copyright notice string for the version-information resource.
-     * By default, {@code "Copyright © {$project.inceptionYear},[curYear] [vendor]"} is used.
+     * Deprecated. Use {@link #windowsVersionInfoConfiguration} parameter instead.
      */
+    @Deprecated
     @Parameter(property = "winVICopyright")
     protected String winVICopyright;
 
     /**
-     * (Windows) File description string for the version-information resource.
+     * Deprecated. Use {@link #windowsVersionInfoConfiguration} parameter instead.
      */
-    @Parameter(property = "winVIDescription", defaultValue = "${project.name}")
+    @Deprecated
+    @Parameter(property = "winVIDescription")
     protected String winVIDescription;
 
     /**
@@ -399,10 +404,8 @@ public class JetMojo extends AbstractJetMojo {
                     .excelsiorJetPackaging(packaging)
                     .vendor(vendor)
                     .product(product)
-                    .winVIVersion(winVIVersion)
-                    .winVICopyright(winVICopyright)
+                    .windowsVersionInfoConfiguration(windowsVersionInfoConfiguration)
                     .inceptionYear(project.getInceptionYear())
-                    .winVIDescription(winVIDescription)
                     .globalOptimizer(globalOptimizer)
                     .javaRuntimeSlimDown(javaRuntimeSlimDown)
                     .trialVersion(trialVersion)
@@ -426,6 +429,8 @@ public class JetMojo extends AbstractJetMojo {
                     .optRtFiles(optRtFiles)
                     .compactProfile(profile)
                     .diskFootprintReduction(diskFootprintReduction);
+
+            checkDeprecated();
             ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
             new JetBuildTask(excelsiorJet, jetProject).execute();
         } catch (JetTaskFailureException | JetHomeException  e) {
@@ -434,6 +439,21 @@ public class JetMojo extends AbstractJetMojo {
             logger.debug("JetTask execution error", e);
             logger.error(e.getMessage());
             throw new MojoExecutionException(e.getMessage(), e);
+        }
+    }
+
+    private void checkDeprecated() {
+        if (winVIVersion != null) {
+            logger.warn(s("JetBuildTask.WinVIDeprecated.Warning", "winVIVersion", "version"));
+            windowsVersionInfoConfiguration.version = winVIVersion;
+        }
+        if (winVICopyright != null) {
+            logger.warn(s("JetBuildTask.WinVIDeprecated.Warning", "winVICopyright", "copyright"));
+            windowsVersionInfoConfiguration.copyright = winVICopyright;
+        }
+        if (winVIDescription != null) {
+            logger.warn(s("JetBuildTask.WinVIDeprecated.Warning", "winVIDescription", "description"));
+            windowsVersionInfoConfiguration.description = winVIDescription;
         }
     }
 
