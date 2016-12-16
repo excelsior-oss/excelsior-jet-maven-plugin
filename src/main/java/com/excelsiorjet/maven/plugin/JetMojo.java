@@ -445,15 +445,21 @@ public class JetMojo extends AbstractJetMojo {
     private void checkDeprecated() {
         if (winVIVersion != null) {
             logger.warn(s("JetBuildTask.WinVIDeprecated.Warning", "winVIVersion", "version"));
-            windowsVersionInfoConfiguration.version = winVIVersion;
+            if (windowsVersionInfoConfiguration.version == null) {
+                windowsVersionInfoConfiguration.version = winVIVersion;
+            }
         }
         if (winVICopyright != null) {
             logger.warn(s("JetBuildTask.WinVIDeprecated.Warning", "winVICopyright", "copyright"));
-            windowsVersionInfoConfiguration.copyright = winVICopyright;
+            if (windowsVersionInfoConfiguration.copyright == null) {
+                windowsVersionInfoConfiguration.copyright = winVICopyright;
+            }
         }
         if (winVIDescription != null) {
             logger.warn(s("JetBuildTask.WinVIDeprecated.Warning", "winVIDescription", "description"));
-            windowsVersionInfoConfiguration.description = winVIDescription;
+            if (windowsVersionInfoConfiguration.description == null) {
+                windowsVersionInfoConfiguration.description = winVIDescription;
+            }
         }
     }
 
