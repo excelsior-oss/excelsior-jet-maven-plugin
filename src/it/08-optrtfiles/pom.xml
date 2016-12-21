@@ -22,10 +22,12 @@
               <version>@project.version@</version>
               <configuration>
                   <mainClass>HelloWorld</mainClass>
-                  <optRtFiles>
-                    <param>javafx-webkit</param>
-                    <param>nashorn</param>
-                  </optRtFiles>
+                  <runtime>
+                      <components>
+                        <param>javafx-webkit</param>
+                        <param>nashorn</param>
+                      </components>
+                  </runtime>
               </configuration>
           </plugin>
       </plugins>

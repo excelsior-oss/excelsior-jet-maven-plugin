@@ -38,9 +38,11 @@
                   <mainClass>HelloWorld</mainClass>
                   <stackTraceSupport>full</stackTraceSupport>
                   <inlineExpansion>very-aggressive</inlineExpansion>
-                  <locales>
-                      <locale>Chinese</locale>
-                  </locales>
+                  <runtime>
+                      <locales>
+                          <locale>Chinese</locale>
+                      </locales>
+                  </runtime>
                   <profileStartup>false</profileStartup>
               </configuration>
           </plugin>

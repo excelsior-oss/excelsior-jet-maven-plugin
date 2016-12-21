@@ -460,8 +460,8 @@ The above parameters are also used by Windows Version Information and OS X bundl
 To further configure the Excelsior Installer setup, you need to add the following configuration section:
 
 ```xml
-<excelsiorInstallerConfiguration>
-</excelsiorInstallerConfiguration>
+<excelsiorInstaller>
+</excelsiorInstaller>
 ```
 
 that has the following configuration parameters:
@@ -490,8 +490,8 @@ to create Excelsior Installer setups on Windows and Linux and an application bun
 To configure the OS X application bundle, you need to add the following configuration section:
 
 ```xml
-<osxBundleConfiguration>
-</osxBundleConfiguration>
+<osxBundle>
+</osxBundle>
 ```
 
 The values of most bundle parameters are derived automatically from the other parameters of your `pom.xml`.
@@ -534,8 +534,8 @@ The values of `<product>` and `<vendor>` configurations are used verbatim as
 other defaults can be changed using the following configuration section:
 
 ```xml
-<windowsVersionInfoConfiguration>
-</windowsVersionInfoConfiguration>
+<windowsVersionInfo>
+</windowsVersionInfo>
 ```
 
 that has the following configuration parameters:
@@ -716,14 +716,23 @@ To enable the Global Optimizer, add the following configuration parameter:
 
 **Note:** performing a Test Run is mandatory if the Global Optimizer is enabled.
 
-#### Optional Runtime Components Configurations
+#### Excelsior JET Runtime Configurations
+
+The plugin allows you to configure Excelsior JET runtime via `<runtime>` configuration section:
+
+```xml
+<runtime>
+</runtime>
+```
+
+that has in turn itself parameters described below.
 
 ##### Compact Profiles
 
 Java SE 8 defines three subsets of the standard Platform API called compact profiles.
 Excelsior JET enables you to deploy your application with one of those subsets.
 
-To specify a particular profile, use the `<profile>` plugin parameter:
+To specify a particular profile, use the `<profile>` parameter of `<runtime>` section:
 
 Valid values are: `auto` (default), `compact1`, `compact2`, `compact3`, `full`
 
@@ -738,10 +747,12 @@ Additional locales and character encoding sets that may potentially be in use in
 where you distribute your application can be added to the package with the following configuration:
 
 ```xml
-<locales>
-  <locale>Locale1</locale>
-  <locale>Locale2</locale>
-<locales>
+<runtime>
+  <locales>
+    <locale>Locale1</locale>
+    <locale>Locale2</locale>
+  <locales>
+</runtime>
 ```
 
 You may specify `all` as the value of `<locale>` to add all locales and charsets at once or
@@ -758,18 +769,21 @@ By default, only the `European` locales are added.
 To include optional JET Runtime components in the package, use the following configuration:
 
 ```xml
-<optRtFiles>
-  <optRtFile>optRtFile1</optRtFile>
-  <optRtFile>optRtFile2</optRtFile>
-</optRtFiles>
+<runtime>
+  <components>
+    <component>optComponent1</component>
+    <component>optComponent2</component>
+  </components>
+</runtime>
 ```
 
-You may specify `all` as the value of `<optRtFile>` to add all components at once or
+You may specify `all` as the value of `<component>` to add all components at once or
 `none` to not include any of them.
 
 The available optional components are:
 
-`runtime_utilities, fonts, awt_natives, api_classes, jce, accessibility, javafx, javafx-webkit, nashorn, cldr`
+`runtime_utilities`, `fonts`, `awt_natives`, `api_classes`, `jce`, `jdk_tools`, `accessibility`, `javafx`, `javafx-webkit`,
+`javafx-swing`, `javafx-qtkit`, `nashorn`, `cldr`, `dnsns`, `zipfs`
 
 *Note:* by default, the plugin automatically includes the optional components which the compiler detected
    as used when building the executable(s).
@@ -780,7 +794,7 @@ The 32-bit versions of Excelsior JET are capable of reducing the disk footprint 
 compiled with the [Global Optimizer](#global-optimizer) enabled, by compressing the (supposedly) unused Java SE API
 classes.
 
-To enable disk footprint reduction, add the following configuration parameter:
+To enable disk footprint reduction, add the following parameter of `<runtime>` section:
 
 `<diskFootprintReduction>`*disk-footprint-reduction-mode*`</diskFootprintReduction>`
 
@@ -795,7 +809,7 @@ The available modes are:
                   onto the heap and can be garbage collected later.
 * `high-disk` - compress as in the `high-memory` mode, decompress to the temp directory
 
-#### Java Runtime Slim-Down Configurations
+##### Java Runtime Slim-Down Configurations
 
 The 32-bit versions of Excelsior JET feature Java Runtime Slim-Down, a unique
 Java application deployment model delivering a significant reduction
@@ -817,9 +831,11 @@ if the deployed application attempts to use any of the detached components via J
 To enable Java Runtime Slim-Down, copy and paste the following plugin configuration:
 
 ```xml
-<javaRuntimeSlimDown>
-    <detachedBaseURL></detachedBaseURL>
-</javaRuntimeSlimDown>
+<runtime>
+    <slimDown>
+        <detachedBaseURL></detachedBaseURL>
+    </slimDown>
+</runtime>
 ```
 
 and specify the base URL of the location where you plan to place the detached package, e.g.
@@ -828,7 +844,7 @@ and specify the base URL of the location where you plan to place the detached pa
 By default, the plugin automatically detects which Java SE APIs your application does not use
 and detaches the respective JET Runtime components from the installation package.
 Alternatively, you may enforce detaching of particular components using the following parameter
-under the `<javaRuntimeSlimDown>` configuration section:
+under the `<slimDown>` configuration section:
 
 `<detachComponents>`*comma-separated list of APIs*`</detachComponents>`
 
@@ -836,7 +852,7 @@ Available detachable components: `corba, management, xml, jndi, jdbc, awt/java2d
 
 At the end of the build process, the plugin places the detached package in the `jet` subdirectory
 of the Maven target build directory. You may configure its name with the `<detachedPackage>` parameter
-of the `<javaRuntimeSlimDown>` section (by default the name is `${project.build.finalName}.pkl`).
+of the `<slimDown>` section (by default the name is `${project.build.finalName}.pkl`).
 
 Do not forget to upload the detached package to the location specified in `</detachedBaseURL>`
 above before deploying your application to end-users.
@@ -985,7 +1001,7 @@ Other packaging types that are available for plain Java SE applications are supp
 #### Tomcat configuration parameters
 Most configuration parameters that are available for plain Java SE applications listed above
 are also available for Tomcat web applications. There are also a few Tomcat-specific configuration parameters that
-you may set within the `<tomcatConfiguration>` parameters block:
+you may set within the `<tomcat>` parameters block:
 
 * `<warDeployName>` - the name of the war file to be deployed into Tomcat.
    By default, Tomcat uses the name of the war file as the context path of the respective web application.
@@ -1143,7 +1159,7 @@ To create a Windows Service, add the following Excelsior JET Maven plugin config
 	<configuration>
         <appType>windows-service</appType>
         <main>*service-main*</main>
-        <windowsServiceConfiguration>
+        <windowsService>
             <name></name>
             <displayName></displayName>
             <description></description>
@@ -1157,7 +1173,7 @@ To create a Windows Service, add the following Excelsior JET Maven plugin config
             <dependencies>
                  <dependency></dependency>
             </dependencies>
-        </windowsServiceConfiguration>
+        </windowsService>
 	</configuration>
 </plugin>
 ```
@@ -1245,7 +1261,11 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 Version 0.9.3 (??-Dec-2016)
 
-* Support for Disk Footprint Reduction
+* `<runtime>` configuration section introduced and related parameters moved to it:
+   `<locales>`, `<profile>`, `<optRtFiles>` renamed to `<components>`, `<javaRuntimeSlimDown>` renamed to `<slimDown>`.
+   Old configuration parameters are deprecated and will be removed in a future release.
+   Support for Disk Footprint Reduction added to `<runtime>` section via `<diskFootprintReduction>` parameter.
+
 * Windows version-info resource configuration changed to meet other enclosed configurations style.
   Old way to configure Windows version info is deprecated and will be removed in a future release.
 

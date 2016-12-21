@@ -35,14 +35,14 @@
               <artifactId>excelsior-jet-maven-plugin</artifactId>
               <version>@project.version@</version>
               <configuration>
-                  <tomcatConfiguration>
+                  <tomcat>
                       <warDeployName>ROOT</warDeployName>
                       <hideConfig>true</hideConfig>
                       <genScripts>false</genScripts>
-                  </tomcatConfiguration>
-                  <windowsServiceConfiguration>
+                  </tomcat>
+                  <windowsService>
                       <description>Jet Compiled Tomcat</description>
-                  </windowsServiceConfiguration>
+                  </windowsService>
                   <dependencies>
                         <dependency>
                             <artifactId>commons-io</artifactId>
