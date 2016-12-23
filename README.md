@@ -727,6 +727,42 @@ The plugin allows you to configure Excelsior JET runtime via `<runtime>` configu
 
 that has in turn itself parameters described below.
 
+##### Runtime Selection
+
+Excelsior JET VM comes with multiple implementations of the runtime system,
+optimized for different hardware configurations and application types.
+It enables your application to effectively utilize the computing power of systems that support parallel execution
+(Examples are multi-processor servers, multi-core chips and CPUs that support Hyper-Threading Technology),
+thereby improving performance.
+
+To select a particular runtime kind, use the `<kind>` parameter of `<runtime>` section.
+The available kinds are:
+
+* `desktop` -
+   The Desktop Runtime is suitable for applications that typically run on conventional desktop and notebook computers.
+   It is optimized for single-CPU systems, including those based on multi-core chips.
+   This is the best choice for rich clients, visualization and engineering design tools, and other desktop applications.
+   This kind is default for Professional Edition.
+* `server` -
+   The Server Runtime fits best for highly concurrent server applications. It provides out-of-the-box performance
+   and scalability and takes full advantage of the computing power of multi-processor hardware.
+   In particular, the Server Runtime includes the CoreBalance garbage collector that fully utilizes parallel hardware
+   to reduce average and maximum pause time.
+   This kind is default for Enterprise Edition and Evaluation and is not available in other retail versions.
+* `classic` -
+   The Classic Runtime is designed to use on low-end hardware which does not support parallel execution
+   such as uniprocessor systems equipped with old CPU models of the x86 architecture.
+   It is not recommended for use on HyperThread/multi-core CPU and multi-processor systems.
+   Note that the Classic Runtime is the only option in the Standard Edition of Excelsior JET.
+
+##### Changing Default Runtime Location in the Resulting Package
+
+By default, Excelsior JET places required Excelsior JET runtime files near to compiled executable
+to a folder with "rt" name.
+You may change its default location with the `<location>` parameter of `<runtime>` section.
+
+**Note:** This functionality is only available in Excelsior JET 11.3 and above.
+
 ##### Compact Profiles
 
 Java SE 8 defines three subsets of the standard Platform API called compact profiles.
@@ -742,7 +778,8 @@ or the entire Platform API (`full`) if there is no such profile.
 
 **Note:** This functionality is only available in Excelsior JET 11.3 and above.
 
-##### Locales and charsets
+##### Locales and Charsets
+
 Additional locales and character encoding sets that may potentially be in use in the regions
 where you distribute your application can be added to the package with the following configuration:
 
@@ -765,7 +802,8 @@ The available sets of locales and encodings are:
 
 By default, only the `European` locales are added.
 
-##### Optional components
+##### Optional Components
+
 To include optional JET Runtime components in the package, use the following configuration:
 
 ```xml
@@ -782,8 +820,8 @@ You may specify `all` as the value of `<component>` to add all components at onc
 
 The available optional components are:
 
-`runtime_utilities`, `fonts`, `awt_natives`, `api_classes`, `jce`, `jdk_tools`, `accessibility`, `javafx`, `javafx-webkit`,
-`javafx-swing`, `javafx-qtkit`, `nashorn`, `cldr`, `dnsns`, `zipfs`
+`runtime_utilities`, `fonts`, `awt_natives`, `api_classes`, `jce`, `jdk_tools`, `accessibility` (Windows only),
+`javafx`, `javafx-webkit`, `javafx-swing`, `javafx-qtkit` (macOS only), `nashorn`, `cldr`, `dnsns`, `zipfs`
 
 *Note:* by default, the plugin automatically includes the optional components which the compiler detected
    as used when building the executable(s).
@@ -1264,7 +1302,10 @@ Version 0.9.3 (??-Dec-2016)
 * `<runtime>` configuration section introduced and related parameters moved to it:
    `<locales>`, `<profile>`, `<optRtFiles>` renamed to `<components>`, `<javaRuntimeSlimDown>` renamed to `<slimDown>`.
    Old configuration parameters are deprecated and will be removed in a future release.
-   Support for Disk Footprint Reduction added to `<runtime>` section via `<diskFootprintReduction>` parameter.
+   New parameters added to `<runtime>` section:
+    - `<kind>` to select a runtime kind
+    - `<location>` to change runtime location in the resulting package
+    - `<diskFootprintReduction>` to reduce runtime disk footprint
 
 * Windows version-info resource configuration changed to meet other enclosed configurations style.
   Old way to configure Windows version info is deprecated and will be removed in a future release.
