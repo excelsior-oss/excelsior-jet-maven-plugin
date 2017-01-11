@@ -1215,6 +1215,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
+Version 0.9.2 (??-Jan-2017)
+
+Issue with buildnumber-maven-plugin #49 fixed
+
 Version 0.9.1 (02-Dec-2016)
 
 * Support for Compact Profiles

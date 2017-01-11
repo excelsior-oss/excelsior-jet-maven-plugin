@@ -55,6 +55,9 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
     private File targetDir;
 
+    @Parameter(defaultValue = "${project.build.finalName}", readonly = true, required = true)
+    protected String artifactName;
+
     /**
      * Application type. Permitted values are:
      * <dl>
@@ -238,7 +241,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .mainClass(mainClass)
                         .tomcatConfiguration(tomcatConfiguration)
                         .projectDependencies(getDependencies())
-                        .artifactName(project.getBuild().getFinalName())
+                        .artifactName(artifactName)
                         .jetOutputDir(jetOutputDir)
                         .packageFilesDir(packageFilesDir)
                         .execProfilesDir(execProfilesDir)

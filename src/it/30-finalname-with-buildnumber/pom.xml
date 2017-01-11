@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.excelsior.it</groupId>
+  <artifactId>HelloWorld</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <description>A simple IT building HelloWorld with Excelsior JET.</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <github-repo-owner>excelsior-oss</github-repo-owner>
+    <github-repo>excelsior-jet-maven-plugin</github-repo>
+  </properties>
+
+  <scm>
+    <connection>scm:git:https://github.com/${github-repo-owner}/${github-repo}.git</connection>
+    <developerConnection>scm:git:https://github.com/${github-repo-owner}/${github-repo}.git</developerConnection>
+    <url>https://github.com/${github-repo-owner}/${github-repo}</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <build>
+      <finalName>${project.artifactId}-${project.version}-${buildNumber}</finalName>
+      <plugins>
+          <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>buildnumber-maven-plugin</artifactId>
+              <version>1.4</version>
+              <executions>
+                  <execution>
+                      <phase>validate</phase>
+                      <goals>
+                          <goal>create</goal>
+                      </goals>
+                  </execution>
+              </executions>
+              <configuration>
+                  <doCheck>false</doCheck>
+                  <doUpdate>true</doUpdate>
+              </configuration>
+          </plugin>
+          <plugin>
+              <groupId>com.excelsiorjet</groupId>
+              <artifactId>excelsior-jet-maven-plugin</artifactId>
+              <version>@project.version@</version>
+              <configuration>
+                  <mainClass>HelloWorld</mainClass>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+</project>
