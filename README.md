@@ -69,7 +69,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.1</version>
+	<version>0.9.2</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -910,7 +910,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.1</version>
+	<version>0.9.2</version>
 	<configuration>
         <tomcatConfiguration>
              <tomcatHome></tomcatHome>
@@ -1042,7 +1042,7 @@ instead of a runnable executable, add the following Excelsior JET Maven plugin c
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.1</version>
+	<version>0.9.2</version>
 	<configuration>
         <appType>dynamic-library</appType>
 	</configuration>
@@ -1111,7 +1111,7 @@ To create a Windows Service, add the following Excelsior JET Maven plugin config
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.1</version>
+	<version>0.9.2</version>
 	<configuration>
         <appType>windows-service</appType>
         <main>*service-main*</main>
@@ -1215,7 +1215,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.9.2 (??-Jan-2017)
+Version 0.9.2 (12-Jan-2017)
 
 Issue with buildnumber-maven-plugin #49 fixed
 
