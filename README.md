@@ -767,6 +767,27 @@ The available optional components are:
 *Note:* by default, the plugin automatically includes the optional components which the compiler detected
    as used when building the executable(s).
 
+##### Disk Footprint Reduction
+
+The 32-bit versions of Excelsior JET are capable of reducing the disk footprint of an application
+compiled with the [Global Optimizer](#global-optimizer) enabled, by compressing the (supposedly) unused Java SE API
+classes.
+
+To enable disk footprint reduction, add the following configuration parameter:
+
+`<diskFootprintReduction>`*disk-footprint-reduction-mode*`</diskFootprintReduction>`
+
+The available modes are:
+
+* `none` - disable compression
+* `medium` - use a simple compression with minimal run time overheads and selective decompression
+* `high-memory` - compress all class files as a whole, resulting in a more significant disk footprint reduction
+                  compared to medium compression. The downside is that the entire bundle
+                  has to be decompressed to retrieve a single class, if it turns out to be
+                  required at run time. In the `high-memory` mode, the bundle is decompressed
+                  onto the heap and can be garbage collected later.
+* `high-disk` - compress as in the `high-memory` mode, decompress to the temp directory
+
 #### Java Runtime Slim-Down Configurations
 
 The 32-bit versions of Excelsior JET feature Java Runtime Slim-Down, a unique
@@ -1214,6 +1235,10 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 ```
 
 ## Release Notes
+
+Version 0.9.3 (??-Dec-2016)
+
+* Support for Disk Footprint Reduction
 
 Version 0.9.2 (12-Jan-2017)
 
