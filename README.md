@@ -436,6 +436,26 @@ in the `src/main/jetresources/packagefiles` subdirectory of your project,
 but you may dynamically generate the contents of that directory by means of other Maven plugins
 such as `maven-resources-plugin`.
 
+If you only need to add a few additional package files,
+it may be more convenient to specify them separately then to prepare `packageFilesDir` directory.
+You may do it using `<packageFiles>` configuration section:
+
+```xml
+<packageFiles>
+    <packageFile>
+        <path></path>
+        <packagePath></packagePath>
+    </packageFile>
+    <packageFile>
+        <path></path>
+        <packagePath></packagePath>
+    </packageFile>
+</packageFiles>
+```
+
+where `<path>` is path to the file or folder on a host system and `<packagePath>` is location of the file/folder
+within the package (root folder if the parameter is omitted).
+
 #### Excelsior Installer Configurations
 
 The plugin supports the creation of Excelsior Installer setups -
