@@ -460,8 +460,8 @@ The above parameters are also used by Windows Version Information and OS X bundl
 To further configure the Excelsior Installer setup, you need to add the following configuration section:
 
 ```xml
-<excelsiorInstaller>
-</excelsiorInstaller>
+<excelsiorInstallerConfiguration>
+</excelsiorInstallerConfiguration>
 ```
 
 that has the following configuration parameters:
@@ -531,17 +531,24 @@ configuration:
 By default, the values of version-information resource strings are derived from project settings.
 The values of `<product>` and `<vendor>` configurations are used verbatim as
 `ProductName` and `CompanyName` respectively;
-other defaults can be changed using the following configuration parameters:
+other defaults can be changed using the following configuration section:
 
-* `<winVIVersion>`*version-string*`</winVIVersion>` - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
+```xml
+<windowsVersionInfoConfiguration>
+</windowsVersionInfoConfiguration>
+```
+
+that has the following configuration parameters:
+
+* `<version>`*version-string*`</version>` - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
 
     **Notice:** unlike Maven `${project.version}`, this string must have format `v1.v2.v3.v4`, where vi is a number.
     The plugin would use heuristics to derive a correct version string from the specified value if the latter
     does not meet this requirement, or from `${project.version}` if this configuration is not present.
 
-* `<winVICopyright>`*legal-copyright*`</winVICopyright>` - `LegalCopyright` string, with default value derived from other parameters
+* `<copyright>`*legal-copyright*`</copyright>` - `LegalCopyright` string, with default value derived from other parameters
 
-* `<winVIDescription>`*executable-description*`</winVIDescription>` - `FileDescription` string, default is `${project.name}`
+* `<description>`*executable-description*`</description>` - `FileDescription` string, default is `${project.name}`
 
 #### Stack trace support
 The Excelsior JET Runtime supports three modes of stack trace printing: `minimal`, `full`, and `none`.
@@ -1239,6 +1246,8 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 Version 0.9.3 (??-Dec-2016)
 
 * Support for Disk Footprint Reduction
+* Windows version-info resource configuration changed to meet other enclosed configurations style.
+  Old way to configure Windows version info is deprecated and will be removed in a future release.
 
 Version 0.9.2 (12-Jan-2017)
 

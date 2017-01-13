@@ -74,6 +74,10 @@ public class TestUtils {
         return excelsiorJet.isTomcatSupported();
     }
 
+    public static boolean isWindowsVersionInfoSupported() {
+        return excelsiorJet.isWindowsVersionInfoSupported();
+    }
+
     //replace line separators to Unix as Groovy """ multiline strings produce Unix line separators
     public static String toUnixLineSeparators(String text) {
         return text.replaceAll("\r\n", "\n");
