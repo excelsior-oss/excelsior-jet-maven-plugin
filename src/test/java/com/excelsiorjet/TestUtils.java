@@ -34,6 +34,10 @@ public class TestUtils {
         return excelsiorJet.getTargetOS().mangleDllName(dll);
     }
 
+    public static boolean since_11_3() {
+        return excelsiorJet.since11_3();
+    }
+
     public static boolean isExcelsiorInstallerSupported() {
         return excelsiorJet.isExcelsiorInstallerSupported();
     }
