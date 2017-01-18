@@ -644,7 +644,7 @@ All in all, the JET Runtime recognizes the following standard JVM arguments:
 `-Xmx` - set maximum heap size
 
 > **Note:** Setting maximum heap size to zero (default) enables adaptive heap sizing.
-> Refer to the "Memory Management" section of the "Application Considerations" chapter
+> Refer to the *"Memory Management"* section of the *"Application Considerations"* chapter
 > of the Excelsior JET User's Guide
 > and [Knowledge Base Article #25](http://www.excelsiorjet.com/kb/25/)
 > for more information.
@@ -663,8 +663,8 @@ All in all, the JET Runtime recognizes the following standard JVM arguments:
 
 The Excelsior JET Runtime also recognizes a handful of system properties controlling
 its own behavior, such as `‑Djet.gc.ratio`.
-For more information, consult the "Java System Properties / JET Runtime Specific Properties" section
-of the "Application Considerations" chapter of the Excelsior JET User's Guide.
+For more information, consult the *"Java System Properties / JET Runtime Specific Properties"* section
+of the *"Application Considerations"* chapter of the Excelsior JET User's Guide.
 
 #### Startup Accelerator Configurations
 
@@ -718,48 +718,32 @@ To enable the Global Optimizer, add the following configuration parameter:
 
 #### Excelsior JET Runtime Configurations
 
-The plugin allows you to configure Excelsior JET runtime via `<runtime>` configuration section:
+The plugin enables you to configure the Excelsior JET Runtime via the `<runtime>` configuration section:
 
 ```xml
 <runtime>
 </runtime>
 ```
 
-that has in turn itself parameters described below.
+that may contain parameters described below.
 
-##### Runtime Selection
+##### Runtime Flavor Selection
 
 Excelsior JET VM comes with multiple implementations of the runtime system,
 optimized for different hardware configurations and application types.
-It enables your application to effectively utilize the computing power of systems that support parallel execution
-(Examples are multi-processor servers, multi-core chips and CPUs that support Hyper-Threading Technology),
-thereby improving performance.
 
-To select a particular runtime kind, use the `<kind>` parameter of `<runtime>` section.
-The available kinds are:
+To select a particular runtime flavor, use the `<flavor>` parameter of the `<runtime>` section.
+The flavors available in the Enterprise Edition and the Evaluation Package are
+`desktop`, `server`, and `classic`; other Excelsior JET products may not feature some of these.
 
-* `desktop` -
-   The Desktop Runtime is suitable for applications that typically run on conventional desktop and notebook computers.
-   It is optimized for single-CPU systems, including those based on multi-core chips.
-   This is the best choice for rich clients, visualization and engineering design tools, and other desktop applications.
-   This kind is default for Professional Edition.
-* `server` -
-   The Server Runtime fits best for highly concurrent server applications. It provides out-of-the-box performance
-   and scalability and takes full advantage of the computing power of multi-processor hardware.
-   In particular, the Server Runtime includes the CoreBalance garbage collector that fully utilizes parallel hardware
-   to reduce average and maximum pause time.
-   This kind is default for Enterprise Edition and Evaluation and is not available in other retail versions.
-* `classic` -
-   The Classic Runtime is designed to use on low-end hardware which does not support parallel execution
-   such as uniprocessor systems equipped with old CPU models of the x86 architecture.
-   It is not recommended for use on HyperThread/multi-core CPU and multi-processor systems.
-   Note that the Classic Runtime is the only option in the Standard Edition of Excelsior JET.
+For details, refer to the Excelsior JET User's Guide, Chapter *"Application
+Considerations"*, section *"Runtime Selection"*.
 
-##### Changing Default Runtime Location in the Resulting Package
+##### Changing Default Runtime Location
 
-By default, Excelsior JET places required Excelsior JET runtime files near to compiled executable
-to a folder with "rt" name.
-You may change its default location with the `<location>` parameter of `<runtime>` section.
+By default, Excelsior JET places its runtime files required for the 
+generated executable to work in a folder named `"rt"` located next to that executable.
+You may change that default location with the `<location>` parameter of the `<runtime>` section.
 
 **Note:** This functionality is only available in Excelsior JET 11.3 and above.
 
@@ -768,9 +752,8 @@ You may change its default location with the `<location>` parameter of `<runtime
 Java SE 8 defines three subsets of the standard Platform API called compact profiles.
 Excelsior JET enables you to deploy your application with one of those subsets.
 
-To specify a particular profile, use the `<profile>` parameter of `<runtime>` section:
-
-Valid values are: `auto` (default), `compact1`, `compact2`, `compact3`, `full`
+To specify a particular profile, use the `<profile>` parameter of the `<runtime>` section.
+The valid values are `auto` (default), `compact1`, `compact2`, `compact3`, and `full`.
 
 `<profile>auto</profile>` forces Excelsior JET to detect which parts of the Java SE Platform API are referenced
 by the application and select the smallest compact profile that includes them all,
@@ -832,7 +815,7 @@ The 32-bit versions of Excelsior JET are capable of reducing the disk footprint 
 compiled with the [Global Optimizer](#global-optimizer) enabled, by compressing the (supposedly) unused Java SE API
 classes.
 
-To enable disk footprint reduction, add the following parameter of `<runtime>` section:
+To enable disk footprint reduction, add the following parameter to the `<runtime>` section:
 
 `<diskFootprintReduction>`*disk-footprint-reduction-mode*`</diskFootprintReduction>`
 
@@ -940,8 +923,8 @@ to be visible in the resulting executable, enable data protection by specifying 
 
 `<protectData>true</protectData>`
 
-For more details on data protection, refer to the "Data Protection" section of
-the "Intellectual Property Protection" chapter of the Excelsior JET User's Guide.
+For more details on data protection, refer to the *"Data Protection"* section of
+the *"Intellectual Property Protection"* chapter of the Excelsior JET User's Guide.
 
 #### Additional Compiler Options and Equations
 The commonly used compiler options and equations are mapped to the parameters of the plugin.
@@ -1170,7 +1153,7 @@ With Excelsior JET, you achieve this functionality by implementing a subclass of
 as the main class of the plugin configuration.
 The JET Runtime will instantiate that class on startup and translate calls to the callback routine into calls
 of its respective methods, collectively called handler methods. For more details, refer to the
-"Windows Services" Chapter of the Excelsior JET User's Guide.
+*"Windows Services"* Chapter of the Excelsior JET User's Guide.
 
 To compile your implementation of `WinService` to Java bytecode you will need to reference
 the Excelsior JET WinService API from your Maven project. For that, add the following dependency
@@ -1297,15 +1280,15 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.9.3 (??-Dec-2016)
+Version 0.9.3 (??-Jan-2017)
 
 * `<runtime>` configuration section introduced and related parameters moved to it:
-   `<locales>`, `<profile>`, `<optRtFiles>` renamed to `<components>`, `<javaRuntimeSlimDown>` renamed to `<slimDown>`.
-   Old configuration parameters are deprecated and will be removed in a future release.
+   `<locales>`, `<profile>`, `<optRtFiles>` (renamed to `<components>`), `<javaRuntimeSlimDown>` (renamed to `<slimDown>`).
+   Old configuration parameters are now deprecated and will be removed in a future release.
    New parameters added to `<runtime>` section:
-    - `<kind>` to select a runtime kind
+    - `<flavor>` to select a runtime flavor
     - `<location>` to change runtime location in the resulting package
-    - `<diskFootprintReduction>` to reduce runtime disk footprint
+    - `<diskFootprintReduction>` to reduce application disk footprint
 
 * Windows version-info resource configuration changed to meet other enclosed configurations style.
   Old way to configure Windows version info is deprecated and will be removed in a future release.
