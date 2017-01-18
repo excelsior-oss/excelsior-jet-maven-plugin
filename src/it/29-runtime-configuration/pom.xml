@@ -24,7 +24,7 @@
                   <mainClass>HelloWorld</mainClass>
                   <packaging>none</packaging>
                   <runtime>
-                      <kind>classic</kind>
+                      <flavor>classic</flavor>
                       <location>hidden/runtime</location>
                   </runtime>
               </configuration>
