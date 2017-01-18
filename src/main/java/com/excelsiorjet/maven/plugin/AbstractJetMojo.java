@@ -131,7 +131,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * @see TomcatConfig#hideConfig
      * @see TomcatConfig#genScripts
      */
-    @Parameter(property = "tomcatConfiguration")
+    @Parameter(property = "tomcatConfiguration", alias = "tomcat")
     protected TomcatConfig tomcatConfiguration;
 
     /**

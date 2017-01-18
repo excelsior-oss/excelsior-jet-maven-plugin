@@ -22,7 +22,9 @@
               <version>@project.version@</version>
               <configuration>
                   <mainClass>HelloWorld</mainClass>
-                  <profile>compact3</profile>
+                  <runtime>
+                      <profile>compact3</profile>
+                  </runtime>
                   <packaging>none</packaging>
               </configuration>
           </plugin>

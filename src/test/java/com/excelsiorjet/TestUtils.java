@@ -78,6 +78,14 @@ public class TestUtils {
         return excelsiorJet.isWindowsVersionInfoSupported();
     }
 
+    public static boolean isSlimDownSupported() {
+        return excelsiorJet.isSlimDownSupported();
+    }
+
+    public static boolean isChangeRTLocationAvailable() {
+        return excelsiorJet.isChangeRTLocationAvailable();
+    }
+
     //replace line separators to Unix as Groovy """ multiline strings produce Unix line separators
     public static String toUnixLineSeparators(String text) {
         return text.replaceAll("\r\n", "\n");

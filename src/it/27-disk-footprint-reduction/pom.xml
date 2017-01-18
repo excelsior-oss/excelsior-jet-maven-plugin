@@ -23,7 +23,9 @@
               <configuration>
                   <mainClass>HelloWorld</mainClass>
                   <globalOptimizer>true</globalOptimizer>
-                  <diskFootprintReduction>high-disk</diskFootprintReduction>
+                  <runtime>
+                      <diskFootprintReduction>high-disk</diskFootprintReduction>
+                  </runtime>
               </configuration>
           </plugin>
       </plugins>
