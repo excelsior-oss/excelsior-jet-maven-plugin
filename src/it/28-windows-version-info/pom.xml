@@ -22,12 +22,13 @@
               <version>@project.version@</version>
               <configuration>
                   <mainClass>HelloWorld</mainClass>
-                  <runtime>
-                      <components>
-                        <param>javafx-webkit</param>
-                        <param>nashorn</param>
-                      </components>
-                  </runtime>
+                  <windowsVersionInfoConfiguration>
+                      <company>MyCompany</company>
+                      <product>MyProduct</product>
+                      <version>4.3.2.1</version>
+                      <copyright>MyCopyright</copyright>
+                      <description>My description</description>
+                  </windowsVersionInfoConfiguration>
               </configuration>
           </plugin>
       </plugins>

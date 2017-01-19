@@ -22,11 +22,10 @@
               <version>@project.version@</version>
               <configuration>
                   <mainClass>HelloWorld</mainClass>
+                  <packaging>none</packaging>
                   <runtime>
-                      <components>
-                        <param>javafx-webkit</param>
-                        <param>nashorn</param>
-                      </components>
+                      <flavor>classic</flavor>
+                      <location>hidden/runtime</location>
                   </runtime>
               </configuration>
           </plugin>

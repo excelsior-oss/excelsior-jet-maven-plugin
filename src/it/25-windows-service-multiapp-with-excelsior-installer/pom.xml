@@ -33,7 +33,7 @@
                   <mainClass>SampleService</mainClass>
                   <multiApp>true</multiApp>
                   <hideConsole>true</hideConsole>
-                  <windowsServiceConfiguration>
+                  <windowsService>
                       <displayName>Sample Service</displayName>
                       <description>Sample Service created with Excelsior JET</description>
                       <arguments>
@@ -48,7 +48,7 @@
                           <dependency>Dhcp</dependency>
                           <dependency>Dnscache</dependency>
                       </dependencies>
-                  </windowsServiceConfiguration>
+                  </windowsService>
                   <packaging>excelsior-installer</packaging>
               </configuration>
           </plugin>

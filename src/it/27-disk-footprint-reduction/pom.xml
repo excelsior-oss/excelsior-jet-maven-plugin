@@ -22,11 +22,9 @@
               <version>@project.version@</version>
               <configuration>
                   <mainClass>HelloWorld</mainClass>
+                  <globalOptimizer>true</globalOptimizer>
                   <runtime>
-                      <components>
-                        <param>javafx-webkit</param>
-                        <param>nashorn</param>
-                      </components>
+                      <diskFootprintReduction>high-disk</diskFootprintReduction>
                   </runtime>
               </configuration>
           </plugin>

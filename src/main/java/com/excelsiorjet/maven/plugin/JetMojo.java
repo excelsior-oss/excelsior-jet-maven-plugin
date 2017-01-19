@@ -28,6 +28,8 @@ import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.*;
+import com.excelsiorjet.api.util.Txt;
+import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
@@ -36,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.excelsiorjet.api.log.Log.logger;
+import static com.excelsiorjet.api.util.Txt.*;
 
 /**
  * Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -122,28 +125,45 @@ public class JetMojo extends AbstractJetMojo {
     protected boolean globalOptimizer;
 
     /**
-     * (32-bit only) Java Runtime Slim-Down configuration parameters.
+     * Runtime configuration parameters.
      *
-     * @see SlimDownConfig#detachedBaseURL
-     * @see SlimDownConfig#detachComponents
-     * @see SlimDownConfig#detachedPackage
+     * @see RuntimeConfig#kind
+     * @see RuntimeConfig#profile
+     * @see RuntimeConfig#components
+     * @see RuntimeConfig#locales
+     * @see RuntimeConfig#diskFootprintReduction
+     * @see RuntimeConfig#location
      */
-    @Parameter(property = "javaRuntimeSlimDown")
-    protected SlimDownConfig javaRuntimeSlimDown;
+    @Parameter(property = "runtimeConfiguration", alias = "runtime")
+    protected RuntimeConfig runtimeConfiguration;
 
     /**
-     * Java SE 8 defines three subsets of the standard Platform API called compact profiles.
-     * Excelsior JET enables you to deploy your application with one of those subsets.
-     * You may set this parameter to specify a particular profile.
-     * Valid values are: {@code auto} (default),  {@code compact1},  {@code compact2},  {@code compact3}, {@code full}
-     *  <p>
-     * {@code auto} value (default) forces Excelsior JET to detect which parts of the Java SE Platform API
-     * are referenced by the application and select the smallest compact profile that includes them all,
-     * or the entire Platform API if there is no such profile.
-     * </p>
+     * Deprecated. Use {@link RuntimeConfig#profile} of {@link #runtimeConfiguration} parameter instead.
      */
-    @Parameter(property = "profile", defaultValue = "auto")
+    @Deprecated
+    @Parameter(property = "profile")
     private String profile;
+
+    /**
+     * Deprecated. Use {@link RuntimeConfig#components} of {@link #runtimeConfiguration} parameter instead.
+     */
+    @Deprecated
+    @Parameter(property = "optRtFiles")
+    protected String[] optRtFiles;
+
+    /**
+     * Deprecated. Use {@link RuntimeConfig#locales} of {@link #runtimeConfiguration} parameter instead.
+     */
+    @Deprecated
+    @Parameter(property = "locales")
+    private String[] locales;
+
+    /**
+     * Deprecated. Use {@link RuntimeConfig#slimDown} of {@link #runtimeConfiguration} parameter instead.
+     */
+    @Deprecated
+    @Parameter(property = "javaRuntimeSlimDown")
+    protected SlimDownConfig javaRuntimeSlimDown;
 
     /**
      * If set to {@code true}, the multi-app mode is enabled for the resulting executable
@@ -200,18 +220,6 @@ public class JetMojo extends AbstractJetMojo {
     TrialVersionConfig trialVersion;
 
     /**
-     * Add optional JET Runtime components to the package.
-     * By default, only the {@code jce} component (Java Crypto Extension) is added.
-     * You may pass a special value {@code all} to include all available optional components at once
-     * or {@code none} to not include any of them.
-     * Available optional components:
-     * {@code runtime_utilities}, {@code fonts}, {@code awt_natives}, {@code api_classes}, {@code jce},
-     * {@code accessibility}, {@code javafx}, {@code javafx-webkit}, {@code nashorn}, {@code cldr}
-     */
-    @Parameter(property = "optRtFiles")
-    protected String[] optRtFiles;
-
-    /**
      * Application packaging mode. Permitted values are:
      * <dl>
      * <dt>zip</dt>
@@ -249,7 +257,7 @@ public class JetMojo extends AbstractJetMojo {
     /**
      * Product version. Required for Excelsior Installer.
      * Note: To specify a different (more precise) version number for the Windows executable version-information resource,
-     * use the {@link #winVIVersion} Mojo parameter.
+     * use the {@link #windowsVersionInfoConfiguration} Mojo parameter.
      */
     @Parameter(property = "version", defaultValue = "${project.version}")
     protected String version;
@@ -257,38 +265,41 @@ public class JetMojo extends AbstractJetMojo {
     /**
      * (Windows) If set to {@code true}, a version-information resource will be added to the final executable.
      *
-     * @see #vendor vendor
-     * @see #product product
-     * @see #winVIVersion winVIVersion
-     * @see #winVICopyright winVICopyright
-     * @see #winVIDescription winVIDescription
+     * @see #windowsVersionInfoConfiguration
+     * @see WindowsVersionInfoConfig#company
+     * @see WindowsVersionInfoConfig#product
+     * @see WindowsVersionInfoConfig#version
+     * @see WindowsVersionInfoConfig#copyright
+     * @see WindowsVersionInfoConfig#description
      */
     @Parameter(property = "addWindowsVersionInfo", defaultValue = "true")
     protected boolean addWindowsVersionInfo;
 
     /**
-     * (Windows) Version number string for the version-information resource.
-     * (Both {@code ProductVersion} and {@code FileVersion} resource strings are set to the same value.)
-     * Must have {@code v1.v2.v3.v4} format where {@code vi} is a number.
-     * If not set, {@code ${project.version}} is used. If the value does not meet the required format,
-     * it is coerced. For instance, "1.2.3-SNAPSHOT" becomes "1.2.3.0"
-     *
-     * @see #version version
+     * Windows version-information resource description.
      */
+    @Parameter(property = "windowsVersionInfoConfiguration", alias = "windowsVersionInfo")
+    protected WindowsVersionInfoConfig windowsVersionInfoConfiguration;
+
+    /**
+     * Deprecated. Use {@link #windowsVersionInfoConfiguration} parameter instead.
+     */
+    @Deprecated
     @Parameter(property = "winVIVersion")
     protected String winVIVersion;
 
     /**
-     * (Windows) Legal copyright notice string for the version-information resource.
-     * By default, {@code "Copyright © {$project.inceptionYear},[curYear] [vendor]"} is used.
+     * Deprecated. Use {@link #windowsVersionInfoConfiguration} parameter instead.
      */
+    @Deprecated
     @Parameter(property = "winVICopyright")
     protected String winVICopyright;
 
     /**
-     * (Windows) File description string for the version-information resource.
+     * Deprecated. Use {@link #windowsVersionInfoConfiguration} parameter instead.
      */
-    @Parameter(property = "winVIDescription", defaultValue = "${project.name}")
+    @Deprecated
+    @Parameter(property = "winVIDescription")
     protected String winVIDescription;
 
     /**
@@ -298,7 +309,7 @@ public class JetMojo extends AbstractJetMojo {
      * @see ExcelsiorInstallerConfig#eulaEncoding
      * @see ExcelsiorInstallerConfig#installerSplash
      */
-    @Parameter(property = "excelsiorInstallerConfiguration")
+    @Parameter(property = "excelsiorInstallerConfiguration", alias = "excelsiorInstaller")
     protected ExcelsiorInstallerConfig excelsiorInstallerConfiguration;
 
     /**
@@ -314,7 +325,7 @@ public class JetMojo extends AbstractJetMojo {
      * @see WindowsServiceConfig#startServiceAfterInstall
      * @see WindowsServiceConfig#dependencies
      */
-    @Parameter(property = "windowsServiceConfiguration")
+    @Parameter(property = "windowsServiceConfiguration", alias = "windowsService")
     protected WindowsServiceConfig windowsServiceConfiguration;
 
     /**
@@ -328,22 +339,8 @@ public class JetMojo extends AbstractJetMojo {
      * @see OSXAppBundleConfig#developerId
      * @see OSXAppBundleConfig#publisherId
      */
-    @Parameter(property = "osxBundleConfiguration")
+    @Parameter(property = "osxBundleConfiguration", alias = "osxBundle")
     protected OSXAppBundleConfig osxBundleConfiguration;
-
-    /**
-     * Add locales and charsets.
-     * By default only {@code European} locales are added.
-     * You may pass a special value {@code all} to include all available locales at once
-     * or {@code none} to not include any additional locales.
-     * Available locales and charsets:
-     *    {@code European}, {@code Indonesian}, {@code Malay}, {@code Hebrew}, {@code Arabic},
-     *    {@code Chinese}, {@code Japanese}, {@code Korean}, {@code Thai}, {@code Vietnamese}, {@code Hindi},
-     *    {@code Extended_Chinese}, {@code Extended_Japanese}, {@code Extended_Korean}, {@code Extended_Thai},
-     *    {@code Extended_IBM}, {@code Extended_Macintosh}, {@code Latin_3}
-     */
-    @Parameter(property = "locales")
-    private String[] locales;
 
     /**
      * Additional compiler options and equations.
@@ -370,12 +367,10 @@ public class JetMojo extends AbstractJetMojo {
                     .excelsiorJetPackaging(packaging)
                     .vendor(vendor)
                     .product(product)
-                    .winVIVersion(winVIVersion)
-                    .winVICopyright(winVICopyright)
+                    .windowsVersionInfoConfiguration(windowsVersionInfoConfiguration)
                     .inceptionYear(project.getInceptionYear())
-                    .winVIDescription(winVIDescription)
                     .globalOptimizer(globalOptimizer)
-                    .javaRuntimeSlimDown(javaRuntimeSlimDown)
+                    .runtimeConfiguration(runtimeConfiguration)
                     .trialVersion(trialVersion)
                     .excelsiorInstallerConfiguration(excelsiorInstallerConfiguration)
                     .windowsServiceConfiguration(windowsServiceConfiguration)
@@ -392,10 +387,9 @@ public class JetMojo extends AbstractJetMojo {
                     .inlineExpansion(inlineExpansion)
                     .hideConsole(hideConsole)
                     .profileStartupTimeout(profileStartupTimeout)
-                    .compilerOptions(compilerOptions)
-                    .locales(locales)
-                    .optRtFiles(optRtFiles)
-                    .compactProfile(profile);
+                    .compilerOptions(compilerOptions);
+
+            checkDeprecated();
             ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
             new JetBuildTask(excelsiorJet, jetProject).execute();
         } catch (JetTaskFailureException | JetHomeException  e) {
@@ -404,6 +398,52 @@ public class JetMojo extends AbstractJetMojo {
             logger.debug("JetTask execution error", e);
             logger.error(e.getMessage());
             throw new MojoExecutionException(e.getMessage(), e);
+        }
+    }
+
+    private void checkDeprecated() {
+        if (winVIVersion != null) {
+            logger.warn(s("JetBuildTask.WinVIDeprecated.Warning", "winVIVersion", "version"));
+            if (windowsVersionInfoConfiguration.version == null) {
+                windowsVersionInfoConfiguration.version = winVIVersion;
+            }
+        }
+        if (winVICopyright != null) {
+            logger.warn(s("JetBuildTask.WinVIDeprecated.Warning", "winVICopyright", "copyright"));
+            if (windowsVersionInfoConfiguration.copyright == null) {
+                windowsVersionInfoConfiguration.copyright = winVICopyright;
+            }
+        }
+        if (winVIDescription != null) {
+            logger.warn(s("JetBuildTask.WinVIDeprecated.Warning", "winVIDescription", "description"));
+            if (windowsVersionInfoConfiguration.description == null) {
+                windowsVersionInfoConfiguration.description = winVIDescription;
+            }
+        }
+
+        if (!Utils.isEmpty(optRtFiles)) {
+            logger.warn(s("JetBuildTask.RTSettingDeprecated.Warning", "optRtFiles", "components"));
+            if (Utils.isEmpty(runtimeConfiguration.components)) {
+                runtimeConfiguration.components = optRtFiles;
+            }
+        }
+        if (!Utils.isEmpty(locales)) {
+            logger.warn(s("JetBuildTask.RTSettingDeprecated.Warning", "locales", "locales"));
+            if (Utils.isEmpty(runtimeConfiguration.locales)) {
+                runtimeConfiguration.locales = locales;
+            }
+        }
+        if (javaRuntimeSlimDown.isEnabled()) {
+            logger.warn(s("JetBuildTask.RTSettingDeprecated.Warning", "javaRuntimeSlimDown", "slimDown"));
+            if (!runtimeConfiguration.slimDown.isEnabled()) {
+                runtimeConfiguration.slimDown = javaRuntimeSlimDown;
+            }
+        }
+        if (profile != null) {
+            logger.warn(s("JetBuildTask.RTSettingDeprecated.Warning", "profile", "profile"));
+            if (runtimeConfiguration.profile == null) {
+                runtimeConfiguration.profile = profile;
+            }
         }
     }
 

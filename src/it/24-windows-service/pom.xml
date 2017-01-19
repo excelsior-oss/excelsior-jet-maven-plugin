@@ -31,7 +31,7 @@
               <configuration>
                   <appType>windows-service</appType>
                   <mainClass>SampleService</mainClass>
-                  <windowsServiceConfiguration>
+                  <windowsService>
                       <displayName>Sample Service</displayName>
                       <description>Sample Service created with Excelsior JET</description>
                       <arguments>
@@ -42,7 +42,7 @@
                           <dependency>Dhcp</dependency>
                           <dependency>Dnscache</dependency>
                       </dependencies>
-                  </windowsServiceConfiguration>
+                  </windowsService>
               </configuration>
           </plugin>
       </plugins>

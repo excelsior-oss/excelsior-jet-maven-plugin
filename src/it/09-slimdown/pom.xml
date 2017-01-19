@@ -22,9 +22,11 @@
               <version>@project.version@</version>
               <configuration>
                   <mainClass>HelloWorld</mainClass>
-                  <javaRuntimeSlimDown>
-                      <detachedBaseURL>file://</detachedBaseURL>
-                  </javaRuntimeSlimDown>
+                  <runtime>
+                      <slimDown>
+                          <detachedBaseURL>file://</detachedBaseURL>
+                      </slimDown>
+                  </runtime>
               </configuration>
           </plugin>
       </plugins>
