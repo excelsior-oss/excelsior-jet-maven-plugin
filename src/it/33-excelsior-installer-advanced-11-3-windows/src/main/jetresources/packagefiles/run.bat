@@ -1,0 +1,1 @@
+..\HelloWorld.exe from run.bat %1 >runout.txt 2>&1
