@@ -26,6 +26,8 @@
         </activation>
         <properties>
           <exe.extension>.exe</exe.extension>
+          <dll.extension>.dll</dll.extension>
+          <dll.prefix></dll.prefix>
         </properties>
       </profile>
       <profile>
@@ -37,6 +39,8 @@
         </activation>
         <properties>
           <exe.extension></exe.extension>
+          <dll.extension>.so</dll.extension>
+          <dll.prefix>lib</dll.prefix>
         </properties>
       </profile>
     </profiles>
@@ -62,6 +66,12 @@
                               <argument>arg with space</argument>
                           </arguments>
                       </afterInstallRunnable>
+                      <installationDirectory>
+                          <type>current-directory</type>
+                          <path>/mavenPluginTestEI</path>
+                          <fixed>true</fixed>
+                      </installationDirectory>
+                      <installCallback>${project.basedir}/${dll.prefix}install${dll.extension}</installCallback>
                   </excelsiorInstaller>
               </configuration>
           </plugin>
