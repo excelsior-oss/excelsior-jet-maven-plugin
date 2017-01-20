@@ -1,3 +1,3 @@
 import com.excelsiorjet.TestUtils
 
-return TestUtils.excelsiorInstallerSupported && TestUtils.since_11_3() && TestUtils.isWindows()
+return TestUtils.advancedExcelsiorInstallerFeaturesSupported && TestUtils.windows
