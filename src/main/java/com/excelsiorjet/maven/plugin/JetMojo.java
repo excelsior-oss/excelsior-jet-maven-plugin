@@ -113,32 +113,28 @@ public class JetMojo extends AbstractJetMojo {
     protected boolean hideConsole;
 
     /**
-     * Optimization presets define default optimization mode for application dependencies.
+     * Optimization presets define the default optimization mode for application dependencies.
      * There are two optimization presets available: {@code typical} and {@code smart}.
      *
      * <dl>
-     * <dt>typical</dt>
+     * <dt>{@code typical} (default)</dt>
      * <dd>
-     * Default compilation mode in which all classes from the application's dependencies are compiled into an executable.
+     * Compile all classes from all dependencies to optimized native code.
      * </dd>
-     * <dt>smart</dt>
+     * <dt>{@code smart}</dt>
      * <dd>
-     * The Smart mode relies on a simple observation: an application using a Java API actually requires only a part
-     * the API's classes so there is no need to native compile the entire API implementation.
-     * The Smart mode detects which of your dependencies are libraries and tells the JET Optimizer
-     * to optimize only used classes from them. The remaining classes are kept in the bytecode form and handled
-     * by the JIT compiler, if the application tries to load them at run time.
-     * The Smart modes provides better compilation time and smaller executable in compare with the Typical mode but
-     * if some classes that it leaves in bytecode form will be JIT-compiled it may negatively affect
-     * the performance of your application.
-     * If you choose smart preset then performing the Test Run with a 32-bit Excelsior JET
-     * is highly recommended: Test Run of 32-bit Excelsior JET versions logs application classes
-     * that were accessed at runtime and the AOT compiler that has the results of the Test Run
-     * will compile those classes thus they will not be handled by JIT compiler at runtime.
+     * Use heuristics to determine which of the project dependencies are libraries and
+     * compile them selectively, leaving the supposedly unused classes in bytecode form.
      * </dd>
-     *
-     * Note: in compare with similar presets of the JET Control Panal, the Smart mode of the Excelsior JET Maven and
-     * Gradle plugins do NOT enable the Global Optimizer.
+     * </dl>
+     * <p>
+     * For details, refer to the Excelsior JET User's Guide, Chapter "JET Control Panel",
+     * section "Step 3: Selecing a compilation mode / Classpath Grid / Selective Optimization".
+     * </p>
+     * <p>
+     * <strong>Note:</strong> Unlike the identically named preset of the JET Control Panal,
+     * selecting the {@code smart} preset does NOT automatically enable the Global Optimizer.
+     * </p>
      *
      * @see #dependencies
      * @see DependencySettings

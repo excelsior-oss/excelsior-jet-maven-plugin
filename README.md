@@ -210,7 +210,7 @@ Just as it works for the splash image, if you place the icon file at
 `${project.basedir}/src/main/jetresources/icon.ico`, you won't need to specify it
 in the configuration explicitly.
 
-#### Dependency-specific settings
+#### Dependency-specific Settings
 
 As mentioned [above](#build-process), the plugin automatically picks up and compiles the run time dependencies
 of your Maven project.
@@ -221,7 +221,7 @@ for each dependency, or for groups of dependencies:
 - enable selective optimization of classes
 - control packing of resource files into the resulting executable
 
-##### Dependencies configuration
+##### Dependencies Configuration
 
 To set these properties for a particular dependency, add the following configuration to the plugin configuration
 section:
@@ -272,7 +272,7 @@ You may also use the `<path>` parameter to identify project dependencies that ar
 with the `<systemPath>` parameter.
 
 
-##### Code protection
+##### Code Protection
 
 If you need to protect your classes from decompilers,
 make sure that the respective dependencies have the `<protect>` property set to `all`.
@@ -281,7 +281,7 @@ set it to the `not-required` value instead. The latter setting may reduce compil
 the resulting executable in some cases.
 
 
-##### Selective optimization
+##### Selective Optimization
 
 To optimize all classes and all methods of each class of a dependency for performance,
 set its `<optimize>` property to `all`. The other valid value of that property is `auto-detect`.
@@ -298,27 +298,29 @@ dynamic class usage by performing a [Test Run](#performing-a-test-run) with 32-b
 prior to the build.
 
 
-##### Optimization presets
+##### Optimization Presets
 
-If you do not configure above settings for the dependencies all classes
-from the application's dependencies are compiled into an executable.
-It is so called `typical` optimization preset.
 
-However, as mentioned above, to reduce compilation time,
-you may wish to set the `<optimize>` property to `auto-detect`
+If you do not configure the above settings for any dependencies, all classes from
+all dependencies will be compiled to native code.
+That is a so called `typical` optimization preset.
+
+However, as mentioned above, you may wish to set the `<optimize>` property to `auto-detect`
 and the `<protect>` property to `not-required` for third-party dependencies, and
-set both properties to `all` for the dependencies containing your own classes.
-You may let the plugin to do that automatically choosing the `smart` optimization preset in
-the plugin configuration:
+set both properties to `all` for the dependencies containing your own classes,
+so as to reduce the compilation time and executable size.
+You may also let the plugin do that automatically by choosing the `smart` optimization
+preset in the plugin configuration:
 
 `<optimizationPreset>smart<optimizationPreset>`
 
-If you enable the `smart` mode, the plugin distinguishes between application classes and third-party library classes
-using the following heuristic: it treats all dependencies sharing the `groupId` with the
-main artifact as application classes, and all other dependencies as third-party dependencies.
+When the `smart` preset is enabled, the plugin distinguishes between application classes
+and third-party library classes using the following heuristic: it treats all dependencies
+sharing the `groupId` with the main artifact as application classes, and all other dependencies
+as third-party dependencies.
 
 Therefore, if some of your application classes reside in a dependency with a different `groupId`
-than your main artifact, make sure to set the `<optimize>` and `<protect>` properties for them
+than your main artifact, make sure to set the `optimize` and `protect` properties for them
 explicitly when you enable the `smart` mode, for instance:
 
 ```xml
@@ -347,7 +349,7 @@ The following configuration is therefore equivalent to the above example:
 </dependencies>
 ```
 
-##### Resource packing
+##### Resource Packing
 
 **Note:** This section only applies to dependencies that are jar or zip files.
 
