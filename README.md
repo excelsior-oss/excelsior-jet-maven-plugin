@@ -715,7 +715,7 @@ To configure the OS X application bundle, you need to add the following configur
 
 The values of most bundle parameters are derived automatically from the other parameters of your `pom.xml`.
 The complete list of the parameters can be obtained
-[here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/OSXAppBundleConfig.java).
+[here](https://github.com/excelsior-oss/excelsior-jet-api/blob/master/src/main/java/com/excelsiorjet/api/tasks/config/OSXAppBundleConfig.java).
 
 You still need to tell the plugin where the OS X icon (`.icns` file) for your bundle is located.
 Do that using the `<icon>` parameter of `<osxBundleConfiguration>`, or simply place the icon file at
