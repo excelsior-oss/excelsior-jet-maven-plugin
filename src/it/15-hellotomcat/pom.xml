@@ -35,6 +35,7 @@
               <artifactId>excelsior-jet-maven-plugin</artifactId>
               <version>@project.version@</version>
               <configuration>
+                  <optimizationPreset>smart</optimizationPreset>
                   <tomcat>
                       <warDeployName>ROOT</warDeployName>
                       <hideConfig>true</hideConfig>

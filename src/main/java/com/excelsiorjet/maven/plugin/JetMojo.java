@@ -113,6 +113,37 @@ public class JetMojo extends AbstractJetMojo {
     protected boolean hideConsole;
 
     /**
+     * Optimization presets define the default optimization mode for application dependencies.
+     * There are two optimization presets available: {@code typical} and {@code smart}.
+     *
+     * <dl>
+     * <dt>{@code typical} (default)</dt>
+     * <dd>
+     * Compile all classes from all dependencies to optimized native code.
+     * </dd>
+     * <dt>{@code smart}</dt>
+     * <dd>
+     * Use heuristics to determine which of the project dependencies are libraries and
+     * compile them selectively, leaving the supposedly unused classes in bytecode form.
+     * </dd>
+     * </dl>
+     * <p>
+     * For details, refer to the Excelsior JET User's Guide, Chapter "JET Control Panel",
+     * section "Step 3: Selecing a compilation mode / Classpath Grid / Selective Optimization".
+     * </p>
+     * <p>
+     * <strong>Note:</strong> Unlike the identically named preset of the JET Control Panal,
+     * selecting the {@code smart} preset does NOT automatically enable the Global Optimizer.
+     * </p>
+     *
+     * @see #dependencies
+     * @see DependencySettings
+     * @see #globalOptimizer
+     */
+    @Parameter(property = "optimizationPreset", defaultValue = "typical")
+    protected String optimizationPreset;
+
+    /**
      * (32-bit only) If set to {@code true}, the Global Optimizer is enabled,
      * providing higher performance and lower memory usage for the compiled application.
      * Performing a Test Run is mandatory when the Global Optimizer is enabled.
@@ -369,6 +400,7 @@ public class JetMojo extends AbstractJetMojo {
                     .product(product)
                     .windowsVersionInfoConfiguration(windowsVersionInfoConfiguration)
                     .inceptionYear(project.getInceptionYear())
+                    .optimizationPreset(optimizationPreset)
                     .globalOptimizer(globalOptimizer)
                     .runtimeConfiguration(runtimeConfiguration)
                     .trialVersion(trialVersion)

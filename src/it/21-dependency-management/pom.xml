@@ -25,6 +25,7 @@
                 <configuration>
                     <packaging>none</packaging>
                     <mainClass>AppWithDep</mainClass>
+                    <optimizationPreset>smart</optimizationPreset>
                     <dependencies>
                         <dependency>
                             <artifactId>commons-io</artifactId>
