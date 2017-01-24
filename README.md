@@ -69,7 +69,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.3</version>
+	<version>0.9.4</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -982,7 +982,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.3</version>
+	<version>0.9.4</version>
 	<configuration>
         <tomcatConfiguration>
              <tomcatHome></tomcatHome>
@@ -1114,7 +1114,7 @@ instead of a runnable executable, add the following Excelsior JET Maven plugin c
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.3</version>
+	<version>0.9.4</version>
 	<configuration>
         <appType>dynamic-library</appType>
 	</configuration>
@@ -1183,7 +1183,7 @@ To create a Windows Service, add the following Excelsior JET Maven plugin config
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.3</version>
+	<version>0.9.4</version>
 	<configuration>
         <appType>windows-service</appType>
         <main>*service-main*</main>
@@ -1287,7 +1287,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.9.4 (??-Jan-2017)
+Version 0.9.4 (24-Jan-2017)
 
 * `typical` and `smart` optimization presets introduced.
 
