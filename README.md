@@ -56,26 +56,28 @@ of plain Java SE applications that yield different executable types: dynamic lib
 
 #### Missing Functionality
 
-The current plugin version supports almost all features of Excelsior JET that you can find
-in Excelsior JET UIs (Jet Control Panel and JetPackII). Missing functionality in compare with Excelsior JET UIs:
+The current plugin version supports almost all features accessible through the Excelsior JET GUIs
+(JET Control Panel and JetPackII). The only bits of functionality that are missing are as follows:
 
-* The plugin does not yet support Eclipse RCP projects. The problem here is that
-  [Eclipse Tycho Maven Plugin](https://eclipse.org/tycho/) that allows to export Eclipse RCP applications from Maven
-   is still in incubation phase. Once it is finally released and there will be enough demand to support
-   Eclipse RCP applications in the Excelsior JET Maven plugin we will support it.
+* Eclipse RCP support. The problem here is that the [Eclipse Tycho Maven Plugin](https://eclipse.org/tycho/)
+  that enables exporting Eclipse RCP applications from Maven is still in incubation phase.
+  If a standard way to build Eclipse RCP applications from Maven ever appears,
+  *and* there will be enough demand, we will support it in the Excelsior JET Maven plugin.
 
-* Support for updates. We are not satisfied how we support updates in the JetPackII and think to revise the process
-  for creating updates. Once it becomes clear how the process should look like, we will support it in the plugin for sure.
-  If this functionality is show-stopper for you to switch to the plugin,
-  please [let us know](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).
+* Application update packaging - because we plan to overhaul that feature completely in the mid-term future.
+  Once it becomes clear how the new update process will look like, we will surely support it in the plugin.
+  However, if the absence of that functionality is a show-stopper for you,
+  please [let us know](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues) and
+  we'll reprioritize.
 
 * Customization of Excelsior Installer wizard texts.
   Custom texts should be supplied in all languages that Excelsior Installer supports,
-  and we have not found an easy-to-use way to configure that from the plugin.
+  and we have not yet found an easy-to-use way to configure them from the plugin.
 
-If you find that some other functionality is also missed or you need the plugin to support
+If you find that some other functionality is also missing, or you need the plugin to support
 an additional feature sooner rather than later, you can help us prioritize the roadmap
 by creating a feature request [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).
+
 
 ### Usage
 
@@ -453,9 +455,11 @@ in the `src/main/jetresources/packagefiles` subdirectory of your project,
 but you may dynamically generate the contents of that directory by means of other Maven plugins
 such as `maven-resources-plugin`.
 
-If you only need to add a few additional package files,
-it may be more convenient to specify them separately then to prepare `packageFilesDir` directory.
-You may do it using `<packageFiles>` configuration section:
+**New in 0.9.5:**
+
+If you only need to add a few extra files or folders to the package,
+you may find it more convenient to specify them directly rather than prepare a `<packageFilesDir>` directory.
+You can do that using the `<packageFiles>` configuration section:
 
 ```xml
 <packageFiles>
@@ -470,8 +474,8 @@ You may do it using `<packageFiles>` configuration section:
 </packageFiles>
 ```
 
-where `<path>` is path to the file or folder on a host system and `<packagePath>` is location of the file/folder
-within the package (root folder if the parameter is omitted).
+where `<path>` is the pathname of the file or folder on the host system,
+and `<packagePath>` is its desired location within the package (root folder if that parameter is omitted).
 
 #### Excelsior Installer Configurations
 
@@ -516,13 +520,17 @@ that has the following configuration parameters:
 
 * `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
 
-The below parameters are available only since Excelsior JET 11.3:
+**New in 0.9.5:**
 
-* `<language>`*setup-language*`</eula>` - available languages: `autodetect` (default), `english`, `french`, `german`, 
-                                         `japanese`, `russian`, `polish`, `spanish`, `italian`, `brazilian`.
+The following parameters are only available for Excelsior JET 11.3 and above:
+
+* `<language>`*setup-language*`</language>` - force the installer to display its messages in a particular language.
+    Available languages: `autodetect` (default), `english`, `french`, `german`, 
+    `japanese`, `russian`, `polish`, `spanish`, `italian`, `brazilian`.
+    
 * `<cleanupAfterUninstall>true</cleanupAfterUninstall>` -  remove all files from the installation folder on uninstall
 
-*  After install runnable configuration section in the form:
+*  After-install runnable configuration section in the form:
 
     ```xml
     <afterInstallRunnable>
@@ -534,12 +542,12 @@ The below parameters are available only since Excelsior JET 11.3:
     </afterInstallRunnable>
     ```
 
-    where `<target>` is a location of the after install runnable within the package,
-`<arguments>` is command line arguments that shall be passed to the target.
+    where `<target>` is the location of the after-install runnable within the package,
+    and `<arguments>` contains its command-line arguments.
 
 * `<compressionLevel>`*setup-compression-level*`</compressionLevel>` - available values: `fast`, `medium`, `high`
 
-* Installation directory configuration section in the form:
+* Installation directory configuration section:
 
     ```xml
     <installationDirectory>
@@ -549,16 +557,16 @@ The below parameters are available only since Excelsior JET 11.3:
     </installationDirectory>
     ```
 
-   where:
-   * `<type>` is `program-files` (default on Windows, Windows only),
+    where:
+    * `<type>` is either `program-files` (default on Windows, Windows only),
       `system-drive` (Windows only, default for Tomcat web applications on Windows),
-      `absolute-path`,  `current-directory` (default on Linux), `user-home` (Linux only)
-   * `<path>` - default installation directory
-   * `<fixed>` - prohibits changes of the installation directory, if set to `true`
+      `absolute-path`,  `current-directory` (default on Linux), or `user-home` (Linux only)
+    * `<path>` - the default pathname of the installation directory
+    * `<fixed>` - if set to `true`, prohibits changes of the `path` value at install time
 
 * `<registryKey>`*registry-key*`</registryKey>` - Windows registry key for installation.
 
-* List of Windows installation shortcuts (f.i. Windows "Start menu" shortcuts) in the form:
+* List of Windows shortcuts to create during installation, e.g. in the Start Menu:
 
     ```xml
     <shortcuts>
@@ -580,23 +588,30 @@ The below parameters are available only since Excelsior JET 11.3:
     ```
 
     where:
-    * `<location>` - `program-folder`, `desktop`, `start-menu` or `startup`
+    * `<location>` - either `program-folder`, `desktop`, `start-menu`, or `startup`
+    
     * `<target>` - location of the shortcut target within the package
-    * `<name>` - name of the shortcut. By default, short name of the target is used
-    * `<icon>` - the location of the shortcut icon. If the icon is not set for the shortcut the default icon will be used
-                 (f.i. the icon associated with the executable target).
-                 If `<packageFilesDir>` or `<packageFiles>` add an icon to the package, you need to configure
-                 `<packagePath>` parameter of `<icon>` locating the icon in the package, else set `<path>` parameter
-                  locating the icon on the host system and `<packagePath>` specifying a folder within the package where
-                  the icon should be placed (root folder by default).
+
+    * `<name>` - shortcut name. If not set, the filename of the target will be used, without extension
+
+    * `<icon>` - location of the shortcut icon. If no icon is set for the shortcut, the default icon will be used.
+
+        If the package already contains the desired icon file, configure the `<packagePath>` parameter
+        to point to its location within the package. Otherwise, set the `<path>` parameter
+        to the pathname of an icon file on the host system,
+        and, optionally, `<packagePath>` to the location of the *folder* within the package
+        in which that icon file should be placed (root folder by default).
+
     * `<workingDirectory>` - pathname of the working directory of the shortcut target within the package.
-                             If it is not set, the the directory containing target will be used.
-    * `<arguments>` - command line arguments that shall be passed to the target
+                             If not set, the directory containing the target will be used.
 
-* `<noDefaultPostInstallActions>`true`</noDefaultPostInstallActions>` -
-     if you do not want to add the default action, prompting the user to run your main executable after installation.
+    * `<arguments>` - command-line arguments that shall be passed to the target
 
-* Windows post install actions that will be shown to the user as a set of checkboxes in the end of installation:
+* `<noDefaultPostInstallActions>true</noDefaultPostInstallActions>` -
+     if you do not want to add the default post-install actions, e.g.
+     prompting the user to run your main executable after installation.
+
+* Windows post-install actions that will be shown to the user as a set of checkboxes at the end of installation:
 
     ```xml
     <postInstallCheckboxes>
@@ -617,11 +632,11 @@ The below parameters are available only since Excelsior JET 11.3:
     * `<type>` - `run` (default), `open` or `restart`
     * `<target>` - location of the target within the package (not valid for `restart`)
     * `<workingDirectory>` - pathname of the working directory of the target within the package.
-                             If it is not set, the the directory containing target will be used.
+                             If not set, the the directory containing target will be used.
                              Valid for `run` type only.
-    * `<arguments>` - command line arguments that shall be passed to the target.
+    * `<arguments>` - command-line arguments that shall be passed to the target.
                       Valid for `run` type only.
-    * `<checked>` - whether the checkbox should be checked by default
+    * `<checked>` - whether the checkbox should be checked by default (`true` or `false`)
 
 * List of Windows file associations in the form:
 
@@ -646,18 +661,26 @@ The below parameters are available only since Excelsior JET 11.3:
     ```
 
     where:
-    * `<extension>` - file name extension without the leading dot
-    * `<target>` - location within the package of the executable program being associated with extension
+    * `<extension>` - file name extension *without the leading dot*
+    
+    * `<target>` - location within the package of the executable program being associated with `<extension>`
+    
     * `<description>` - description of the file type. For example, the description of .mp3 files is "MP3 Format Sound".
+    
     * `<targetDescription>` -  string to be used in the prompt displayed by the Excelsior Installer wizard:
                                "Associate *.extension files with targetDescription".
-    * `<icon>` - the location of the association icon. If the icon is not set the default icon will be used
-                 (f.i. the icon associated with the executable target).
-                 If `<packageFilesDir>` or `<packageFiles>` add an icon to the package, you need to configure
-                 `<packagePath>` parameter of `<icon>` locating the icon in the package, else set `<path>` parameter
-                 locating the icon on the host system and `<packagePath>` specifying a folder within the package where
-                 the icon should be placed (root folder by default).
-    * `<arguments>` - command line arguments that shall be passed to the target
+
+    * `<icon>` - the location of the association icon.  If not set, the default icon will be used
+               (e.g. the icon associated with the executable target).
+
+        If the package already contains the desired icon file, configure the `<packagePath>` parameter
+        to point to its location within the package. Otherwise, set the `<path>` parameter
+        to the pathname of an icon file on the host system,
+        and, optionally, `<packagePath>` to the location of the *folder* within the package
+        in which that icon file should be placed (root folder by default).
+
+    * `<arguments>` - command-line arguments that shall be passed to the target
+    
     * `<checked>` - initial state of the respective checkbox "Associate *.extension files with target-desc"
                     in the Excelsior Installer wizard. Default value is `true`.
 
@@ -674,22 +697,23 @@ The below parameters are available only since Excelsior JET 11.3:
     ```
 
     If `<packageFilesDir>` or `<packageFiles>` add a library to the package, you need to configure
-`<packagePath>` parameter of `<uninstallCallback>` locating the library in the package, else set `<path>` parameter
-locating the library on the host system and `<packagePath>` specifying a folder within the package where
-the library should be placed (root folder by default). Default value for `<path>` is
-`${project.basedir}/src/main/jetresources/uninstall.dll|libuninstall.so`
+    `<packagePath>` parameter of `<uninstallCallback>` locating the library in the package, else set `<path>` parameter
+    locating the library on the host system and `<packagePath>` specifying a folder within the package where
+    the library should be placed (root folder by default). Default value for `<path>` is
+    `${project.basedir}/src/main/jetresources/uninstall.dll|libuninstall.so`
 
-* `<welcomeImage>`*welcome-image`</welcomeImage>` - (Windows) image to display on the first screen of
+* `<welcomeImage>`*welcome-image*`</welcomeImage>` - (Windows) image to display on the first screen of
   the installation wizard. Recommended size: 177*314px.
   Default is `${project.basedir}/src/main/jetresources/welcomeImage.bmp`.
 
-* `<installerImage>`*installer-image`</installerImage>` - (Windows) image to display in the upper-right corner
+* `<installerImage>`*installer-image*`</installerImage>` - (Windows) image to display in the upper-right corner
   on subsequent Excelsior Installer screens. Recommended size: 109*59px.
   Default is `${project.basedir}/src/main/jetresources/installerImage.bmp`.
 
-* `<uninstallerImage>`*uninstaller-image`</uninstallerImage>` - (Windows) Image to display on the first screen
+* `<uninstallerImage>`*uninstaller-image*`</uninstallerImage>` - (Windows) Image to display on the first screen
   of the uninstall wizard. Recommended size: 177*314px.
   Default is `${project.basedir}/src/main/jetresources/uninstallerImage.bmp`.
+
 
 #### Creating OS X application bundles and installers
 
@@ -1286,6 +1310,8 @@ you may set within the `<tomcat>` parameters block:
 
     **Note:** This functionality is only available in Excelsior JET 11.3 and above.
 
+**New in 0.9.5:**
+
 * `<allowUserToChangeTomcatPort>` -  if you opt for `excelsior-installer` packaging for Tomcat on Windows,
   you may have the Excelsior Installer wizard prompt the user to specify the Tomcat HTTP port during installation
   setting this parameter to `true`.
@@ -1505,33 +1531,36 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 1.0.0 (??-Feb-2017)
+Version 0.9.5 aka 1.0 Release Candidate (??-Feb-2017)
 
-This release covers all of the compiler options that are available in the JET Control Panel UI,
-and all options of the `xpack` utility as of Excelsior JET 11.3 release except options for creating updates.
-So we believe that starting with this release you should be able to employ all Excelsior JET features that are available
-in Excelsior JET UIs (Jet Control Panel, JetPackII). So we consider this release as first non-beta plugin release.
-If you notice that some of functionality that is available in Excelsior JET UIs is still missing in the plugin,
+This release covers all Excelsior JET features accessible through the JET Control Panel GUI,
+and all options of the `xpack` utility as of Excelsior JET 11.3 release, except for three things
+that we do not plan to implement in the near future, for different reasons:
+creation of update packages, Eclipse RCP applications support, and internationalization
+of Excelsior Installer messages. 
+If you are using any other Excelsior JET functionality that the plugin does not support,
 please create a feature request [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).
-In compare with the previous releases the following functionality added to the plugin:
+Otherwise, think of this version as of 1.0 Release Candidate 1.
+
+Compared with the previous releases, the following functionality was added to the plugin:
 
 * `<packageFiles>` parameter introduced to add separate files/folders to the package
-* `<excelsiorInstaller>` configuration section has extended with the following parameters:
+* `<excelsiorInstaller>` configuration section extended with the following parameters:
   - `<language>` - to set installation wizard language
   - `<cleanupAfterUninstall>` - to remove all files on uninstall
   - `<afterInstallRunnable>` - to run an executable after installation
-  - `<compressionLevel>` - to control aggressiveness of installer compression
+  - `<compressionLevel>` - to control installation package compression
   - `<installationDirectory>` - to change installation directory defaults
-  - `<registryKey>` - to customize registry key used for installation on Windows
-  - `<shortcuts>` - to add shortcuts to Windows Start menu, Desktop, etc.
+  - `<registryKey>` - to customize the registry key used for installation on Windows
+  - `<shortcuts>` - to add shortcuts to the Windows Start menu, Desktop, etc.
   - `<noDefaultPostInstallActions>` - to not add the default action after installation
   - `<postInstallCheckboxes>` - to configure post install actions
-  - `<fileAssociations>` - to set file associations
+  - `<fileAssociations>` - to create file associations
   - `<installCallback>` - to set install callback dynamic library
   - `<uninstallCallback>` - to set uninstall callback dynamic library
   - `<welcomeImage>`, `<installerImage>`, `<uninstallerImage>` - to customize (un)installer appearance
-* `<allowUserToChangeTomcatPort>` parameter added to `<tomcat>` configuration section to allow the user to change Tomcat
-   port after installation
+* `<allowUserToChangeTomcatPort>` parameter added to `<tomcat>` configuration section to allow the user to change
+  the Tomcat port at install time
 
 Version 0.9.4 (24-Jan-2017)
 
