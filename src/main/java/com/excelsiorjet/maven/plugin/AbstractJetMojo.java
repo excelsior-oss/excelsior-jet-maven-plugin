@@ -22,11 +22,11 @@
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.tasks.config.PackageFile;
-import com.excelsiorjet.api.tasks.config.enums.ApplicationType;
+import com.excelsiorjet.api.tasks.config.ApplicationType;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
-import com.excelsiorjet.api.tasks.config.DependencySettings;
-import com.excelsiorjet.api.tasks.config.ProjectDependency;
+import com.excelsiorjet.api.tasks.config.dependencies.DependencySettings;
+import com.excelsiorjet.api.tasks.config.dependencies.ProjectDependency;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
 import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
