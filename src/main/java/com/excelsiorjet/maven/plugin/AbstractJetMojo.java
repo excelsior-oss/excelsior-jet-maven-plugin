@@ -21,7 +21,7 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.tasks.config.PackageFile;
+import com.excelsiorjet.api.tasks.config.packagefile.PackageFile;
 import com.excelsiorjet.api.tasks.config.ApplicationType;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;

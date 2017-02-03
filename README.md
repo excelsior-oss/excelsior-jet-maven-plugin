@@ -465,16 +465,20 @@ You can do that using the `<packageFiles>` configuration section:
 <packageFiles>
     <packageFile>
         <path></path>
+        <type></type>
         <packagePath></packagePath>
     </packageFile>
     <packageFile>
         <path></path>
+        <type></type>
         <packagePath></packagePath>
     </packageFile>
 </packageFiles>
 ```
 
 where `<path>` is the pathname of the file or folder on the host system,
+`<type>` is either `file` or `folder` depending whether `<path>` is going to be file or folder
+(you may omit this parameter if you do not need to check `<path>` on being file or folder)
 and `<packagePath>` is its desired location within the package (root folder if that parameter is omitted).
 
 #### Excelsior Installer Configurations

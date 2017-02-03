@@ -24,10 +24,12 @@
                   <mainClass>HelloWorld</mainClass>
                   <packageFiles>
                       <packageFile>
+                          <type>file</type>
                           <path>${project.basedir}/packagefiles/custom.file</path>
                           <packagePath>customfiles</packagePath>
                       </packageFile>
                       <packageFile>
+                          <type>folder</type>
                           <path>${project.basedir}/packagefiles/subdir</path>
                           <packagePath>customfiles</packagePath>
                       </packageFile>
