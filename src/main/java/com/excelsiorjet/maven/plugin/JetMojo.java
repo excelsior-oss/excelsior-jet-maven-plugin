@@ -472,9 +472,9 @@ public class JetMojo extends AbstractJetMojo {
                 runtimeConfiguration.locales = locales;
             }
         }
-        if (javaRuntimeSlimDown.isEnabled()) {
+        if (javaRuntimeSlimDown.isDefined()) {
             logger.warn(s("JetBuildTask.RTSettingDeprecated.Warning", "javaRuntimeSlimDown", "slimDown"));
-            if (!runtimeConfiguration.slimDown.isEnabled()) {
+            if (!runtimeConfiguration.slimDown.isDefined()) {
                 runtimeConfiguration.slimDown = javaRuntimeSlimDown;
             }
         }
