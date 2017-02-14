@@ -477,8 +477,8 @@ You can do that using the `<packageFiles>` configuration section:
 ```
 
 where `<path>` is the pathname of the file or folder on the host system,
-`<type>` is either `file` or `folder` depending whether `<path>` is going to be file or folder
-(you may omit this parameter if you do not need to check `<path>` on being file or folder)
+`<type>` is either `file` or `folder` (omit this parameter if you do not want
+Excelsior JET to check that `<path>` indeed points to a file or folder during packaging),
 and `<packagePath>` is its desired location within the package (root folder if that parameter is omitted).
 
 #### Excelsior Installer Configurations
@@ -529,9 +529,9 @@ that has the following configuration parameters:
 The following parameters are only available for Excelsior JET 11.3 and above:
 
 * `<language>`*setup-language*`</language>` - force the installer to display its messages in a particular language.
-    Available languages: `autodetect` (default), `english`, `french`, `german`, 
+    Available languages: `autodetect` (default), `english`, `french`, `german`,
     `japanese`, `russian`, `polish`, `spanish`, `italian`, `brazilian`.
-    
+
 * `<cleanupAfterUninstall>true</cleanupAfterUninstall>` -  remove all files from the installation folder on uninstall
 
 *  After-install runnable configuration section in the form:
@@ -593,7 +593,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 
     where:
     * `<location>` - either `program-folder`, `desktop`, `start-menu`, or `startup`
-    
+
     * `<target>` - location of the shortcut target within the package
 
     * `<name>` - shortcut name. If not set, the filename of the target will be used, without extension
@@ -666,11 +666,11 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 
     where:
     * `<extension>` - file name extension *without the leading dot*
-    
+
     * `<target>` - location within the package of the executable program being associated with `<extension>`
-    
+
     * `<description>` - description of the file type. For example, the description of .mp3 files is "MP3 Format Sound".
-    
+
     * `<targetDescription>` -  string to be used in the prompt displayed by the Excelsior Installer wizard:
                                "Associate *.extension files with targetDescription".
 
@@ -684,7 +684,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
         in which that icon file should be placed (root folder by default).
 
     * `<arguments>` - command-line arguments that shall be passed to the target
-    
+
     * `<checked>` - initial state of the respective checkbox "Associate *.extension files with target-desc"
                     in the Excelsior Installer wizard. Default value is `true`.
 
@@ -988,7 +988,7 @@ Considerations"*, section *"Runtime Selection"*.
 
 ##### Changing Default Runtime Location
 
-By default, Excelsior JET places its runtime files required for the 
+By default, Excelsior JET places its runtime files required for the
 generated executable to work in a folder named `"rt"` located next to that executable.
 You may change that default location with the `<location>` parameter of the `<runtime>` section.
 
@@ -1494,7 +1494,7 @@ Where:
 *  `<dependencies>` - list of other service names on which the service depends.
 
 Based on the above parameters, the plugin will create the `install.bat`/`uninstall.bat` scripts
-in the `target/jet/app` directory to enable you to install and uninstall the service manually to test it. 
+in the `target/jet/app` directory to enable you to install and uninstall the service manually to test it.
 If you opt for the `excelsior-installer` packaging type, the service will be registered automatically
 during package installation.
 
@@ -1541,7 +1541,7 @@ This release covers all Excelsior JET features accessible through the JET Contro
 and all options of the `xpack` utility as of Excelsior JET 11.3 release, except for three things
 that we do not plan to implement in the near future, for different reasons:
 creation of update packages, Eclipse RCP applications support, and internationalization
-of Excelsior Installer messages. 
+of Excelsior Installer messages.
 If you are using any other Excelsior JET functionality that the plugin does not support,
 please create a feature request [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).
 Otherwise, think of this version as of 1.0 Release Candidate 1.
