@@ -88,7 +88,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.4</version>
+	<version>0.9.5</version>
 	<configuration>
 		<mainClass></mainClass>
 	</configuration>
@@ -1222,7 +1222,7 @@ section of your `pom.xml` file:
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.4</version>
+	<version>0.9.5</version>
 	<configuration>
         <tomcatConfiguration>
              <tomcatHome></tomcatHome>
@@ -1362,7 +1362,7 @@ instead of a runnable executable, add the following Excelsior JET Maven plugin c
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.4</version>
+	<version>0.9.5</version>
 	<configuration>
         <appType>dynamic-library</appType>
 	</configuration>
@@ -1431,7 +1431,7 @@ To create a Windows Service, add the following Excelsior JET Maven plugin config
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
 	<artifactId>excelsior-jet-maven-plugin</artifactId>
-	<version>0.9.4</version>
+	<version>0.9.5</version>
 	<configuration>
         <appType>windows-service</appType>
         <main>*service-main*</main>
@@ -1535,7 +1535,7 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
 
 ## Release Notes
 
-Version 0.9.5 aka 1.0 Release Candidate (??-Feb-2017)
+Version 0.9.5 aka 1.0 Release Candidate (15-Feb-2017)
 
 This release covers all Excelsior JET features accessible through the JET Control Panel GUI,
 and all options of the `xpack` utility as of Excelsior JET 11.3 release, except for three things
