@@ -34,6 +34,10 @@ public class TestUtils {
         return excelsiorJet.getTargetOS().mangleDllName(dll);
     }
 
+    public static boolean since_11_3() {
+        return excelsiorJet.since11_3();
+    }
+
     public static boolean isExcelsiorInstallerSupported() {
         return excelsiorJet.isExcelsiorInstallerSupported();
     }
@@ -84,6 +88,10 @@ public class TestUtils {
 
     public static boolean isChangeRTLocationAvailable() {
         return excelsiorJet.isChangeRTLocationAvailable();
+    }
+
+    public static boolean isAdvancedExcelsiorInstallerFeaturesSupported() {
+        return excelsiorJet.isAdvancedExcelsiorInstallerFeaturesSupported();
     }
 
     //replace line separators to Unix as Groovy """ multiline strings produce Unix line separators

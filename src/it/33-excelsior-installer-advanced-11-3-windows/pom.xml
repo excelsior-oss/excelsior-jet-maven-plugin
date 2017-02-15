@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.excelsior.it</groupId>
+  <artifactId>HelloWorld</artifactId>
+  <version>1.2.3-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <description>IT testing Windows excelsior installer options for xpack available since 11.3.</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+    <build>
+      <plugins>
+          <plugin>
+              <groupId>com.excelsiorjet</groupId>
+              <artifactId>excelsior-jet-maven-plugin</artifactId>
+              <version>@project.version@</version>
+              <configuration>
+                  <mainClass>HelloWorld</mainClass>
+                  <packaging>excelsior-installer</packaging>
+                  <profileStartup>false</profileStartup>
+                  <excelsiorInstaller>
+                      <cleanupAfterUninstall>true</cleanupAfterUninstall>
+                      <installationDirectory>
+                          <type>current-directory</type>
+                      </installationDirectory>
+                      <registryKey>excelsior/maven/tests</registryKey>
+                      <shortcuts>
+                          <shortcut>
+                              <location>program-folder</location>
+                              <target>README.txt</target>
+                              <name>Read me first</name>
+                              <icon>
+                                  <path>${project.basedir}/resources/readme.ico</path>
+                              </icon>
+                          </shortcut>
+                      </shortcuts>
+                      <noDefaultPostInstallActions>true</noDefaultPostInstallActions>
+                      <postInstallCheckboxes>
+                          <postInstallCheckbox>
+                              <type>run</type>
+                              <target>run.bat</target>
+                              <workingDirectory>workDir</workingDirectory>
+                              <arguments>
+                                  <arg>arg</arg>
+                              </arguments>
+                          </postInstallCheckbox>
+                          <postInstallCheckbox>
+                              <type>open</type>
+                              <target>README.txt</target>
+                          </postInstallCheckbox>
+                          <postInstallCheckbox>
+                              <type>restart</type>
+                              <checked>false</checked>
+                          </postInstallCheckbox>
+                      </postInstallCheckboxes>
+                      <fileAssociations>
+                          <fileAssociation>
+                              <extension>abc</extension>
+                              <target>HelloWorld.exe</target>
+                              <description>ABC Files</description>
+                              <targetDescription>Super Duper Program</targetDescription>
+                              <icon>
+                                  <packagePath>file.ico</packagePath>
+                              </icon>
+                          </fileAssociation>
+                      </fileAssociations>
+                      <welcomeImage>${project.basedir}/resources/big.bmp</welcomeImage>
+                  </excelsiorInstaller>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+</project>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.excelsior.it</groupId>
+  <artifactId>HelloWorld</artifactId>
+  <version>1.2.3-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <description>IT testing Windows and Linux common excelsior installer options for xpack available since 11.3.</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+    <profiles>
+      <profile>
+        <id>Windows</id>
+        <activation>
+          <os>
+            <family>Windows</family>
+          </os>
+        </activation>
+        <properties>
+          <exe.extension>.exe</exe.extension>
+          <dll.extension>.dll</dll.extension>
+          <dll.prefix></dll.prefix>
+        </properties>
+      </profile>
+      <profile>
+        <id>unix</id>
+        <activation>
+          <os>
+            <family>unix</family>
+          </os>
+        </activation>
+        <properties>
+          <exe.extension></exe.extension>
+          <dll.extension>.so</dll.extension>
+          <dll.prefix>lib</dll.prefix>
+        </properties>
+      </profile>
+    </profiles>
+
+    <build>
+      <plugins>
+          <plugin>
+              <groupId>com.excelsiorjet</groupId>
+              <artifactId>excelsior-jet-maven-plugin</artifactId>
+              <version>@project.version@</version>
+              <configuration>
+                  <mainClass>HelloWorld</mainClass>
+                  <packaging>excelsior-installer</packaging>
+                  <profileStartup>false</profileStartup>
+                  <excelsiorInstaller>
+                      <language>german</language>
+                      <cleanupAfterUninstall>true</cleanupAfterUninstall>
+                      <compressionLevel>fast</compressionLevel>
+                      <afterInstallRunnable>
+                          <target>HelloWorld${exe.extension}</target>
+                          <arguments>
+                              <argument>arg</argument>
+                              <argument>arg with space</argument>
+                          </arguments>
+                      </afterInstallRunnable>
+                      <installationDirectory>
+                          <type>current-directory</type>
+                          <path>/mavenPluginTestEI</path>
+                          <fixed>true</fixed>
+                      </installationDirectory>
+                      <installCallback>${project.basedir}/${dll.prefix}install${dll.extension}</installCallback>
+                  </excelsiorInstaller>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+</project>

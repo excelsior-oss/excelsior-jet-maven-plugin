@@ -28,6 +28,13 @@ import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.*;
+import com.excelsiorjet.api.tasks.config.compiler.TrialVersionConfig;
+import com.excelsiorjet.api.tasks.config.compiler.WindowsVersionInfoConfig;
+import com.excelsiorjet.api.tasks.config.dependencies.DependencySettings;
+import com.excelsiorjet.api.tasks.config.excelsiorinstaller.ExcelsiorInstallerConfig;
+import com.excelsiorjet.api.tasks.config.runtime.RuntimeConfig;
+import com.excelsiorjet.api.tasks.config.runtime.SlimDownConfig;
+import com.excelsiorjet.api.tasks.config.windowsservice.WindowsServiceConfig;
 import com.excelsiorjet.api.util.Txt;
 import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -465,9 +472,9 @@ public class JetMojo extends AbstractJetMojo {
                 runtimeConfiguration.locales = locales;
             }
         }
-        if (javaRuntimeSlimDown.isEnabled()) {
+        if (javaRuntimeSlimDown.isDefined()) {
             logger.warn(s("JetBuildTask.RTSettingDeprecated.Warning", "javaRuntimeSlimDown", "slimDown"));
-            if (!runtimeConfiguration.slimDown.isEnabled()) {
+            if (!runtimeConfiguration.slimDown.isDefined()) {
                 runtimeConfiguration.slimDown = javaRuntimeSlimDown;
             }
         }

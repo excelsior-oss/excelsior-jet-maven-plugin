@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Excelsior LLC.
+ * Copyright (c) 2015-2017, Excelsior LLC.
  *
  *  This file is part of Excelsior JET Maven Plugin.
  *
@@ -21,11 +21,12 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.tasks.ApplicationType;
+import com.excelsiorjet.api.tasks.config.packagefile.PackageFile;
+import com.excelsiorjet.api.tasks.config.ApplicationType;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
-import com.excelsiorjet.api.tasks.config.DependencySettings;
-import com.excelsiorjet.api.tasks.config.ProjectDependency;
+import com.excelsiorjet.api.tasks.config.dependencies.DependencySettings;
+import com.excelsiorjet.api.tasks.config.dependencies.ProjectDependency;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
 import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
@@ -152,9 +153,18 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * of the package files directory by means of other Maven plugins such as {@code maven-resources-plugin}.
      *
      * </p>
+     *
+     * @see #packageFiles
      */
     @Parameter(property = "packageFilesDir")
     protected File packageFilesDir;
+
+    /**
+     * If you only need to add a few additional package files,
+     * it may be more convenient to specify them separately then to prepare {@link #packageFilesDir} directory.
+     */
+    @Parameter(property = "packageFiles")
+    protected List<PackageFile> packageFiles;
 
     /**
      * Defines system properties and JVM arguments to be passed to the Excelsior JET JVM at runtime, e.g.:
@@ -244,6 +254,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .artifactName(artifactName)
                         .jetOutputDir(jetOutputDir)
                         .packageFilesDir(packageFilesDir)
+                        .packageFiles(packageFiles)
                         .execProfilesDir(execProfilesDir)
                         .execProfilesName(execProfilesName)
                         .jvmArgs(jvmArgs)
