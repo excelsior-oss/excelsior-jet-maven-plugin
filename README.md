@@ -212,7 +212,7 @@ If the splash image has been specified in the manifest of the application's JAR 
 the respective image will be obtained automatically,
 otherwise, you may assign a splash screen image to the application manually:
 
-`<splash>`*splash-file*`</splash>`
+`<splash>`*`splash-file`*`</splash>`
 
 It is recommended to place the splash image in a VCS, and if you place it at
 `${project.basedir}/src/main/jetresources/splash.png`, you won't need to specify it
@@ -223,7 +223,7 @@ There are also two useful Windows-specific configuration parameters:
 
 `<hideConsole>true</hideConsole>` – hide console
 
-`<icon>`*icon-file*`</icon>` – set executable icon (in Windows .ico format)
+`<icon>`*`icon-file`*`</icon>` – set executable icon (in Windows .ico format)
 
 Just as it works for the splash image, if you place the icon file at
 `${project.basedir}/src/main/jetresources/icon.ico`, you won't need to specify it
@@ -445,7 +445,7 @@ By default, the final package contains just the resulting executable and the nec
 However, you may want the plugin to add other files to it: README, license, media, help files,
 third-party native libraries, and so on. For that, add the following configuration parameter:
 
-`<packageFilesDir>`*extra-package-files-directory*`</packageFilesDir>`
+`<packageFilesDir>`*`extra-package-files-directory`*`</packageFilesDir>`
 
 referencing a directory with all such extra files that you need added to the package.
 The contents of the directory will be copied recursively to the final package.
@@ -501,11 +501,11 @@ to create Excelsior Installer setups on Windows and Linux and an application bun
 
 Excelsior Installer setup, in turn, has the following configurations:
 
-* `<product>`*product-name*`</product>` - default is `${project.name}`
+* `<product>`*`product-name`*`</product>` - default is `${project.name}`
 
-* `<vendor>`*vendor-name*`</vendor>` -  default is `${project.organization.name}`
+* `<vendor>`*`vendor-name`*`</vendor>` -  default is `${project.organization.name}`
 
-* `<version>`*product-version*`</version>` - default is `${project.version}`
+* `<version>`*`product-version`*`</version>` - default is `${project.version}`
 
 The above parameters are also used by Windows Version Information and OS X bundle configurations.
 
@@ -518,17 +518,17 @@ To further configure the Excelsior Installer setup, you need to add the followin
 
 that has the following configuration parameters:
 
-* `<eula>`*end-user-license-agreement-file*`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
+* `<eula>`*`end-user-license-agreement-file`*`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
 
-* `<eulaEncoding>`*eula-file-encoding*`</eulaEncoding>` - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
+* `<eulaEncoding>`*`eula-file-encoding`*`</eulaEncoding>` - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
 
-* `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
+* `<installerSplash>`*`installer-splash-screen-image`*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
 
 **New in 0.9.5:**
 
 The following parameters are only available for Excelsior JET 11.3 and above:
 
-* `<language>`*setup-language*`</language>` - force the installer to display its messages in a particular language.
+* `<language>`*`setup-language`*`</language>` - force the installer to display its messages in a particular language.
     Available languages: `autodetect` (default), `english`, `french`, `german`,
     `japanese`, `russian`, `polish`, `spanish`, `italian`, `brazilian`.
 
@@ -549,7 +549,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     where `<target>` is the location of the after-install runnable within the package,
     and `<arguments>` contains its command-line arguments.
 
-* `<compressionLevel>`*setup-compression-level*`</compressionLevel>` - available values: `fast`, `medium`, `high`
+* `<compressionLevel>`*`setup-compression-level`*`</compressionLevel>` - available values: `fast`, `medium`, `high`
 
 * Installation directory configuration section:
 
@@ -568,7 +568,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     * `<path>` - the default pathname of the installation directory
     * `<fixed>` - if set to `true`, prohibits changes of the `path` value at install time
 
-* `<registryKey>`*registry-key*`</registryKey>` - Windows registry key for installation.
+* `<registryKey>`*`registry-key`*`</registryKey>` - Windows registry key for installation.
 
 * List of Windows shortcuts to create during installation, e.g. in the Start Menu:
 
@@ -688,7 +688,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     * `<checked>` - initial state of the respective checkbox "Associate *.extension files with target-desc"
                     in the Excelsior Installer wizard. Default value is `true`.
 
-* `<installCallback>`*dynamic-library*`</installCallback>` - install callback dynamic library.
+* `<installCallback>`*`dynamic-library`*`</installCallback>` - install callback dynamic library.
   Default is `${project.basedir}/src/main/jetresources/install.dll|libinstall.so`
 
 * Uninstall callback dynamic library:
@@ -706,15 +706,15 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     the library should be placed (root folder by default). Default value for `<path>` is
     `${project.basedir}/src/main/jetresources/uninstall.dll|libuninstall.so`
 
-* `<welcomeImage>`*welcome-image*`</welcomeImage>` - (Windows) image to display on the first screen of
+* `<welcomeImage>`*`welcome-image`*`</welcomeImage>` - (Windows) image to display on the first screen of
   the installation wizard. Recommended size: 177*314px.
   Default is `${project.basedir}/src/main/jetresources/welcomeImage.bmp`.
 
-* `<installerImage>`*installer-image*`</installerImage>` - (Windows) image to display in the upper-right corner
+* `<installerImage>`*`installer-image`*`</installerImage>` - (Windows) image to display in the upper-right corner
   on subsequent Excelsior Installer screens. Recommended size: 109*59px.
   Default is `${project.basedir}/src/main/jetresources/installerImage.bmp`.
 
-* `<uninstallerImage>`*uninstaller-image*`</uninstallerImage>` - (Windows) Image to display on the first screen
+* `<uninstallerImage>`*`uninstaller-image`*`</uninstallerImage>` - (Windows) Image to display on the first screen
   of the uninstall wizard. Recommended size: 177*314px.
   Default is `${project.basedir}/src/main/jetresources/uninstallerImage.bmp`.
 
@@ -754,8 +754,8 @@ but to distribute your application to your customers you probably need to sign i
 OS X installer (`.pkg` file).
 The plugin enables you to do that using the following parameters under `<osxBundleConfiguration>` section:
 
-* `<developerId>`*developer-identity-certificate*`</developerId>` - "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle with `codesign` tool.
-* `<publisherId>`*publisher-identity-certificate*`</publisherId>` - "Developer ID Installer" or "Mac Installer Distribution"
+* `<developerId>`*`developer-identity-certificate`*`</developerId>` - "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle with `codesign` tool.
+* `<publisherId>`*`publisher-identity-certificate`*`</publisherId>` - "Developer ID Installer" or "Mac Installer Distribution"
 certificate name for signing the resulting OS X Installer Package (`.pkg` file) with the `productbuild` tool.
 
 If you do not want to expose above parameters via `pom.xml`, you may pass them as system properties
@@ -787,15 +787,15 @@ other defaults can be changed using the following configuration section:
 
 that has the following configuration parameters:
 
-* `<version>`*version-string*`</version>` - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
+* `<version>`*`version-string`*`</version>` - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
 
     **Notice:** unlike Maven `${project.version}`, this string must have format `v1.v2.v3.v4`, where vi is a number.
     The plugin would use heuristics to derive a correct version string from the specified value if the latter
     does not meet this requirement, or from `${project.version}` if this configuration is not present.
 
-* `<copyright>`*legal-copyright*`</copyright>` - `LegalCopyright` string, with default value derived from other parameters
+* `<copyright>`*`legal-copyright`*`</copyright>` - `LegalCopyright` string, with default value derived from other parameters
 
-* `<description>`*executable-description*`</description>` - `FileDescription` string, default is `${project.name}`
+* `<description>`*`executable-description`*`</description>` - `FileDescription` string, default is `${project.name}`
 
 #### Stack trace support
 The Excelsior JET Runtime supports three modes of stack trace printing: `minimal`, `full`, and `none`.
@@ -812,7 +812,7 @@ Note, however, that certain third-party APIs rely on stack trace printing. One e
 
 To set the stack trace support mode, use the `<stackTraceSupport>` configuration parameter:
 
-`<stackTraceSupport>`*stack-trace-mode*`</stackTraceSupport>`
+`<stackTraceSupport>`*`stack-trace-mode`*`</stackTraceSupport>`
 
 #### Method Inlining
 When optimizing a Java program, the compiler often replaces method call statements with bodies of the methods
@@ -821,7 +821,7 @@ especially when tiny methods, such as get/set accessors, are inlined.
 However, inlining of larger methods increases code size and its impact on performance may be uncertain.
 To control the aggressiveness of method inlining, use the `<inlineExpansion>` plugin parameter:
 
-`<inlineExpansion>`*inline-expasnion-mode*`</inlineExpansion>`
+`<inlineExpansion>`*`inline-expasnion-mode`*`</inlineExpansion>`
 
 The available modes are:
   `aggressive` (default), `very-aggressive`, `medium`, `low`, and `tiny-methods-only`
@@ -927,7 +927,7 @@ configuration:
 You may also specify the duration of the profiling session in seconds by specifying the following
 configuration:
 
-`<profileStartupTimeout>`*duration-in-seconds*`</profileStartupTimeout>`
+`<profileStartupTimeout>`*`duration-in-seconds`*`</profileStartupTimeout>`
 
 As soon as the specified period elapses, profiling stops and the application is automatically terminated,
 so ensure that the timeout value is large enough to capture all actions the application nomrally carries out
@@ -1064,7 +1064,7 @@ classes.
 
 To enable disk footprint reduction, add the following parameter to the `<runtime>` section:
 
-`<diskFootprintReduction>`*disk-footprint-reduction-mode*`</diskFootprintReduction>`
+`<diskFootprintReduction>`*`disk-footprint-reduction-mode`*`</diskFootprintReduction>`
 
 The available modes are:
 
@@ -1114,7 +1114,7 @@ and detaches the respective JET Runtime components from the installation package
 Alternatively, you may enforce detaching of particular components using the following parameter
 under the `<slimDown>` configuration section:
 
-`<detachComponents>`*comma-separated list of APIs*`</detachComponents>`
+`<detachComponents>`*`comma-separated list of APIs`*`</detachComponents>`
 
 Available detachable components: `corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws`
 

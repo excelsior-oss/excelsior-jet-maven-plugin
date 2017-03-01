@@ -8,17 +8,19 @@
         define('GRADLE', FALSE);
         function tool() {echo 'Maven';}
         function project_file() {echo '`pom.xml`';}
+        function project_dir() {echo '${project.basedir}';}
         function name($n) {echo "`<$n>`";}
-        function name_value($n, $v) {echo "`<$n>`$v`</$n>`";}
-        function name_value1($n, $v) {echo "`<$n>$v</$n>`";}
+        function name_pattern($n, $v) {echo "`<$n>`*`$v`*`</$n>`";}
+        function name_value($n, $v) {echo "`<$n>$v</$n>`";}
     } else if ($argv[1] == 'gradle') {
         define('GRADLE', TRUE);
         define('MAVEN', FALSE);
         function tool() {echo 'Gradle';}
         function project_file() {echo '`build.gradle`';}
+        function project_dir() {echo '<project.projectDir>';}
         function name($n) {echo "`$n`";}
-        function name_value($n, $v) {echo "`$n = `&nbsp;$v";}
-        function name_value1($n, $v) {echo "`$n = $v`";}
+        function name_pattern($n, $v) {echo "`$n = `*`$v`*";}
+        function name_value($n, $v) {echo "`$n = $v`";}
     } else {
         print 'ERROR: Expected "maven" or "gradle" as command-line argument';
         exit(1);
@@ -209,9 +211,9 @@ to `jet/app`, if applicable (see "Customizing Package Content" below.)
 
 Finally, the plugin packs the contents of the `jet/app` directory into
 a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
-On Windows and Linux, you can also set the <?php name_value1('packaging', 'excelsior-installer'); ?> 
+On Windows and Linux, you can also set the <?php name_value('packaging', 'excelsior-installer'); ?> 
 configuration parameter to have the plugin create an Excelsior Installer setup instead,
-and on OS X, setting <?php name_value1('packaging', 'osx-app-bundle'); ?> will result in the creation
+and on OS X, setting <?php name_value('packaging', 'osx-app-bundle'); ?> will result in the creation
 of an application bundle and, optionally, a native OS X installer package (`.pkg` file).
 
 ### Performing a Test Run
@@ -239,7 +241,7 @@ gradlew jetTestRun
 ```
 <?php endif; ?>
 
-The plugin will place the gathered profiles in the `${project.basedir}/src/main/jetresources` directory.
+The plugin will place the gathered profiles in the `<?php project_dir(); ?>/src/main/jetresources` directory.
 Incremental changes of application code do not typically invalidate the profiles, so
 it is recommended to commit the profiles (`.usg`, `.startup`) to VCS to allow the plugin
 to re-use them during automatic application builds without performing a Test Run.
@@ -292,21 +294,21 @@ If the splash image has been specified in the manifest of the application's JAR 
 the respective image will be obtained automatically,
 otherwise, you may assign a splash screen image to the application manually:
 
-<?php name_value('splash', '*splash-file*'); ?>
+<?php name_pattern('splash', 'splash-file'); ?>
 
 It is recommended to place the splash image in a VCS, and if you place it at
-`${project.basedir}/src/main/jetresources/splash.png`, you won't need to specify it
-in the configuration explicitly. The plugin uses the location `${project.basedir}/src/main/jetresources`
+`<?php project_dir(); ?>/src/main/jetresources/splash.png`, you won't need to specify it
+in the configuration explicitly. The plugin uses the location `<?php project_dir(); ?>/src/main/jetresources`
 for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
 
 There are also two useful Windows-specific configuration parameters:
 
-<?php name_value1('hideConsole', 'true'); ?> – hide console
+<?php name_value('hideConsole', 'true'); ?> – hide console
 
-<?php name_value('icon', '*icon-file*'); ?> – set executable icon (in Windows .ico format)
+<?php name_pattern('icon', 'icon-file'); ?> – set executable icon (in Windows .ico format)
 
 Just as it works for the splash image, if you place the icon file at
-`${project.basedir}/src/main/jetresources/icon.ico`, you won't need to specify it
+`<?php project_dir(); ?>/src/main/jetresources/icon.ico`, you won't need to specify it
 in the configuration explicitly.
 
 #### Dependency-specific Settings
@@ -587,7 +589,7 @@ By default, the final package contains just the resulting executable and the nec
 However, you may want the plugin to add other files to it: README, license, media, help files,
 third-party native libraries, and so on. For that, add the following configuration parameter:
 
-<?php name_value('packageFilesDir', '*extra-package-files-directory*'); ?>
+<?php name_pattern('packageFilesDir', 'extra-package-files-directory'); ?>
 
 referencing a directory with all such extra files that you need added to the package.
 The contents of the directory will be copied recursively to the final package.
@@ -648,22 +650,22 @@ for Linux.
 To create an Excelsior Installer setup, add the following configuration into the plugin
 <?php name('configuration'); ?> section:
 
-<?php name_value1('packaging', 'excelsior-installer'); ?>
+<?php name_value('packaging', 'excelsior-installer'); ?>
 
 **Note:** if you use the same pom.xml for all three supported platforms (Windows, OS X, and Linux),
 it is recommended to use another configuration:
 
-<?php name_value1('packaging', 'native-bundle'); ?>
+<?php name_value('packaging', 'native-bundle'); ?>
 
 to create Excelsior Installer setups on Windows and Linux and an application bundle and installer on OS X.
 
 Excelsior Installer setup, in turn, has the following configurations:
 
-* <?php name_value('product', '*product-name*'); ?> - default is `${project.name}`
+* <?php name_pattern('product', 'product-name'); ?> - default is `${project.name}`
 
-* <?php name_value('vendor', '*vendor-name*'); ?> -  default is `${project.organization.name}`
+* <?php name_pattern('vendor', 'vendor-name'); ?> -  default is `${project.organization.name}`
 
-* <?php name_value('version', '*product-version*'); ?> - default is `${project.version}`
+* <?php name_pattern('version', 'product-version'); ?> - default is `${project.version}`
 
 The above parameters are also used by Windows Version Information and OS X bundle configurations.
 
@@ -683,21 +685,21 @@ excelsiorInstaller {
 
 that has the following configuration parameters:
 
-* <?php name_value('eula', '*end-user-license-agreement-file*'); ?> - default is `${project.basedir}/src/main/jetresources/eula.txt`
+* <?php name_pattern('eula', 'end-user-license-agreement-file'); ?> - default is `<?php project_dir(); ?>/src/main/jetresources/eula.txt`
 
-* <?php name_value('eulaEncoding', '*eula-file-encoding*'); ?> - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
+* <?php name_pattern('eulaEncoding', 'eula-file-encoding'); ?> - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
 
-* <?php name_value('installerSplash', '*installer-splash-screen-image*'); ?> - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
+* <?php name_pattern('installerSplash', 'installer-splash-screen-image'); ?> - default is `<?php project_dir(); ?>/src/main/jetresources/installerSplash.bmp`
 
 **New in 0.9.5:**
 
 The following parameters are only available for Excelsior JET 11.3 and above:
 
-* <?php name_value('language', '*setup-language*'); ?> - force the installer to display its messages in a particular language.
+* <?php name_pattern('language', 'setup-language'); ?> - force the installer to display its messages in a particular language.
     Available languages: `autodetect` (default), `english`, `french`, `german`,
     `japanese`, `russian`, `polish`, `spanish`, `italian`, `brazilian`.
 
-* <?php name_value1('cleanupAfterUninstall', 'true'); ?> -  remove all files from the installation folder on uninstall
+* <?php name_value('cleanupAfterUninstall', 'true'); ?> -  remove all files from the installation folder on uninstall
 
 *  After-install runnable configuration section in the form:
 
@@ -723,7 +725,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     where <?php name('target'); ?> is the location of the after-install runnable within the package,
     and <?php name('arguments'); ?> contains its command-line arguments.
 
-* <?php name_value('compressionLevel', '*setup-compression-level*'); ?> - available values: `fast`, `medium`, `high`
+* <?php name_pattern('compressionLevel', 'setup-compression-level'); ?> - available values: `fast`, `medium`, `high`
 
 * Installation directory configuration section:
 
@@ -752,7 +754,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     * <?php name('path'); ?> - the default pathname of the installation directory
     * <?php name('fixed'); ?> - if set to `true`, prohibits changes of the `path` value at install time
 
-* <?php name_value('registryKey', '*registry-key*'); ?> - Windows registry key for installation.
+* <?php name_pattern('registryKey', 'registry-key'); ?> - Windows registry key for installation.
 
 * List of Windows shortcuts to create during installation, e.g. in the Start Menu:
 
@@ -814,7 +816,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 
     * <?php name('arguments'); ?> - command-line arguments that shall be passed to the target
 
-* <?php name_value1('noDefaultPostInstallActions', 'true'); ?> -
+* <?php name_value('noDefaultPostInstallActions', 'true'); ?> -
      if you do not want to add the default post-install actions, e.g.
      prompting the user to run your main executable after installation.
 
@@ -926,8 +928,8 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     * <?php name('checked'); ?> - initial state of the respective checkbox "Associate *.extension files with target-desc"
                     in the Excelsior Installer wizard. Default value is `true`.
 
-* <?php name_value('installCallback', '*dynamic-library*'); ?> - install callback dynamic library.
-  Default is `${project.basedir}/src/main/jetresources/install.dll|libinstall.so`
+* <?php name_pattern('installCallback', 'dynamic-library'); ?> - install callback dynamic library.
+  Default is `<?php project_dir(); ?>/src/main/jetresources/install.dll|libinstall.so`
 
 * Uninstall callback dynamic library:
 
@@ -951,19 +953,19 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     <?php name('packagePath'); ?> parameter of <?php name('uninstallCallback'); ?> locating the library in the package, else set <?php name('path'); ?> parameter
     locating the library on the host system and <?php name('packagePath'); ?> specifying a folder within the package where
     the library should be placed (root folder by default). Default value for <?php name('path'); ?> is
-    `${project.basedir}/src/main/jetresources/uninstall.dll|libuninstall.so`
+    `<?php project_dir(); ?>/src/main/jetresources/uninstall.dll|libuninstall.so`
 
-* <?php name_value('welcomeImage', '*welcome-image*'); ?> - (Windows) image to display on the first screen of
+* <?php name_pattern('welcomeImage', 'welcome-image'); ?> - (Windows) image to display on the first screen of
   the installation wizard. Recommended size: 177*314px.
-  Default is `${project.basedir}/src/main/jetresources/welcomeImage.bmp`.
+  Default is `<?php project_dir(); ?>/src/main/jetresources/welcomeImage.bmp`.
 
-* <?php name_value('installerImage', '*installer-image*'); ?> - (Windows) image to display in the upper-right corner
+* <?php name_pattern('installerImage', 'installer-image'); ?> - (Windows) image to display in the upper-right corner
   on subsequent Excelsior Installer screens. Recommended size: 109*59px.
-  Default is `${project.basedir}/src/main/jetresources/installerImage.bmp`.
+  Default is `<?php project_dir(); ?>/src/main/jetresources/installerImage.bmp`.
 
-* <?php name_value('uninstallerImage', '*uninstaller-image*'); ?> - (Windows) Image to display on the first screen
+* <?php name_pattern('uninstallerImage', 'uninstaller-image'); ?> - (Windows) Image to display on the first screen
   of the uninstall wizard. Recommended size: 177*314px.
-  Default is `${project.basedir}/src/main/jetresources/uninstallerImage.bmp`.
+  Default is `<?php project_dir(); ?>/src/main/jetresources/uninstallerImage.bmp`.
 
 
 #### Creating OS X application bundles and installers
@@ -973,11 +975,11 @@ The plugin supports the creation of OS X application bundles and installers.
 To create an OS X application bundle, add the following configuration into the plugin
 <?php name('configuration'); ?> section:
 
-<?php name_value1('packaging', 'osx-app-bundle'); ?>
+<?php name_value('packaging', 'osx-app-bundle'); ?>
 
 **Note:** if you use the same pom.xml for all three supported platforms (Windows, OS X, and Linux), it is recommended to use another configuration:
 
-<?php name_value1('packaging', 'native-bundle'); ?>
+<?php name_value('packaging', 'native-bundle'); ?>
 
 to create Excelsior Installer setups on Windows and Linux and an application bundle and installer on OS X.
 
@@ -1001,15 +1003,15 @@ The complete list of the parameters can be obtained
 
 You still need to tell the plugin where the OS X icon (`.icns` file) for your bundle is located.
 Do that using the <?php name('icon'); ?> parameter of <?php name('osxBundleConfiguration'); ?>, or simply place the icon file at
-`${project.basedir}/src/main/jetresources/icon.icns` to let the plugin pick it up automatically.
+`<?php project_dir(); ?>/src/main/jetresources/icon.icns` to let the plugin pick it up automatically.
 
 By default, the plugin will create an OS X application bundle only,
 but to distribute your application to your customers you probably need to sign it and package as an
 OS X installer (`.pkg` file).
 The plugin enables you to do that using the following parameters under <?php name('osxBundleConfiguration'); ?> section:
 
-* <?php name_value('developerId', '*developer-identity-certificate*'); ?> - "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle with `codesign` tool.
-* <?php name_value('publisherId', '*publisher-identity-certificate*'); ?> - "Developer ID Installer" or "Mac Installer Distribution"
+* <?php name_pattern('developerId', 'developer-identity-certificate'); ?> - "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle with `codesign` tool.
+* <?php name_pattern('publisherId', 'publisher-identity-certificate'); ?> - "Developer ID Installer" or "Mac Installer Distribution"
 certificate name for signing the resulting OS X Installer Package (`.pkg` file) with the `productbuild` tool.
 
 If you do not want to expose above parameters via <?php project_file(); ?>, you may pass them as system properties
@@ -1044,15 +1046,15 @@ other defaults can be changed using the following configuration section:
 
 that has the following configuration parameters:
 
-* <?php name_value('version', '*version-string*'); ?> - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
+* <?php name_pattern('version', 'version-string'); ?> - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
 
     **Notice:** unlike <?php tool(); ?> `${project.version}`, this string must have format `v1.v2.v3.v4`, where vi is a number.
     The plugin would use heuristics to derive a correct version string from the specified value if the latter
     does not meet this requirement, or from `${project.version}` if this configuration is not present.
 
-* <?php name_value('copyright', '*legal-copyright*'); ?> - `LegalCopyright` string, with default value derived from other parameters
+* <?php name_pattern('copyright', 'legal-copyright'); ?> - `LegalCopyright` string, with default value derived from other parameters
 
-* <?php name_value('description', '*executable-description*'); ?> - `FileDescription` string, default is `${project.name}`
+* <?php name_pattern('description', 'executable-description'); ?> - `FileDescription` string, default is `${project.name}`
 
 #### Stack trace support
 The Excelsior JET Runtime supports three modes of stack trace printing: `minimal`, `full`, and `none`.
@@ -1069,7 +1071,7 @@ Note, however, that certain third-party APIs rely on stack trace printing. One e
 
 To set the stack trace support mode, use the <?php name('stackTraceSupport'); ?> configuration parameter:
 
-<?php name_value('stackTraceSupport', '*stack-trace-mode*'); ?>
+<?php name_pattern('stackTraceSupport', 'stack-trace-mode'); ?>
 
 #### Method Inlining
 When optimizing a Java program, the compiler often replaces method call statements with bodies of the methods
@@ -1078,7 +1080,7 @@ especially when tiny methods, such as get/set accessors, are inlined.
 However, inlining of larger methods increases code size and its impact on performance may be uncertain.
 To control the aggressiveness of method inlining, use the <?php name('inlineExpansion'); ?> plugin parameter:
 
-<?php name_value('inlineExpansion', '*inline-expasnion-mode*'); ?>
+<?php name_pattern('inlineExpansion', 'inline-expasnion-mode'); ?>
 
 The available modes are:
   `aggressive` (default), `very-aggressive`, `medium`, `low`, and `tiny-methods-only`
@@ -1102,7 +1104,7 @@ and the arguments of the application:
 
 To enable the multi-app mode add the following configuration parameter:
 
-<?php name_value1('multiApp', 'true'); ?>
+<?php name_value('multiApp', 'true'); ?>
 
 <a name="jvmargs"></a>
 #### Defining System Properties and JVM Arguments
@@ -1185,12 +1187,12 @@ The JET Runtime will then use the information to reduce the application startup 
 The Startup Accelerator is enabled by default, but you may disable it by specifying the following
 configuration:
 
-<?php name_value1('profileStartup', 'false'); ?>
+<?php name_value('profileStartup', 'false'); ?>
 
 You may also specify the duration of the profiling session in seconds by specifying the following
 configuration:
 
-<?php name_value('profileStartupTimeout', '*duration-in-seconds*'); ?>
+<?php name_pattern('profileStartupTimeout', 'duration-in-seconds'); ?>
 
 As soon as the specified period elapses, profiling stops and the application is automatically terminated,
 so ensure that the timeout value is large enough to capture all actions the application nomrally carries out
@@ -1222,7 +1224,7 @@ installation package size.
 
 To enable the Global Optimizer, add the following configuration parameter:
 
-<?php name_value1('globalOptimizer', 'true'); ?>
+<?php name_value('globalOptimizer', 'true'); ?>
 
 **Note:** performing a Test Run is mandatory if the Global Optimizer is enabled.
 
@@ -1272,7 +1274,7 @@ Excelsior JET enables you to deploy your application with one of those subsets.
 To specify a particular profile, use the <?php name('profile'); ?> parameter of the <?php name('runtime'); ?> section.
 The valid values are `auto` (default), `compact1`, `compact2`, `compact3`, and `full`.
 
-<?php name_value1('profile', 'auto'); ?> forces Excelsior JET to detect which parts of the Java SE Platform API are referenced
+<?php name_value('profile', 'auto'); ?> forces Excelsior JET to detect which parts of the Java SE Platform API are referenced
 by the application and select the smallest compact profile that includes them all,
 or the entire Platform API (`full`) if there is no such profile.
 
@@ -1350,7 +1352,7 @@ classes.
 
 To enable disk footprint reduction, add the following parameter to the <?php name('runtime'); ?> section:
 
-<?php name_value('diskFootprintReduction', '*disk-footprint-reduction-mode*'); ?>
+<?php name_pattern('diskFootprintReduction', 'disk-footprint-reduction-mode'); ?>
 
 The available modes are:
 
@@ -1410,7 +1412,7 @@ and detaches the respective JET Runtime components from the installation package
 Alternatively, you may enforce detaching of particular components using the following parameter
 under the <?php name('slimDown'); ?> configuration section:
 
-<?php name_value('detachComponents', '*comma-separated list of APIs*'); ?>
+<?php name_pattern('detachComponents', 'comma-separated list of APIs'); ?>
 
 Available detachable components: `corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws`
 
@@ -1473,7 +1475,7 @@ an outdated trial copy for evaluation.
 If you do not wish constant data, such as reflection info, Java string literals, or packed resource files,
 to be visible in the resulting executable, enable data protection by specifying the following configuration:
 
-<?php name_value1('protectData', 'true'); ?>
+<?php name_value('protectData', 'true'); ?>
 
 For more details on data protection, refer to the *"Data Protection"* section of
 the *"Intellectual Property Protection"* chapter of the Excelsior JET User's Guide.
