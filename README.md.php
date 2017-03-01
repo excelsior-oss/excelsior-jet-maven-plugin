@@ -7,6 +7,7 @@
         define('MAVEN', TRUE);
         define('GRADLE', FALSE);
         function tool() {echo 'Maven';}
+        function github($uri) {echo "https://github.com/excelsior-oss/excelsior-jet-maven-plugin/$uri";}
         function project_file() {echo '`pom.xml`';}
         function project_dir() {echo '${project.basedir}';}
         function name($n) {echo "`<$n>`";}
@@ -16,6 +17,7 @@
         define('GRADLE', TRUE);
         define('MAVEN', FALSE);
         function tool() {echo 'Gradle';}
+        function github($uri) {echo "https://github.com/excelsior-oss/excelsior-jet-gradle-plugin/$uri";}
         function project_file() {echo '`build.gradle`';}
         function project_dir() {echo '<project.projectDir>';}
         function name($n) {echo "`$n`";}
@@ -95,7 +97,7 @@ The current plugin version supports almost all features accessible through the E
 * Application update packaging - because we plan to overhaul that feature completely in the mid-term future.
   Once it becomes clear how the new update process will look like, we will surely support it in the plugin.
   However, if the absence of that functionality is a show-stopper for you,
-  please [let us know](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues) and
+  please [let us know](<?php github('issues'); ?>) and
   we'll reprioritize.
 
 * Customization of Excelsior Installer wizard texts.
@@ -104,7 +106,7 @@ The current plugin version supports almost all features accessible through the E
 
 If you find that some other functionality is also missing, or you need the plugin to support
 an additional feature sooner rather than later, you can help us prioritize the roadmap
-by creating a feature request [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).
+by creating a feature request [here](<?php github('issues'); ?>).
 
 
 ### Usage
@@ -277,8 +279,8 @@ You may also pass the arguments via the `jet.runArgs` system property, where arg
 
 For a complete list of parameters, look into the Javadoc of `@Parameter` field declarations
 of the
-[AbstractJetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/AbstractJetMojo.java)
-and [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
+[AbstractJetMojo](<?php github('blob/master/src/main/java/com/excelsiorjet/maven/plugin/AbstractJetMojo.java'); ?>)
+and [JetMojo](<?php github('blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java'); ?>)
 classes. Most of them have default values derived from your <?php project_file(); ?> project
 such as <?php name('outputName'); ?> parameter specifying resulting executable name.
 
@@ -1933,7 +1935,7 @@ that we do not plan to implement in the near future, for different reasons:
 creation of update packages, Eclipse RCP applications support, and internationalization
 of Excelsior Installer messages.
 If you are using any other Excelsior JET functionality that the plugin does not support,
-please create a feature request [here](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues).
+please create a feature request [here](<?php github('issues'); ?>).
 Otherwise, think of this version as of 1.0 Release Candidate 1.
 
 Compared with the previous releases, the following functionality was added to the plugin:
@@ -2056,8 +2058,8 @@ Reduced the download size and disk footprint of resulting packages by means of s
 
 Version 0.3.2 (01-Feb-2016)
 
-* "[Changes are not reflected in compiled app if building without clean #11](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues/11)" issue fixed
-* Error message corrected for "[Cannot find jar if classifier is used #10](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues/10)",
+* "[Changes are not reflected in compiled app if building without clean #11](<?php github('issues/11'); ?>)" issue fixed
+* Error message corrected for "[Cannot find jar if classifier is used #10](<?php github('issues/10'); ?>)",
   explicitly referring the <?php name('mainJar'); ?> plugin parameter that should be set in such cases.
 
 Version 0.3.1 (26-Jan-2016)
