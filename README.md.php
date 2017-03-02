@@ -1,4 +1,40 @@
 <?php
+/***
+ *  ##      ##    ###    ########  ##    ## #### ##    ##  ######    ##  
+ *  ##  ##  ##   ## ##   ##     ## ###   ##  ##  ###   ## ##    ##  #### 
+ *  ##  ##  ##  ##   ##  ##     ## ####  ##  ##  ####  ## ##         ##  
+ *  ##  ##  ## ##     ## ########  ## ## ##  ##  ## ## ## ##   ####      
+ *  ##  ##  ## ######### ##   ##   ##  ####  ##  ##  #### ##    ##   ##  
+ *  ##  ##  ## ##     ## ##    ##  ##   ###  ##  ##   ### ##    ##  #### 
+ *   ###  ###  ##     ## ##     ## ##    ## #### ##    ##  ######    ##
+ *
+ *  NEVER REMOVE TRAILING SPACES FROM THIS FILE BECAUSE PHP.
+ *  
+ *  Specifically, PHP removes newline characters _immediately_ following
+ *  its "?>" closing tag.
+ *
+ *  For instance, 
+ *
+ *      <?php echo "foo"; ?>
+ *      bar
+ *
+ *  becomes
+ *
+ *      foobar
+ *
+ *  and not
+ *
+ *      foo
+ *      bar
+ *
+ *  as you might expect.
+ *  
+ *  As newlines are important in Markdown, it is necessary to handle
+ *  those closing tags with care when they appear last on a line.
+ *  Either insert a space after such tags, or do not let them appear there
+ *  in the first place.
+ */
+
     if (empty($argv[1]) || !empty($argv[2])) {
         print 'ERROR: Expected one command-line argument: "maven" or "gradle"';
         exit (1);
@@ -13,6 +49,8 @@
         function name($n) {echo "`<$n>`";}
         function name_pattern($n, $v) {echo "`<$n>`*`$v`*`</$n>`";}
         function name_value($n, $v) {echo "`<$n>$v</$n>`";}
+        function name_string($n, $v) {name_value($n, $v);}
+        function section($s) {echo "`<$s>`";}
     } else if ($argv[1] == 'gradle') {
         define('GRADLE', TRUE);
         define('MAVEN', FALSE);
@@ -23,12 +61,25 @@
         function name($n) {echo "`$n`";}
         function name_pattern($n, $v) {echo "`$n = `*`$v`*";}
         function name_value($n, $v) {echo "`$n = $v`";}
+        function name_string($n, $v) {echo "`$n = '$v'`";}
+        function section($s) {echo "`$s{}`";}
     } else {
         print 'ERROR: Expected "maven" or "gradle" as command-line argument';
         exit(1);
     }
+    function maven_gradle($maven_str, $gradle_str) {
+        if (MAVEN) echo $maven_str;
+        elseif (GRADLE) echo $gradle_str;
+        else {
+            print 'ERROR: Neither MAVEN nor GRADLE set';
+            exit(1);
+        }
+    }
 ?>
-[![Maven Central](https://img.shields.io/maven-central/v/com.excelsiorjet/excelsior-jet-maven-plugin.svg)](https://maven-badges.herokuapp.com/maven-central/com.excelsiorjet/excelsior-jet-maven-plugin)
+<?php maven_gradle(
+'[![Maven Central](https://img.shields.io/maven-central/v/com.excelsiorjet/excelsior-jet-maven-plugin.svg)](https://maven-badges.herokuapp.com/maven-central/com.excelsiorjet/excelsior-jet-maven-plugin)',
+'[![Maven Central](https://img.shields.io/maven-central/v/com.excelsiorjet/excelsior-jet-gradle-plugin.svg)](https://maven-badges.herokuapp.com/maven-central/com.excelsiorjet/excelsior-jet-gradle-plugin)');
+?> 
 Excelsior JET <?php tool(); ?> Plugin
 =====
 
@@ -52,8 +103,8 @@ separately. The supported platforms are Windows (32- and 64-bit), Linux (32- and
 This plugin will transform your application into an optimized native executable for the platform
 on which you run <?php tool(); ?>, and place it into a separate directory together with all required
 Excelsior JET runtime files. In addition, it can either pack that directory into a zip archive
-(all platforms), create an Excelsior Installer setup (Windows and Linux only)
-or an OS X application bundle/installer.
+(all platforms), create an Excelsior Installer setup (Windows and Linux only),
+or create an OS X application bundle/installer.
 
 The current version of the plugin can handle four types of applications:
 
@@ -63,10 +114,10 @@ and have all their dependencies explicitly listed in the JVM classpath at launch
 * **Tomcat Web applications** &mdash; `.war` files that can be deployed to the
   Apache Tomcat application server.
 
-* **Invocation Dynamic Libraries** (e.g. Windows DLLs), callable
+* **Invocation Dynamic Libraries** (e.g. Windows DLLs) callable
   from non-JVM languages via the Invocation API
 
-* **Windows Services** special long-running processes that may be launched
+* **Windows Services**, special long-running processes that may be launched
    during operating system bootstrap and use the
    [Excelsior JET WinService API](https://github.com/excelsior-oss/excelsior-jet-winservice-api)
    (Windows only)
@@ -89,8 +140,15 @@ of plain Java SE applications that yield different executable types: dynamic lib
 The current plugin version supports almost all features accessible through the Excelsior JET GUIs
 (JET Control Panel and JetPackII). The only bits of functionality that are missing are as follows:
 
-* Eclipse RCP support. The problem here is that the [Eclipse Tycho Maven Plugin](https://eclipse.org/tycho/)
+* Eclipse RCP support.
+  <?php if (MAVEN) : ?>
+  The problem here is that the [Eclipse Tycho Maven Plugin](https://eclipse.org/tycho/)
   that enables exporting Eclipse RCP applications from Maven is still in incubation phase.
+  <?php elseif (GRADLE) : ?>
+  The problem here is that there is no official <?php tool(); ?> plugin
+  for building Eclipse RCP applications. Even the [Eclipse Tycho Maven Plugin](https://eclipse.org/tycho/)
+  that enables exporting Eclipse RCP applications from Maven is still in incubation phase.
+  <?php endif; ?>
   If a standard way to build Eclipse RCP applications from <?php tool(); ?> ever appears,
   *and* there will be enough demand, we will support it in the Excelsior JET <?php tool(); ?> plugin.
 
@@ -111,10 +169,11 @@ by creating a feature request [here](<?php github('issues'); ?>).
 
 ### Usage
 
-If your project is a plain Java SE application, you need to copy and paste the following configuration into the <?php name('plugins'); ?> 
-section of your <?php project_file(); ?> file:
-
 <?php if (MAVEN) : ?>
+If your project is a plain Java SE application, you need to copy and paste
+the following configuration into the <?php section('plugins'); ?> section
+of your <?php project_file(); ?> file:
+
 ```xml
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
@@ -126,12 +185,16 @@ section of your <?php project_file(); ?> file:
 </plugin>
 ```
 
-set the <?php name('mainClass'); ?> parameter, and use the following command line to build the application:
+set the <?php name('mainClass'); ?> parameter<sup>\*</sup>, and use the following command line to build the application:
 
 ```
 mvn jet:build
 ```
 <?php elseif (GRADLE) : ?>
+Excelsior JET <?php tool(); ?> plugin is hosted on Maven Central, so you need to add
+the plugin dependency to the <?php section('buildscript'); ?> configuration
+of your <?php project_file(); ?> file first:
+
 ```gradle
 buildscript {
     ext.jetPluginVersion = '0.9.5'
@@ -159,12 +222,15 @@ and use the following command line to build the application:
 ```
 gradlew jetBuild
 ```
+
+**Note:** The Excelsior JET Gradle plugin requires the Java plugin be applied beforehand: ```apply plugin: 'java'```
 <?php else :
           exit(1);
       endif; ?>
 
-For a Tomcat Web application, the <?php name('mainClass'); ?> parameter is not needed. Instead, you would need to add
-the <?php name('tomcatHome'); ?> parameter pointing to a *clean* Tomcat installation, a copy of which will be used
+<sup>\*</sup> For a Tomcat Web application, the <?php name('mainClass'); ?> parameter is not needed.
+Instead, you would need to add the <?php name('tomcatHome'); ?> parameter pointing
+to a *clean* Tomcat installation, a copy of which will be used
 for the deployment of your Web application at build time.
 See [Building Tomcat Web Applications](#building-tomcat-web-applications) section below for more details.
 
@@ -177,20 +243,22 @@ of the [Excelsior JET WinService API](https://github.com/excelsior-oss/excelsior
 In order to do its job, the plugin needs to locate an Excelsior JET installation.
 You have three ways to specify the Excelsior JET installation directory explicitly:
 
-- add the <?php name('jetHome'); ?> parameter to the <?php name('configuration'); ?> section of the plugin
-- pass the `jet.home` system property on the <?php tool(); ?> command line as follows:
+  - add the <?php name('jetHome'); ?> parameter to the <?php
+    maven_gradle('`<configuration>` section of the plugin',
+                 '`excelsiorJet{}` plugin extension'); ?> 
+  - pass the `jet.home` system property on the <?php tool(); ?> command line as follows:
 
 <?php if (MAVEN) : ?>
-```
-mvn jet:build -Djet.home=[JET-Home]
-```
+    ```
+    mvn jet:build -Djet.home=[JET-Home]
+    ```
 <?php elseif (GRADLE) : ?>
-```
-gradlew jetBuild -Djet.home=[JET-Home]
-```
+    ```
+    gradlew jetBuild -Djet.home=[JET-Home]
+    ```
 <?php endif; ?>
 
-- or set the `JET_HOME` O/S environment variable
+  - or set the `JET_HOME` O/S environment variable
 
 If none of above is set, the plugin searches for an Excelsior JET installation along the `PATH`.
 So if you only have one copy of Excelsior JET installed, the plugin should be able to find it on Windows right away,
@@ -198,7 +266,8 @@ and on Linux and OS X - if you have run the Excelsior JET `setenv` script prior 
 
 ### Build process
 
-The native build is performed in the `jet` subdirectory of the <?php tool(); ?> target build directory.
+The native build is performed in the `jet` subdirectory
+of the <?php tool(); ?> <?php maven_gradle('`target`' , 'build'); ?> directory.
 First, the plugin copies the main application jar to the `jet/build` directory,
 and copies all its run time dependencies to `jet/build/lib`.
 Then it invokes the Excelsior JET AOT compiler to compile all those jars into a native executable.
@@ -212,10 +281,11 @@ to `jet/app`, if applicable (see "Customizing Package Content" below.)
 > the Oracle JRE installed, and the executable should work as expected.
 
 Finally, the plugin packs the contents of the `jet/app` directory into
-a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
-On Windows and Linux, you can also set the <?php name_value('packaging', 'excelsior-installer'); ?> 
+a zip archive named `<?php maven_gradle('${project.build.finalName}', '<artifactName>'); ?>.zip`
+so as to aid single file re-distribution.
+On Windows and Linux, you can also set the <?php name_string('packaging', 'excelsior-installer'); ?> 
 configuration parameter to have the plugin create an Excelsior Installer setup instead,
-and on OS X, setting <?php name_value('packaging', 'osx-app-bundle'); ?> will result in the creation
+and on OS X, setting <?php name_string('packaging', 'osx-app-bundle'); ?> will result in the creation
 of an application bundle and, optionally, a native OS X installer package (`.pkg` file).
 
 ### Performing a Test Run
@@ -250,15 +320,16 @@ to re-use them during automatic application builds without performing a Test Run
 
 It is recommended to perform a Test Run at least once before building your application.
 
-Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
-      So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
+**Note:** 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
+  So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
 
 The profiles will be used by the Startup Optimizer and the Global Optimizer (see below).
 
-Note: During a Test Run, the application executes in a special profiling mode,
-      so disregard its modest start-up time and performance.
+**Note:** During a Test Run, the application executes in a special profiling mode,
+  so disregard its modest start-up time and performance.
 
-Your application may require command line arguments to run. If that is the case, set the `runArgs` plugin parameter as follows:
+Your application may require command-line arguments to run. If that is the case,
+set the `runArgs` plugin parameter as follows:
 
 <?php if (MAVEN) : ?>
 ```xml
@@ -273,32 +344,40 @@ runArgs = ["arg1", "arg2"]
 ```
 <?php endif; ?>
 
-You may also pass the arguments via the `jet.runArgs` system property, where arguments are comma separated (use "`\`" to escape commas within arguments, i.e. `-Djet.runArgs="arg1,Hello\, World"` will be passed to your application as `arg1 "Hello, World"`)
+You may also pass the arguments via the `jet.runArgs` system property as a comma-separated string.
+(Use "`\`" to escape commas within arguments: `-Djet.runArgs="arg1,Hello\, World"` will be passed
+to your application as `arg1 "Hello, World"`.)
 
 ### Configurations other than <?php name('mainClass'); ?>
 
-For a complete list of parameters, look into the Javadoc of `@Parameter` field declarations
-of the
+For the complete list of parameters, refer to
+<?php if (MAVEN) : ?>
+the Javadoc of `@Parameter` field declarations of the
 [AbstractJetMojo](<?php github('blob/master/src/main/java/com/excelsiorjet/maven/plugin/AbstractJetMojo.java'); ?>)
 and [JetMojo](<?php github('blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java'); ?>)
-classes. Most of them have default values derived from your <?php project_file(); ?> project
-such as <?php name('outputName'); ?> parameter specifying resulting executable name.
+classes.
+<?php elseif (GRADLE) : ?>
+the Javadoc of field declarations of the
+[ExcelsiorJetExtension](https://github.com/excelsior-oss/excelsior-jet-gradle-plugin/blob/master/src/main/groovy/com/excelsiorjet/gradle/plugin/ExcelsiorJetExtension.groovy) class.
+<?php endif; ?>
+Most of them have default values derived from your <?php project_file(); ?> project,
+such as the <?php name('outputName'); ?> parameter specifying the name of the resulting executable.
 
 #### Application appearance
 If the startup of your client application takes longer than you would have liked,
 the thumb rule is to show a splash screen.
-A splash screen provides visial feedback about the loading process the end user, and
+A splash screen provides visial feedback about the loading process to the end user, and
 gives you an opportunity to display information about your product and company.
-The splash screen functionality appeared in Java API since Java SE 6. For more details, see
+The splash screen functionality appeared in the Java API since Java SE 6. For more details, see
 http://docs.oracle.com/javase/tutorial/uiswing/misc/splashscreen.html
 
-If the splash image has been specified in the manifest of the application's JAR file,
+If the splash image has been specified in the manifest of the application JAR file,
 the respective image will be obtained automatically,
 otherwise, you may assign a splash screen image to the application manually:
 
-<?php name_pattern('splash', 'splash-file'); ?>
+<?php name_pattern('splash', 'splash-image-file'); ?>
 
-It is recommended to place the splash image in a VCS, and if you place it at
+It is recommended to store the splash image in a VCS, and if you place it at
 `<?php project_dir(); ?>/src/main/jetresources/splash.png`, you won't need to specify it
 in the configuration explicitly. The plugin uses the location `<?php project_dir(); ?>/src/main/jetresources`
 for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
@@ -326,8 +405,8 @@ for each dependency, or for groups of dependencies:
 
 ##### Dependencies Configuration
 
-To set these properties for a particular dependency, add the following configuration to the plugin configuration
-section:
+To set these properties for a particular dependency, add the following configuration
+to the plugin configuration section:
 
 <?php if (MAVEN) : ?>
 ```xml
@@ -358,15 +437,15 @@ dependencies {
 <?php endif; ?>
 
 where <?php name('groupId'); ?>, <?php name('artifactId'); ?>, and <?php name('version'); ?> identify the dependency in the same way as in
-the respective global <?php name('dependencies'); ?> section of the <?php tool(); ?> project,
+the respective global <?php section('dependencies'); ?> section of the <?php tool(); ?> project,
 and <?php name('protect'); ?>, <?php name('optimize'); ?>, and <?php name('pack'); ?> are Excelsior JET-specific properties for the dependency,
 described below.
 
 You may omit <?php name('groupId'); ?> and/or <?php name('version'); ?> from the configuration, if you are sure that there is
-only one dependency with the given <?php name('artifactId'); ?> in the project. The plugin will issue an
+exactly one dependency with the given <?php name('artifactId'); ?> in the project. The plugin will issue an
 ambiguous dependency resolution error if that is not the case.
 
-You may also set only the <?php name('groupId'); ?> parameter to set the same properties for all dependencies
+You may also specify just the <?php name('groupId'); ?> parameter to set the same properties for all dependencies
 sharing the same `groupId` at once.
 
 Finally, if you need some additional dependencies that are not listed in the project explicitly
@@ -399,16 +478,19 @@ dependencies {
 ```
 <?php endif; ?>
 
-You may also use the <?php name('path'); ?> parameter to identify project dependencies that are described
-with the <?php name('systemPath'); ?> parameter.
-
+You may also use the <?php name('path'); ?> parameter to identify project dependencies that are described with 
+<?php if (MAVEN) : ?>
+the <?php name('systemPath'); ?> parameter.
+<?php elseif (GRADLE) : ?>
+<?php name('files'); ?> or <?php name('fileTree'); ?> parameters.
+<?php endif; ?>
 
 ##### Code Protection
 
 If you need to protect your classes from decompilers,
 make sure that the respective dependencies have the <?php name('protect'); ?> property set to `all`.
 If you do not need to protect classes for a certain dependency (e.g. a third-party library),
-set it to the `not-required` value instead. The latter setting may reduce compilation time and the size of
+set it to the `not-required` value instead. The latter setting may reduce the build time and the size of
 the resulting executable in some cases.
 
 
@@ -425,8 +507,7 @@ uses only a fraction of their implementing classes. However, it is not recommend
 `auto-detect` value for the dependencies containing your own classes, because, in general,
 the Excelsior JET Optimizer cannot determine the exact set of used classes due to possible access
 via the Reflection API at run time. That said, you can help it significantly to detect such
-dynamic class usage by performing a [Test Run](#performing-a-test-run) with 32-bit version of Excelsior JET
-prior to the build.
+dynamic class usage by performing a [Test Run](#performing-a-test-run) prior to the build.
 
 
 ##### Optimization Presets
@@ -443,7 +524,7 @@ so as to reduce the compilation time and executable size.
 You may also let the plugin do that automatically by choosing the `smart` optimization
 preset in the plugin configuration:
 
-`<optimizationPreset>smart<optimizationPreset>`
+<?php name_string('optimizationPreset', 'smart'); ?> 
 
 When the `smart` preset is enabled, the plugin distinguishes between application classes
 and third-party library classes using the following heuristic: it treats all dependencies
@@ -476,10 +557,11 @@ dependencies {
 ```
 <?php endif; ?>
 
-Instead of setting the <?php name('protect'); ?> and <?php name('optimize'); ?> properties, you may provide a semantic hint
-to the future maintainers of the POM file that a particular dependency is a third party library
+Instead of setting the <?php name('protect'); ?> and <?php name('optimize'); ?> properties,
+you may provide a semantic hint to the future maintainers
+of the <?php maven_gradle('POM file', 'Gradle build script'); ?> that a particular dependency is a third party library
 by setting its <?php name('isLibrary'); ?> property to `true`. The plugin will then set <?php name('protect'); ?> 
-to `not-required` and <?php name('optimize'); ?> to `auto-detect` when the `smart` mode is enabled.
+to `not-required` and <?php name('optimize'); ?> to `auto-detect` when the `smart` optimization preset is enabled.
 Conversely, if you set <?php name('isLibrary'); ?> to `false`, both those properties will be set to `all`.
 The following configuration is therefore equivalent to the above example:
 
@@ -568,14 +650,16 @@ so there is no need to set it in the respective <?php name('dependency'); ?> con
 
 ##### Ignoring project dependencies
 
-If you build your main artifact as a so called fat jar (using `maven-assembly-plugin`
-with `jar-with-dependencies`, for example), you most likely do not need Excelsior JET
+If you build your main artifact as a so called fat jar (using
+<?php maven_gradle('`maven-assembly-plugin` with `jar-with-dependencies`',
+                   'the `com.github.johnrengelman.shadow` plugin'); ?>,
+for example), you most likely do not need Excelsior JET
 to compile any of its dependencies, because the main artifact will contain all
 classes and resources of the application.
 In this case, you may set the <?php name('ignoreProjectDependencies'); ?> plugin parameter to `true`
 to disable compilation of project dependencies.
 Then you will only need to set the `protect/optimize/pack` properties for your main artifact
-and for the entries of the <?php name('dependencies'); ?> section of the plugin that are identified
+and for the entries of the <?php section('dependencies'); ?> section of the plugin that are identified
 with the <?php name('path'); ?> parameter, if any.
 
 
@@ -591,21 +675,21 @@ By default, the final package contains just the resulting executable and the nec
 However, you may want the plugin to add other files to it: README, license, media, help files,
 third-party native libraries, and so on. For that, add the following configuration parameter:
 
-<?php name_pattern('packageFilesDir', 'extra-package-files-directory'); ?>
+<?php name_pattern('packageFilesDir', 'extra-package-files-directory'); ?> 
 
 referencing a directory with all such extra files that you need added to the package.
 The contents of the directory will be copied recursively to the final package.
 
 By default, the plugin assumes that the extra package files reside
 in the `src/main/jetresources/packagefiles` subdirectory of your project,
-but you may dynamically generate the contents of that directory by means of other <?php tool(); ?> plugins
-such as `maven-resources-plugin`.
+but you may dynamically generate the contents of that directory by means
+of other <?php tool(); ?> plugins <?php maven_gradle('such as `maven-resources-plugin`', ''); ?>.
 
 **New in 0.9.5:**
 
 If you only need to add a few extra files or folders to the package,
 you may find it more convenient to specify them directly rather than prepare a <?php name('packageFilesDir'); ?> directory.
-You can do that using the <?php name('packageFiles'); ?> configuration section:
+You can do that using the <?php section('packageFiles'); ?> configuration section:
 
 <?php if (MAVEN) : ?>
 ```xml
@@ -639,8 +723,10 @@ packageFiles {
 <?php endif; ?>
 
 where <?php name('path'); ?> is the pathname of the file or folder on the host system,
+<?php if (MAVEN) : ?>
 <?php name('type'); ?> is either `file` or `folder` (omit this parameter if you do not want
 Excelsior JET to check that <?php name('path'); ?> indeed points to a file or folder during packaging),
+<?php endif; ?>
 and <?php name('packagePath'); ?> is its desired location within the package (root folder if that parameter is omitted).
 
 #### Excelsior Installer Configurations
@@ -649,25 +735,25 @@ The plugin supports the creation of Excelsior Installer setups -
 conventional installer GUIs for Windows or self-extracting archives with command-line interface
 for Linux.
 
-To create an Excelsior Installer setup, add the following configuration into the plugin
-<?php name('configuration'); ?> section:
+To create an Excelsior Installer setup, add the following configuration
+into <?php maven_gradle('the plugin `<configuration>` section', 'the `excelsiorJet{}` plugin extension'); ?>:
 
-<?php name_value('packaging', 'excelsior-installer'); ?>
+<?php name_string('packaging', 'excelsior-installer'); ?> 
 
-**Note:** if you use the same pom.xml for all three supported platforms (Windows, OS X, and Linux),
+**Note:** if you use the same <?php project_file(); ?> for all three supported platforms (Windows, OS X, and Linux),
 it is recommended to use another configuration:
 
-<?php name_value('packaging', 'native-bundle'); ?>
+<?php name_string('packaging', 'native-bundle'); ?> 
 
 to create Excelsior Installer setups on Windows and Linux and an application bundle and installer on OS X.
 
 Excelsior Installer setup, in turn, has the following configurations:
 
-* <?php name_pattern('product', 'product-name'); ?> - default is `${project.name}`
+* <?php name_pattern('product', 'product-name'); ?> - default is <?php maven_gradle('`${project.name}`', '`<project.name>`'); ?>
 
-* <?php name_pattern('vendor', 'vendor-name'); ?> -  default is `${project.organization.name}`
+* <?php name_pattern('vendor', 'vendor-name'); ?> -  default is <?php maven_gradle('`${project.organization.name}`', '`<project.group>`'); ?>
 
-* <?php name_pattern('version', 'product-version'); ?> - default is `${project.version}`
+* <?php name_pattern('version', 'product-version'); ?> - default is <?php maven_gradle('`${project.version}`', '`<project.version>`'); ?>
 
 The above parameters are also used by Windows Version Information and OS X bundle configurations.
 
@@ -689,7 +775,7 @@ that has the following configuration parameters:
 
 * <?php name_pattern('eula', 'end-user-license-agreement-file'); ?> - default is `<?php project_dir(); ?>/src/main/jetresources/eula.txt`
 
-* <?php name_pattern('eulaEncoding', 'eula-file-encoding'); ?> - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
+* <?php name_pattern('eulaEncoding', 'eula-file-encoding'); ?> - default is `autodetect`. Supported encodings are `US-ASCII` (plain text) and `UTF16-LE`
 
 * <?php name_pattern('installerSplash', 'installer-splash-screen-image'); ?> - default is `<?php project_dir(); ?>/src/main/jetresources/installerSplash.bmp`
 
@@ -698,12 +784,12 @@ that has the following configuration parameters:
 The following parameters are only available for Excelsior JET 11.3 and above:
 
 * <?php name_pattern('language', 'setup-language'); ?> - force the installer to display its messages in a particular language.
-    Available languages: `autodetect` (default), `english`, `french`, `german`,
-    `japanese`, `russian`, `polish`, `spanish`, `italian`, `brazilian`.
+    Available languages: `autodetect` (default), `english`, `french`, `german`,
+    `japanese`, `russian`, `polish`, `spanish`, `italian`, and `brazilian`.
 
 * <?php name_value('cleanupAfterUninstall', 'true'); ?> -  remove all files from the installation folder on uninstall
 
-*  After-install runnable configuration section in the form:
+*  After-install runnable configuration sections of the form:
 
 <?php if (MAVEN) : ?>
     ```xml
@@ -855,13 +941,13 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 <?php endif; ?>
 
     where:
-    * <?php name('type'); ?> - `run` (default), `open` or `restart`
+    * <?php name('type'); ?> - `run` (default), `open`, or `restart`
     * <?php name('target'); ?> - location of the target within the package (not valid for `restart`)
     * <?php name('workingDirectory'); ?> - pathname of the working directory of the target within the package.
-                             If not set, the the directory containing target will be used.
-                             Valid for `run` type only.
+                             If not set, the directory containing the target will be used.
+                             Valid for the `run` type only.
     * <?php name('arguments'); ?> - command-line arguments that shall be passed to the target.
-                      Valid for `run` type only.
+                      Valid for the `run` type only.
     * <?php name('checked'); ?> - whether the checkbox should be checked by default (`true` or `false`)
 
 * List of Windows file associations in the form:
@@ -914,7 +1000,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     * <?php name('description'); ?> - description of the file type. For example, the description of .mp3 files is "MP3 Format Sound".
 
     * <?php name('targetDescription'); ?> -  string to be used in the prompt displayed by the Excelsior Installer wizard:
-                               "Associate *.extension files with targetDescription".
+                               "Associate *.extension files with <?php name('targetDescription'); ?>".
 
     * <?php name('icon'); ?> - the location of the association icon.  If not set, the default icon will be used
                (e.g. the icon associated with the executable target).
@@ -927,7 +1013,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 
     * <?php name('arguments'); ?> - command-line arguments that shall be passed to the target
 
-    * <?php name('checked'); ?> - initial state of the respective checkbox "Associate *.extension files with target-desc"
+    * <?php name('checked'); ?> - initial state of the respective checkbox "Associate *.extension files with <?php name('targetDescription'); ?>"
                     in the Excelsior Installer wizard. Default value is `true`.
 
 * <?php name_pattern('installCallback', 'dynamic-library'); ?> - install callback dynamic library.
@@ -939,7 +1025,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```xml
     <uninstallCallback>
         <path></path>
-        <packagePath><packagePath>
+        <packagePath></packagePath>
     </uninstallCallback>
     ```
 <?php elseif (GRADLE) : ?>
@@ -974,14 +1060,14 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 
 The plugin supports the creation of OS X application bundles and installers.
 
-To create an OS X application bundle, add the following configuration into the plugin
-<?php name('configuration'); ?> section:
+To create an OS X application bundle, add the following configuration
+into <?php maven_gradle('the plugin `<configuration>` section', 'the `excelsiorJet{}` plugin extension'); ?>:
 
-<?php name_value('packaging', 'osx-app-bundle'); ?>
+<?php name_string('packaging', 'osx-app-bundle'); ?>
 
-**Note:** if you use the same pom.xml for all three supported platforms (Windows, OS X, and Linux), it is recommended to use another configuration:
+**Note:** if you use the same <?php project_file(); ?> for all three supported platforms (Windows, OS X, and Linux), it is recommended to use another configuration:
 
-<?php name_value('packaging', 'native-bundle'); ?>
+<?php name_string('packaging', 'native-bundle'); ?>
 
 to create Excelsior Installer setups on Windows and Linux and an application bundle and installer on OS X.
 
@@ -1004,20 +1090,20 @@ The complete list of the parameters can be obtained
 [here](https://github.com/excelsior-oss/excelsior-jet-api/blob/master/src/main/java/com/excelsiorjet/api/tasks/config/OSXAppBundleConfig.java).
 
 You still need to tell the plugin where the OS X icon (`.icns` file) for your bundle is located.
-Do that using the <?php name('icon'); ?> parameter of <?php name('osxBundleConfiguration'); ?>, or simply place the icon file at
+Do that using the <?php name('icon'); ?> parameter of the <?php section('osxBundle'); ?> section, or simply place the icon file at
 `<?php project_dir(); ?>/src/main/jetresources/icon.icns` to let the plugin pick it up automatically.
 
 By default, the plugin will create an OS X application bundle only,
 but to distribute your application to your customers you probably need to sign it and package as an
 OS X installer (`.pkg` file).
-The plugin enables you to do that using the following parameters under <?php name('osxBundleConfiguration'); ?> section:
+The plugin enables you to do that using the following parameters within the <?php section('osxBundle'); ?> section:
 
 * <?php name_pattern('developerId', 'developer-identity-certificate'); ?> - "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle with `codesign` tool.
 * <?php name_pattern('publisherId', 'publisher-identity-certificate'); ?> - "Developer ID Installer" or "Mac Installer Distribution"
 certificate name for signing the resulting OS X Installer Package (`.pkg` file) with the `productbuild` tool.
 
 If you do not want to expose above parameters via <?php project_file(); ?>, you may pass them as system properties
-to the `mvn` command instead, using the arguments `-Dosx.developer.id` and `-Dosx.publisher.id` respectively.
+to the `<?php maven_gradle('mvn', 'gradlew'); ?>` command instead, using the arguments `-Dosx.developer.id` and `-Dosx.publisher.id` respectively.
 
 **Troubleshooting:** If you would like to test the created installer file on the same OS X system on which
 it was built, you need to first remove the OS X application bundle created by the plugin and located
@@ -1031,32 +1117,31 @@ On Windows, the plugin automatically adds a
 to the resulting executable. This can be disabled by specifying the following
 configuration:
 
-    <addWindowsVersionInfo>false</addWindowsVersionInfo>
+<?php name_value('addWindowsVersionInfo', 'false'); ?> 
 
 By default, the values of version-information resource strings are derived from project settings.
 The values of <?php name('product'); ?> and <?php name('vendor'); ?> configurations are used verbatim as
 `ProductName` and `CompanyName` respectively;
-other defaults can be changed using the following configuration section:
+other defaults can be changed using the <?php section('windowsVersionInfo'); ?> configuration section
+that has the following parameters:
 
-<?php if (MAVEN) : ?>
-```xml
-<windowsVersionInfo>
-</windowsVersionInfo>
-```
-<?php elseif (GRADLE) : ?>
-<?php endif; ?>
+  * <?php name_pattern('version', 'version-string'); ?>
+  
+    Version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
 
-that has the following configuration parameters:
+    **Notice:** unlike <?php maven_gradle('Maven `${project.version}`', 'Gradle `project.version`'); ?>, this string
+    must have format `v1.v2.v3.v4`, where vi is a number.
+    The plugin would use heuristics to derive a correct version string from the specified value
+    if the latter does not meet this requirement,
+    or from `<?php maven_gradle('${project.version}', 'project.version'); ?>` if this configuration is not present.
 
-* <?php name_pattern('version', 'version-string'); ?> - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
+  * <?php name_pattern('copyright', 'legal-copyright'); ?>
+  
+    `LegalCopyright` string, with default value derived from other parameters
 
-    **Notice:** unlike <?php tool(); ?> `${project.version}`, this string must have format `v1.v2.v3.v4`, where vi is a number.
-    The plugin would use heuristics to derive a correct version string from the specified value if the latter
-    does not meet this requirement, or from `${project.version}` if this configuration is not present.
-
-* <?php name_pattern('copyright', 'legal-copyright'); ?> - `LegalCopyright` string, with default value derived from other parameters
-
-* <?php name_pattern('description', 'executable-description'); ?> - `FileDescription` string, default is `${project.name}`
+  * <?php name_pattern('description', 'executable-description'); ?>
+  
+    `FileDescription` string, default is `<?php maven_gradle('${project.name}', 'project.name'); ?>`
 
 #### Stack trace support
 The Excelsior JET Runtime supports three modes of stack trace printing: `minimal`, `full`, and `none`.
@@ -1079,7 +1164,7 @@ To set the stack trace support mode, use the <?php name('stackTraceSupport'); ?>
 When optimizing a Java program, the compiler often replaces method call statements with bodies of the methods
 that would be called at run time. This optimization, known as method inlining, improves application performance,
 especially when tiny methods, such as get/set accessors, are inlined.
-However, inlining of larger methods increases code size and its impact on performance may be uncertain.
+However, inlining of larger methods increases code size, and its impact on performance may be uncertain.
 To control the aggressiveness of method inlining, use the <?php name('inlineExpansion'); ?> plugin parameter:
 
 <?php name_pattern('inlineExpansion', 'inline-expasnion-mode'); ?>
@@ -1093,7 +1178,7 @@ Note that it does not necessarily worsen application performance.
 #### Multi-app Executables
 
 The plugin may compile more than one application into a single executable and
-let you select a particular application at launch time via command line arguments.
+let you select a particular application at launch time via command-line arguments.
 
 The command line syntax of [multi-app executables](http://www.excelsior-usa.com/doc/jet/jetw011.html#0330)
 is an extension of the `java` launcher command
@@ -1112,7 +1197,7 @@ To enable the multi-app mode add the following configuration parameter:
 #### Defining System Properties and JVM Arguments
 
 Unless you opted for multi-app executable generation, the resulting executable interprets
-all its command line arguments as arguments of the main class you have specified.
+all its command-line arguments as arguments of the main class you have specified.
 In other words, there is no place on the application command line for an argument
 setting a system property or altering JVM defaults, such as `-Dprop=value` or `-Xmx1G` .
 To address this, the plugin enables you to hardwire system properties and JVM arguments
@@ -1197,10 +1282,11 @@ configuration:
 <?php name_pattern('profileStartupTimeout', 'duration-in-seconds'); ?>
 
 As soon as the specified period elapses, profiling stops and the application is automatically terminated,
-so ensure that the timeout value is large enough to capture all actions the application nomrally carries out
+so ensure that the timeout value is large enough to capture all actions the application normally carries out
 during startup. (It is safe to close the application manually if the profiling period proves to be excessively long.)
 
-If your application requires command line arguments to run, set the `runArgs` plugin parameter in the same way as for the [Test Run](#performing-a-test-run).
+If your application requires command-line arguments to run, set the `runArgs` plugin parameter
+in the same way as for a [Test Run](#performing-a-test-run).
 
 #### Global Optimizer
 
@@ -1232,7 +1318,7 @@ To enable the Global Optimizer, add the following configuration parameter:
 
 #### Excelsior JET Runtime Configurations
 
-The plugin enables you to configure the Excelsior JET Runtime via the <?php name('runtime'); ?> configuration section:
+The plugin enables you to configure the Excelsior JET Runtime via the <?php section('runtime'); ?> configuration section:
 
 <?php if (MAVEN) : ?>
 ```xml
@@ -1253,7 +1339,7 @@ that may contain parameters described below.
 Excelsior JET VM comes with multiple implementations of the runtime system,
 optimized for different hardware configurations and application types.
 
-To select a particular runtime flavor, use the <?php name('flavor'); ?> parameter of the <?php name('runtime'); ?> section.
+To select a particular runtime flavor, use the <?php name('flavor'); ?> parameter of the <?php section('runtime'); ?> section.
 The flavors available in the Enterprise Edition and the Evaluation Package are
 `desktop`, `server`, and `classic`; other Excelsior JET products may not feature some of these.
 
@@ -1264,7 +1350,7 @@ Considerations"*, section *"Runtime Selection"*.
 
 By default, Excelsior JET places its runtime files required for the
 generated executable to work in a folder named `"rt"` located next to that executable.
-You may change that default location with the <?php name('location'); ?> parameter of the <?php name('runtime'); ?> section.
+You may change that default location with the <?php name('location'); ?> parameter of the <?php section('runtime'); ?> section.
 
 **Note:** This functionality is only available in Excelsior JET 11.3 and above.
 
@@ -1273,10 +1359,10 @@ You may change that default location with the <?php name('location'); ?> paramet
 Java SE 8 defines three subsets of the standard Platform API called compact profiles.
 Excelsior JET enables you to deploy your application with one of those subsets.
 
-To specify a particular profile, use the <?php name('profile'); ?> parameter of the <?php name('runtime'); ?> section.
+To specify a particular profile, use the <?php name('profile'); ?> parameter of the <?php section('runtime'); ?> section.
 The valid values are `auto` (default), `compact1`, `compact2`, `compact3`, and `full`.
 
-<?php name_value('profile', 'auto'); ?> forces Excelsior JET to detect which parts of the Java SE Platform API are referenced
+<?php name_string('profile', 'auto'); ?> forces Excelsior JET to detect which parts of the Java SE Platform API are referenced
 by the application and select the smallest compact profile that includes them all,
 or the entire Platform API (`full`) if there is no such profile.
 
@@ -1296,16 +1382,20 @@ where you distribute your application can be added to the package with the follo
   <locales>
 </runtime>
 ```
+
+You may specify `all` as the value of <?php name('locale'); ?> to add all locales and charsets at once or
+`none` to not include any of them.
 <?php elseif (GRADLE) : ?>
 ```gradle
 runtime {
    locales = ["Locale"`, "Locale2"]
 }
 ```
+
+You may specify `["all"]` as the value of `locales` to add all locales and charsets at once or
+`["none"]` to not include any of them.
 <?php endif; ?>
 
-You may specify `all` as the value of <?php name('locale'); ?> to add all locales and charsets at once or
-`none` to not include any of them.
 The available sets of locales and encodings are:
 
 `European`, `Indonesian`, `Malay`, `Hebrew`, `Arabic`, `Chinese`, `Japanese`, `Korean`, `Thai`,
@@ -1327,16 +1417,20 @@ To include optional JET Runtime components in the package, use the following con
   </components>
 </runtime>
 ```
+
+You may specify `all` as the value of <?php name('component'); ?> to add all components at once or
+`none` to not include any of them.
 <?php elseif (GRADLE) : ?>
 ```gradle
 runtime {
     components = ["optComponent1", "optComponent2"]
 }
 ```
+
+You may specify `["all"]` as the value of `components` to add all components at once or
+`["none"]` to not include any of them.
 <?php endif; ?>
 
-You may specify `all` as the value of <?php name('component'); ?> to add all components at once or
-`none` to not include any of them.
 
 The available optional components are:
 
@@ -1352,7 +1446,7 @@ The 32-bit versions of Excelsior JET are capable of reducing the disk footprint 
 compiled with the [Global Optimizer](#global-optimizer) enabled, by compressing the (supposedly) unused Java SE API
 classes.
 
-To enable disk footprint reduction, add the following parameter to the <?php name('runtime'); ?> section:
+To enable disk footprint reduction, add the following parameter to the <?php section('runtime'); ?> section:
 
 <?php name_pattern('diskFootprintReduction', 'disk-footprint-reduction-mode'); ?>
 
@@ -1412,18 +1506,20 @@ and specify the base URL of the location where you plan to place the detached pa
 By default, the plugin automatically detects which Java SE APIs your application does not use
 and detaches the respective JET Runtime components from the installation package.
 Alternatively, you may enforce detaching of particular components using the following parameter
-under the <?php name('slimDown'); ?> configuration section:
+under the <?php section('slimDown'); ?> configuration section:
 
 <?php name_pattern('detachComponents', 'comma-separated list of APIs'); ?>
 
 Available detachable components: `corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws`
 
-At the end of the build process, the plugin places the detached package in the `jet` subdirectory
-of the <?php tool(); ?> target build directory. You may configure its name with the <?php name('detachedPackage'); ?> parameter
-of the <?php name('slimDown'); ?> section (by default the name is `${project.build.finalName}.pkl`).
+At the end of the build process, the plugin places the detached package
+in the `jet` subdirectory of the <?php tool(); ?> target build directory.
+You may configure its name with the <?php name('detachedPackage'); ?> parameter
+of the <?php section('slimDown'); ?> section
+(by default the name is `<?php maven_gradle('${project.build.finalName}.pkl', 'artifactName.pkl'); ?>`).
 
-Do not forget to upload the detached package to the location specified in `</detachedBaseURL>`
-above before deploying your application to end-users.
+Do not forget to upload the detached package to the location specified
+in <?php name('detachedBaseURL'); ?> above before deploying your application to end-users.
 
 **Note:** Enabling Java Runtime Slim-Down automatically enables the Global Optimizer,
           so performing a Test Run is mandatory for Java Runtime Slim-Down as well.
@@ -1463,7 +1559,7 @@ You can also set a particular, fixed expiration date by using the <?php name('ex
 instead of <?php name('expireInDays'); ?>. The format of the <?php name('expireDate'); ?> parameter value
 is *ddMMMyyyy*, for example `15Sep2020`.
 
-**Note:** If you choose the `excelsior-installer` <?php name('packaging'); ?> type, the generated setup
+**Note:** If you choose the <?php name('packaging'); ?> type `excelsior-installer`, the generated setup
 package will also expire, displaying the same message to the user.
 
 One common usage scenario of this functionality is setting the hard expiration date further into the future,
@@ -1484,7 +1580,7 @@ the *"Intellectual Property Protection"* chapter of the Excelsior JET User's Gui
 
 #### Additional Compiler Options and Equations
 The commonly used compiler options and equations are mapped to the parameters of the plugin.
-However the compiler has some advanced options and equations that you may find in the
+However the compiler also has some advanced options and equations that you may find in the
 Excelsior JET User's Guide, plus some troubleshooting settings that the Excelsior JET Support
 team may suggest you to use.
 You may enumerate such options using the <?php name('compilerOptions'); ?> configuration, for instance:
@@ -1502,7 +1598,7 @@ compilerOptions = ["-disablestacktrace+", "-inlinetolimit=200"]
 ```
 <?php endif; ?>
 
-These options will be appended to Excelsior JET project generated by the plugin.
+These options will be appended to the Excelsior JET project file generated by the plugin.
 
 **Notice:** Care must be taken with using this parameter to avoid conflicts
 with other project parameters.
@@ -1529,11 +1625,11 @@ Excelsior JET 11 supports Apache Tomcat 5.0.x (starting from version 5.0.1), 5.5
 and 7.0.x up to version 7.0.62. Excelsior JET 11.3 adds support for Tomcat 8.0 and Tomcat 7.0.63+ versions.
 
 #### Usage
-The plugin will treat your <?php tool(); ?> project as a Tomcat Web application project if its <?php name('packaging'); ?> type is `war`.
-To enable native compliation of your Tomcat Web application, you need to copy and paste the following configuration into the <?php name('plugins'); ?> 
-section of your <?php project_file(); ?> file:
 
 <?php if (MAVEN) : ?>
+The plugin will treat your <?php tool(); ?> project as a Tomcat Web application project if its <?php name('packaging'); ?> type is `war`.
+To enable native compliation of your Tomcat Web application, you need to copy and paste the following configuration into the <?php section('plugins'); ?> section of your <?php project_file(); ?> file:
+
 ```xml
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
@@ -1547,6 +1643,9 @@ section of your <?php project_file(); ?> file:
 </plugin>
 ```
 <?php elseif (GRADLE) : ?>
+The plugin will treat your Gradle project as a Tomcat Web application project if the `war` plugin is applied **before** the `excelsiorJet` plugin.
+To enable native compilation of your Tomcat Web application, you need to add the plugin dependency to the `buildscript` configuration of the `build.gradle` file, e.g.:
+
 ```gradle
 buildscript {
     def jetPluginVersion = '0.9.5'
@@ -1558,9 +1657,21 @@ buildscript {
     }
 }
 ```
+
+then apply and configure the `excelsiorJet` plugin as follows:
+
+```gradle
+apply plugin: 'excelsiorJet'
+excelsiorJet {
+    tomcat {
+        tomcatHome = ""
+    }
+}
+```
+
 <?php endif; ?>
 
-and set the <?php name('tomcatHome'); ?> parameter, which has to point to the *master* Tomcat installation &mdash; basically,
+and then set the <?php name('tomcatHome'); ?> parameter, which has to point to the *master* Tomcat installation &mdash; basically,
 a clean Tomcat instance that was never launched.
 
 You may also set the above parameter by passing the `tomcat.home` system property on the <?php tool(); ?> command line as follows:
@@ -1598,13 +1709,14 @@ into the `jet/app` directory and binds the resulting executable to that copy of 
 > `jet/app/bin` folder by default.
 
 Finally, the plugin packs the contents of the `jet/app` directory into
-a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
+a zip archive named `<?php maven_gradle('${project.build.finalName}', '<artifactName>'); ?>.zip`
+so as to aid single file re-distribution.
 Other packaging types that are available for plain Java SE applications are supported for Tomcat as well (see above).
 
 #### Tomcat configuration parameters
 Most configuration parameters that are available for plain Java SE applications listed above
 are also available for Tomcat web applications. There are also a few Tomcat-specific configuration parameters that
-you may set within the <?php name('tomcat'); ?> parameters block:
+you may set within the <?php section('tomcat'); ?> section:
 
 * <?php name('warDeployName'); ?> - the name of the war file to be deployed into Tomcat.
    By default, Tomcat uses the name of the war file as the context path of the respective web application.
@@ -1642,10 +1754,10 @@ you may set within the <?php name('tomcat'); ?> parameters block:
   the <?php name('genScripts'); ?> parameter to `false`.
 
 * <?php name('installWindowsService'); ?> - if you opt for `excelsior-installer` packaging for Tomcat on Windows,
-  the installer will registers the Tomcat executable as a Windows service by default.
+  the installer will register the Tomcat executable as a Windows service by default.
   You may set this parameter to `false` to disable that behavior.
   Otherwise, you may configure Windows Service-specific parameters for the Tomcat service by adding
-  a <?php name('windowsServiceConfiguration'); ?> section as described [here](#windows-service-configuration).
+  a <?php section('windowsService'); ?> configuration section as described [here](#windows-service-configuration).
 
     **Note:** This functionality is only available in Excelsior JET 11.3 and above.
 
@@ -1681,19 +1793,22 @@ automatically.
 #### Test Run of a Tomcat Web application
 
 You can launch your Tomcat Web application on Excelsior JET JVM using a JIT compiler
-before pre-compiling it to native code using the `jet:testrun` Mojo the same way as with plain Java SE applications.
+before pre-compiling it to native code using the
+<?php maven_gradle('`jet:testrun` Mojo', '`jetTestRun` task'); ?> the same way
+as with plain Java SE applications.
 
 However, please note that a running Tomcat instance would not terminate until you run its standard `shutdown` script.
-Technically, you can terminate it using <key>Ctrl-C</key>, but that would terminate the entire <?php tool(); ?> build and would not constitute a correct Tomcat termination.
-So it is recommended to use the standard Tomcat `shutdown` script for correct Tomcat termination at the end of a Test Run.
-You may launch it from any standard Tomcat installation.
+Technically, you can terminate it using <key>Ctrl-C</key>, but that would terminate the entire <?php tool(); ?> build
+and would not constitute a correct Tomcat termination.
+So it is recommended to use the standard Tomcat `shutdown` script for correct Tomcat termination
+at the end of a Test Run. You may launch it from any standard Tomcat installation.
 
 ### Invocation Dynamic Libraries
 
-To create a dynamic library callable from applications written in a non-JVM language
-instead of a runnable executable, add the following Excelsior JET <?php tool(); ?> plugin configuration:
-
+To create a dynamic library callable from applications written in a non-JVM language instead of a runnable executable, 
 <?php if (MAVEN) : ?>
+add the following Excelsior JET <?php tool(); ?> plugin configuration:
+
 ```xml
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
@@ -1705,6 +1820,8 @@ instead of a runnable executable, add the following Excelsior JET <?php tool(); 
 </plugin>
 ```
 <?php elseif (GRADLE) : ?>
+you need to add the plugin dependency to the `buildscript` configuration of the `build.gradle` file, e.g.:
+
 ```gradle
 buildscript {
     def jetPluginVersion = '0.9.5'
@@ -1716,9 +1833,18 @@ buildscript {
     }
 }
 ```
+
+then apply and configure the `excelsiorJet` plugin as follows:
+
+```gradle
+apply plugin: 'excelsiorJet'
+excelsiorJet {
+    appType = "dynamic-library"
+}
+```
 <?php endif; ?>
 
-Using Invocation DLLs is a bit tricky.
+Using such libraries is a bit tricky.
 Like any other JVM, Excelsior JET executes Java code in a special isolated context
 to correctly support exception handling, garbage collection, and so on.
 That is why Java methods cannot be directly invoked from a foreign environment.
@@ -1753,17 +1879,18 @@ through the start button in the Windows Control Panel/Services).
 A Windows service program must register a callback routine (so called control handler)
 that is invoked by the system on service initialization, interruption, resume, etc.
 With Excelsior JET, you achieve this functionality by implementing a subclass of
-`com.excelsior.service.WinService` of Excelsior JET WinService API and specifying it
+`com.excelsior.service.WinService` of the Excelsior JET WinService API and specifying it
 as the main class of the plugin configuration.
 The JET Runtime will instantiate that class on startup and translate calls to the callback routine into calls
 of its respective methods, collectively called handler methods. For more details, refer to the
 *"Windows Services"* Chapter of the Excelsior JET User's Guide.
 
-To compile your implementation of `WinService` to Java bytecode you will need to reference
-the Excelsior JET WinService API from your <?php tool(); ?> project. For that, add the following dependency
-to the <?php name('dependencies'); ?> section  of your <?php project_file(); ?> file:
-
+To compile your implementation of `WinService` to Java bytecode, you will need to reference
+the Excelsior JET WinService API from your
 <?php if (MAVEN) : ?>
+<?php tool(); ?> project. For that, add the following dependency
+to the <?php section('dependencies'); ?> section  of your <?php project_file(); ?> file:
+
 ```xml
 <dependency>
     <groupId>com.excelsiorjet</groupId>
@@ -1773,6 +1900,9 @@ to the <?php name('dependencies'); ?> section  of your <?php project_file(); ?> 
 </dependency>
 ```
 <?php elseif (GRADLE) : ?>
+Gradle build script.
+For that, add the following dependency to your <?php project_file(); ?> file:
+
 ```gradle
 dependencies {
     compileOnly "com.excelsiorjet:excelsior-jet-winservice-api:1.0.0"
@@ -1782,9 +1912,10 @@ dependencies {
 
 #### Windows Service Configuration
 
-To create a Windows Service, add the following Excelsior JET <?php tool(); ?> plugin configuration:
-
+To create a Windows Service,
 <?php if (MAVEN) : ?>
+add the following Excelsior JET <?php tool(); ?> plugin configuration:
+
 ```xml
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
@@ -1812,6 +1943,9 @@ To create a Windows Service, add the following Excelsior JET <?php tool(); ?> pl
 </plugin>
 ```
 <?php elseif (GRADLE) : ?>
+you need to add the plugin dependency to the <?php section('buildscript'); ?> configuration
+of the <?php project_file(); ?> file, e.g.:
+
 ```gradle
 buildscript {
     def jetPluginVersion = '0.9.5'
@@ -1853,16 +1987,16 @@ Where:
 * <?php name('name'); ?> -  the system name of the service. It is used to install, remove and otherwise manage the service.
   It can also be used to recognize messages from this service in the system event log.
   This name is set during the creation of the service executable.
-  By default, the value of the <?php name('outputName'); ?> parameter is substituted.
+  By default, the value of the <?php name('outputName'); ?> parameter is used as the system name of the service.
 
 * <?php name('displayName'); ?> - the descriptive name of the service.
   It is shown in the Event Viewer system tool and in the Services applet of the Windows Control Panel.
-  By default, the value of the <?php name('name'); ?> paramter of the <?php name('windowsServiceConfiguration'); ?> section is used
-  as the display name.
+  By default, the value of the <?php name('name'); ?> parameter
+  of the <?php section('windowsService'); ?> section is used as the display name.
 
 * <?php name('description'); ?> - the user description of the service. It must not exceed 1000 characters.
 
-* <?php name('arguments'); ?> - command line arguments that shall be passed to the service upon startup.
+* <?php name('arguments'); ?> - command-line arguments that shall be passed to the service upon startup.
 
 * <?php name('logOnType'); ?> - specifies an account to be used by the service.
   Valid values are: `local-system-account` (default), `user-account`.
@@ -1895,10 +2029,10 @@ using Excelsior JET 11.0, as the respective functionality is missing in the `xpa
 It only works for Excelsior JET 11.3 and above.
 
 **Note:** You may build a multi-app executable runnable as both plain application and Windows service.
-For that set <?php name('appType'); ?> parameter to "windows-service" and <?php name('multiApp'); ?> parameter to `true`.
-Please note that in this case, Windows Service arguments will have the syntax of multi-app executables,
-so if you would need to just pass usual arguments to your service and not pass VM arguments, do not forget
-to add "-args" as the first argument of your service <?php name('arguments'); ?> list.
+For that, set the <?php name('appType'); ?> parameter to `windows-service` and <?php name('multiApp'); ?> to `true`.
+Please note that in this case <?php name('arguments'); ?> will have the syntax of multi-app executables,
+so to pass arguments to your service and not to the Excelsior JET JVM, 
+add `"-args"` (without the quotes) as the first argument.
 
 #### Test Run of Windows Services
 
@@ -1909,6 +2043,7 @@ to test your basic application functionality with Test Run.
 
 ## Sample Project
 
+<?php if (MAVEN) : ?>
 To demonstrate the process and result of plugin usage, we have forked the [JavaFX VNC Client](https://github.com/comtel2000/jfxvnc) project on GitHub, added the Excelsior JET plugin to its <?php project_file(); ?> file, and run it through Maven to build native binaries for three platforms.
 
 You can download the binaries from here:
@@ -1924,6 +2059,24 @@ or clone [the project](https://github.com/pjBooms/jfxvnc) and build it yourself:
     cd jfxvnc/ui
     mvn jet:build
 ```
+<?php elseif (GRADLE) : ?>
+To demonstrate the process and result of plugin usage, we have forked the [Pax Britannica](https://github.com/libgdx/libgdx-demo-pax-britannica) Libgdx demo project on GitHub,
+added the Excelsior JET plugin to its `build.gradle` file, and run it through Gradle to build native binaries for three platforms.
+
+You can download the binaries from here:
+
+* [Windows (32-bit, 27MB installer)](http://www.excelsior-usa.com/download/jet/gradle/pax-britannica-windows-x86.exe)
+* [OS X (64-bit, 50MB installer)](http://www.excelsior-usa.com/download/jet/gradle/pax-britannica-osx-amd64.pkg)
+* [Linux (64-bit, 37MB installer)](http://www.excelsior-usa.com/download/jet/gradle/pax-britannica-linux-amd64.bin)
+
+or clone [the project](https://github.com/excelsior-oss/libgdx-demo-pax-britannica) and build it yourself:
+
+```
+    git clone https://github.com/excelsior-oss/libgdx-demo-pax-britannica
+    cd libgdx-demo-pax-britannica
+    gradlew :desktop:jetBuild
+```
+<?php endif; ?>
 
 ## Release Notes
 
@@ -1941,22 +2094,22 @@ Otherwise, think of this version as of 1.0 Release Candidate 1.
 Compared with the previous releases, the following functionality was added to the plugin:
 
 * <?php name('packageFiles'); ?> parameter introduced to add separate files/folders to the package
-* <?php name('excelsiorInstaller'); ?> configuration section extended with the following parameters:
-  - <?php name('language'); ?> - to set installation wizard language
-  - <?php name('cleanupAfterUninstall'); ?> - to remove all files on uninstall
-  - <?php name('afterInstallRunnable'); ?> - to run an executable after installation
-  - <?php name('compressionLevel'); ?> - to control installation package compression
-  - <?php name('installationDirectory'); ?> - to change installation directory defaults
-  - <?php name('registryKey'); ?> - to customize the registry key used for installation on Windows
-  - <?php name('shortcuts'); ?> - to add shortcuts to the Windows Start menu, Desktop, etc.
-  - <?php name('noDefaultPostInstallActions'); ?> - to not add the default action after installation
-  - <?php name('postInstallCheckboxes'); ?> - to configure post install actions
-  - <?php name('fileAssociations'); ?> - to create file associations
-  - <?php name('installCallback'); ?> - to set install callback dynamic library
-  - <?php name('uninstallCallback'); ?> - to set uninstall callback dynamic library
-  - <?php name('welcomeImage'); ?>, <?php name('installerImage'); ?>, <?php name('uninstallerImage'); ?> - to customize (un)installer appearance
-* <?php name('allowUserToChangeTomcatPort'); ?> parameter added to <?php name('tomcat'); ?> configuration section to allow the user to change
-  the Tomcat port at install time
+* <?php section('excelsiorInstaller'); ?> configuration section extended with the following parameters:
+    - <?php name('language'); ?> - to set installation wizard language
+    - <?php name('cleanupAfterUninstall'); ?> - to remove all files on uninstall
+    - <?php name('afterInstallRunnable'); ?> - to run an executable after installation
+    - <?php name('compressionLevel'); ?> - to control installation package compression
+    - <?php name('installationDirectory'); ?> - to change installation directory defaults
+    - <?php name('registryKey'); ?> - to customize the registry key used for installation on Windows
+    - <?php name('shortcuts'); ?> - to add shortcuts to the Windows Start menu, desktop, etc.
+    - <?php name('noDefaultPostInstallActions'); ?> - to not add the default post-install actions
+    - <?php name('postInstallCheckboxes'); ?> - to configure post-install actions
+    - <?php name('fileAssociations'); ?> - to create file associations
+    - <?php name('installCallback'); ?> - to set install callback dynamic library
+    - <?php name('uninstallCallback'); ?> - to set uninstall callback dynamic library
+    - <?php name('welcomeImage'); ?>, <?php name('installerImage'); ?>, <?php name('uninstallerImage'); ?> - to customize (un)installer appearance
+* <?php name('allowUserToChangeTomcatPort'); ?> parameter added to the <?php section('tomcat'); ?> configuration section
+  to allow the user to change the Tomcat port at install time
 
 Version 0.9.4 (24-Jan-2017)
 
@@ -1964,10 +2117,10 @@ Version 0.9.4 (24-Jan-2017)
 
 Version 0.9.3 (19-Jan-2017)
 
-* <?php name('runtime'); ?> configuration section introduced and related parameters moved to it:
+* <?php section('runtime'); ?> configuration section introduced and related parameters moved to it:
    <?php name('locales'); ?>, <?php name('profile'); ?>, <?php name('optRtFiles'); ?> (renamed to <?php name('components'); ?>), <?php name('javaRuntimeSlimDown'); ?> (renamed to <?php name('slimDown'); ?>).
    Old configuration parameters are now deprecated and will be removed in a future release.
-   New parameters added to <?php name('runtime'); ?> section:
+   New parameters added to the <?php section('runtime'); ?> section:
     - <?php name('flavor'); ?> to select a runtime flavor
     - <?php name('location'); ?> to change runtime location in the resulting package
     - <?php name('diskFootprintReduction'); ?> to reduce application disk footprint
@@ -1975,14 +2128,16 @@ Version 0.9.3 (19-Jan-2017)
 * Windows version-info resource configuration changed to meet other enclosed configurations style.
   Old way to configure Windows version info is deprecated and will be removed in a future release.
 
+<?php if (MAVEN) : ?>
 Version 0.9.2 (12-Jan-2017)
 
 Issue with buildnumber-maven-plugin #49 fixed
+<?php endif; ?>
 
 Version 0.9.1 (02-Dec-2016)
 
 * Support for Compact Profiles
-* Not working Test Run for 7+ Tomcat versions fixed (#42 issue)
+* Not working Test Run for 7+ Tomcat versions fixed<?php if (MAVEN) : ?>(issue #42)<?php endif; ?> 
 
 Version 0.9.0 (23-Nov-2016)
 
@@ -1999,8 +2154,8 @@ such as code protection, selective optimization, and resource packing.
 
 Version 0.7.2 (19-Aug-2016)
 
-This release adds the capability to pass command-line arguments to the application during startup profiling
-and the test run.
+This release adds the capability to pass command-line arguments to the application
+during startup profiling and the test run.
 
 Version 0.7.1 (10-Aug-2016)
 
@@ -2013,6 +2168,7 @@ and all options of the `xpack` utility as of Excelsior JET 11.0 release:
   * <?php name('compilerOptions'); ?> parameter introduced to set advanced compiler options and equations
   * <?php name('locales'); ?> parameter introduced to add additional locales and charsets to the resulting package
 
+<?php if (MAVEN) : ?>
 Version 0.7.0 (22-June-2016)
 
 * Massive refactoring that introduces `excelsior-jet-api` module: a common part between Maven and Gradle
@@ -2085,6 +2241,34 @@ Version 0.2.0 (14-Dec-2015)
 Version 0.1.0 (08-Dec-2015)
 * Initial release supporting compilation of the Maven Project with all dependencies into native executable
 and placing it into a separate directory with required Excelsior JET runtime files.
+<?php elseif (GRADLE) : ?>
+Version 0.7.0 (12-Jul-2016)
+
+* Compilation of Tomcat Web applications is supported
+
+Version 0.3.0 (06-Jul-2016)
+
+* Support of Excelsior Installer setup generation
+* Windows Version Information generation
+* Support of multi-app executables
+* Startup Accelerator supported and enabled by default
+* Test Run Task implemented that enables:
+   - running an application on the Excelsior JET JVM before pre-compiling it to native code
+   - gathering application execution profiles to enable the Startup Optimizer
+* `optRtFiles` parameter introduced to add optional JET runtime components
+* Reduced the download size and disk footprint of resulting packages by means of supporting:
+   * Global Optimizer
+   * Java Runtime Slim-Down
+* `packageFilesDir` parameter introduced to add extra files to the final package
+* Trial version generation is supported
+* `jvmArgs` parameter introduced to define system properties and JVM arguments
+* `protectData` parameter added to enable data protection
+* Mac OS X application bundles and installers support
+
+Version 0.1.0 (24-Jun-2016)
+* Initial release supporting compilation of the Gradle Project with all dependencies into native executable
+and placing it into a separate directory with required Excelsior JET runtime files.
+<?php endif; ?>
 
 ## Roadmap
 
