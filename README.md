@@ -572,6 +572,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
+    
     * `<type>` is either `program-files` (default on Windows, Windows only),
       `system-drive` (Windows only, default for Tomcat web applications on Windows),
       `absolute-path`,  `current-directory` (default on Linux), or `user-home` (Linux only)
@@ -602,6 +603,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
+    
     * `<location>` - either `program-folder`, `desktop`, `start-menu`, or `startup`
 
     * `<target>` - location of the shortcut target within the package
@@ -643,6 +645,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
+    
     * `<type>` - `run` (default), `open`, or `restart`
     * `<target>` - location of the target within the package (not valid for `restart`)
     * `<workingDirectory>` - pathname of the working directory of the target within the package.
@@ -675,6 +678,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
+    
     * `<extension>` - file name extension *without the leading dot*
 
     * `<target>` - location within the package of the executable program being associated with `<extension>`
@@ -1037,6 +1041,7 @@ where you distribute your application can be added to the package with the follo
 
 You may specify `all` as the value of `<locale>` to add all locales and charsets at once or
 `none` to not include any of them.
+
 The available sets of locales and encodings are:
 
 `European`, `Indonesian`, `Malay`, `Hebrew`, `Arabic`, `Chinese`, `Japanese`, `Korean`, `Thai`,

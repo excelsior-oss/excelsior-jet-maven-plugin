@@ -348,7 +348,7 @@ You may also pass the arguments via the `jet.runArgs` system property as a comma
 (Use "`\`" to escape commas within arguments: `-Djet.runArgs="arg1,Hello\, World"` will be passed
 to your application as `arg1 "Hello, World"`.)
 
-### Configurations other than <?php name('mainClass'); ?>
+### Configurations other than <?php name('mainClass'); ?> 
 
 For the complete list of parameters, refer to
 <?php if (MAVEN) : ?>
@@ -375,7 +375,7 @@ If the splash image has been specified in the manifest of the application JAR fi
 the respective image will be obtained automatically,
 otherwise, you may assign a splash screen image to the application manually:
 
-<?php name_pattern('splash', 'splash-image-file'); ?>
+<?php name_pattern('splash', 'splash-image-file'); ?> 
 
 It is recommended to store the splash image in a VCS, and if you place it at
 `<?php project_dir(); ?>/src/main/jetresources/splash.png`, you won't need to specify it
@@ -749,11 +749,11 @@ to create Excelsior Installer setups on Windows and Linux and an application bun
 
 Excelsior Installer setup, in turn, has the following configurations:
 
-* <?php name_pattern('product', 'product-name'); ?> - default is <?php maven_gradle('`${project.name}`', '`<project.name>`'); ?>
+* <?php name_pattern('product', 'product-name'); ?> - default is <?php maven_gradle('`${project.name}`', '`<project.name>`'); ?> 
 
-* <?php name_pattern('vendor', 'vendor-name'); ?> -  default is <?php maven_gradle('`${project.organization.name}`', '`<project.group>`'); ?>
+* <?php name_pattern('vendor', 'vendor-name'); ?> -  default is <?php maven_gradle('`${project.organization.name}`', '`<project.group>`'); ?> 
 
-* <?php name_pattern('version', 'product-version'); ?> - default is <?php maven_gradle('`${project.version}`', '`<project.version>`'); ?>
+* <?php name_pattern('version', 'product-version'); ?> - default is <?php maven_gradle('`${project.version}`', '`<project.version>`'); ?> 
 
 The above parameters are also used by Windows Version Information and OS X bundle configurations.
 
@@ -836,6 +836,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 <?php endif; ?>
 
     where:
+    
     * <?php name('type'); ?> is either `program-files` (default on Windows, Windows only),
       `system-drive` (Windows only, default for Tomcat web applications on Windows),
       `absolute-path`,  `current-directory` (default on Linux), or `user-home` (Linux only)
@@ -885,6 +886,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 <?php endif; ?>
 
     where:
+    
     * <?php name('location'); ?> - either `program-folder`, `desktop`, `start-menu`, or `startup`
 
     * <?php name('target'); ?> - location of the shortcut target within the package
@@ -941,6 +943,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 <?php endif; ?>
 
     where:
+    
     * <?php name('type'); ?> - `run` (default), `open`, or `restart`
     * <?php name('target'); ?> - location of the target within the package (not valid for `restart`)
     * <?php name('workingDirectory'); ?> - pathname of the working directory of the target within the package.
@@ -993,9 +996,10 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 <?php endif; ?>
 
     where:
+    
     * <?php name('extension'); ?> - file name extension *without the leading dot*
 
-    * <?php name('target'); ?> - location within the package of the executable program being associated with <?php name('extension'); ?>
+    * <?php name('target'); ?> - location within the package of the executable program being associated with <?php name('extension'); ?> 
 
     * <?php name('description'); ?> - description of the file type. For example, the description of .mp3 files is "MP3 Format Sound".
 
@@ -1063,11 +1067,11 @@ The plugin supports the creation of OS X application bundles and installers.
 To create an OS X application bundle, add the following configuration
 into <?php maven_gradle('the plugin `<configuration>` section', 'the `excelsiorJet{}` plugin extension'); ?>:
 
-<?php name_string('packaging', 'osx-app-bundle'); ?>
+<?php name_string('packaging', 'osx-app-bundle'); ?> 
 
 **Note:** if you use the same <?php project_file(); ?> for all three supported platforms (Windows, OS X, and Linux), it is recommended to use another configuration:
 
-<?php name_string('packaging', 'native-bundle'); ?>
+<?php name_string('packaging', 'native-bundle'); ?> 
 
 to create Excelsior Installer setups on Windows and Linux and an application bundle and installer on OS X.
 
@@ -1125,7 +1129,7 @@ The values of <?php name('product'); ?> and <?php name('vendor'); ?> configurati
 other defaults can be changed using the <?php section('windowsVersionInfo'); ?> configuration section
 that has the following parameters:
 
-  * <?php name_pattern('version', 'version-string'); ?>
+  * <?php name_pattern('version', 'version-string'); ?> 
   
     Version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
 
@@ -1135,11 +1139,11 @@ that has the following parameters:
     if the latter does not meet this requirement,
     or from `<?php maven_gradle('${project.version}', 'project.version'); ?>` if this configuration is not present.
 
-  * <?php name_pattern('copyright', 'legal-copyright'); ?>
+  * <?php name_pattern('copyright', 'legal-copyright'); ?> 
   
     `LegalCopyright` string, with default value derived from other parameters
 
-  * <?php name_pattern('description', 'executable-description'); ?>
+  * <?php name_pattern('description', 'executable-description'); ?> 
   
     `FileDescription` string, default is `<?php maven_gradle('${project.name}', 'project.name'); ?>`
 
@@ -1158,7 +1162,7 @@ Note, however, that certain third-party APIs rely on stack trace printing. One e
 
 To set the stack trace support mode, use the <?php name('stackTraceSupport'); ?> configuration parameter:
 
-<?php name_pattern('stackTraceSupport', 'stack-trace-mode'); ?>
+<?php name_pattern('stackTraceSupport', 'stack-trace-mode'); ?> 
 
 #### Method Inlining
 When optimizing a Java program, the compiler often replaces method call statements with bodies of the methods
@@ -1167,7 +1171,7 @@ especially when tiny methods, such as get/set accessors, are inlined.
 However, inlining of larger methods increases code size, and its impact on performance may be uncertain.
 To control the aggressiveness of method inlining, use the <?php name('inlineExpansion'); ?> plugin parameter:
 
-<?php name_pattern('inlineExpansion', 'inline-expasnion-mode'); ?>
+<?php name_pattern('inlineExpansion', 'inline-expasnion-mode'); ?> 
 
 The available modes are:
   `aggressive` (default), `very-aggressive`, `medium`, `low`, and `tiny-methods-only`
@@ -1191,7 +1195,7 @@ and the arguments of the application:
 
 To enable the multi-app mode add the following configuration parameter:
 
-<?php name_value('multiApp', 'true'); ?>
+<?php name_value('multiApp', 'true'); ?> 
 
 <a name="jvmargs"></a>
 #### Defining System Properties and JVM Arguments
@@ -1274,12 +1278,12 @@ The JET Runtime will then use the information to reduce the application startup 
 The Startup Accelerator is enabled by default, but you may disable it by specifying the following
 configuration:
 
-<?php name_value('profileStartup', 'false'); ?>
+<?php name_value('profileStartup', 'false'); ?> 
 
 You may also specify the duration of the profiling session in seconds by specifying the following
 configuration:
 
-<?php name_pattern('profileStartupTimeout', 'duration-in-seconds'); ?>
+<?php name_pattern('profileStartupTimeout', 'duration-in-seconds'); ?> 
 
 As soon as the specified period elapses, profiling stops and the application is automatically terminated,
 so ensure that the timeout value is large enough to capture all actions the application normally carries out
@@ -1312,7 +1316,7 @@ installation package size.
 
 To enable the Global Optimizer, add the following configuration parameter:
 
-<?php name_value('globalOptimizer', 'true'); ?>
+<?php name_value('globalOptimizer', 'true'); ?> 
 
 **Note:** performing a Test Run is mandatory if the Global Optimizer is enabled.
 
@@ -1448,7 +1452,7 @@ classes.
 
 To enable disk footprint reduction, add the following parameter to the <?php section('runtime'); ?> section:
 
-<?php name_pattern('diskFootprintReduction', 'disk-footprint-reduction-mode'); ?>
+<?php name_pattern('diskFootprintReduction', 'disk-footprint-reduction-mode'); ?> 
 
 The available modes are:
 
@@ -1508,7 +1512,7 @@ and detaches the respective JET Runtime components from the installation package
 Alternatively, you may enforce detaching of particular components using the following parameter
 under the <?php section('slimDown'); ?> configuration section:
 
-<?php name_pattern('detachComponents', 'comma-separated list of APIs'); ?>
+<?php name_pattern('detachComponents', 'comma-separated list of APIs'); ?> 
 
 Available detachable components: `corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws`
 
@@ -1573,7 +1577,7 @@ an outdated trial copy for evaluation.
 If you do not wish constant data, such as reflection info, Java string literals, or packed resource files,
 to be visible in the resulting executable, enable data protection by specifying the following configuration:
 
-<?php name_value('protectData', 'true'); ?>
+<?php name_value('protectData', 'true'); ?> 
 
 For more details on data protection, refer to the *"Data Protection"* section of
 the *"Intellectual Property Protection"* chapter of the Excelsior JET User's Guide.
