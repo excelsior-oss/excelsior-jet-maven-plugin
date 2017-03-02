@@ -1398,7 +1398,7 @@ See `samples/Invocation` in your Excelsior JET installation directory for detail
 #### Test Run for Dynamic Libraries
 
 To test an invocation dynamic library, you may set
-a "test" `<main>` class in the plugin configuration. The `main` method of that class
+a "test" `<mainClass>` in the plugin configuration. The `main` method of that class
 should in turn call methods that are subject for usage from a non-JVM language.
 
 ### Windows Services
@@ -1453,7 +1453,7 @@ add the following Excelsior JET Maven plugin configuration:
 	<version>0.9.5</version>
 	<configuration>
         <appType>windows-service</appType>
-        <main>*service-main*</main>
+        <mainClass>*service-main*</mainClass>
         <windowsService>
             <name></name>
             <displayName></displayName>
@@ -1475,7 +1475,8 @@ add the following Excelsior JET Maven plugin configuration:
 
 Where:
 
-* `<main>` - a class extending the `com.excelsior.service.WinService` class of the Excelsior WinService API.
+* `<mainClass>` - a class extending the `com.excelsior.service.WinService` class
+  of the Excelsior JET WinService API.
 
 * `<name>` -  the system name of the service. It is used to install, remove and otherwise manage the service.
   It can also be used to recognize messages from this service in the system event log.
