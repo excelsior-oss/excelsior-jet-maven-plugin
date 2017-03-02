@@ -32,8 +32,17 @@
  *  As newlines are important in Markdown, it is necessary to handle
  *  those closing tags with care when they appear last on a line.
  *  Either insert a space after such tags, or do not let them appear there
- *  in the first place.
+ *  in the first place. The following code block self-validates this script:
  */
+    $matches = array();
+    $self = file_get_contents($argv[0]);
+    $test = preg_match_all('/^.+\); \?>\R/m', $self, $matches);
+    if ($test !== 0) {
+        print "*** ERROR: Self-validation failed $test times (see top comment in " . $argv[0] . ")\n";
+        print "The offending lines are:\n";
+        foreach($matches[0] as $match) print "$match\n";
+        exit (1);
+    }
 
     if (empty($argv[1]) || !empty($argv[2])) {
         print 'ERROR: Expected one command-line argument: "maven" or "gradle"';
