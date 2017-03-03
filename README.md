@@ -60,9 +60,9 @@ The current plugin version supports almost all features accessible through the E
 (JET Control Panel and JetPackII). The only bits of functionality that are missing are as follows:
 
 * Eclipse RCP support.
-  The problem here is that the [Eclipse Tycho Maven Plugin](https://eclipse.org/tycho/)
+    The problem here is that the [Eclipse Tycho Maven Plugin](https://eclipse.org/tycho/)
   that enables exporting Eclipse RCP applications from Maven is still in incubation phase.
-  If a standard way to build Eclipse RCP applications from Maven ever appears,
+    If a standard way to build Eclipse RCP applications from Maven ever appears,
   *and* there will be enough demand, we will support it in the Excelsior JET Maven plugin.
 
 * Application update packaging - because we plan to overhaul that feature completely in the mid-term future.
@@ -118,12 +118,14 @@ of the [Excelsior JET WinService API](https://github.com/excelsior-oss/excelsior
 In order to do its job, the plugin needs to locate an Excelsior JET installation.
 You have three ways to specify the Excelsior JET installation directory explicitly:
 
-- add the `<jetHome>` parameter to the `<configuration>` section of the plugin
-- pass the `jet.home` system property on the Maven command line as follows:
-```
-mvn jet:build -Djet.home=[JET-Home]
-```
-- or set the `JET_HOME` O/S environment variable
+  - add the `<jetHome>` parameter to the `<configuration>` section of the plugin
+  - pass the `jet.home` system property on the Maven command line as follows:
+
+    ```
+    mvn jet:build -Djet.home=[JET-Home]
+    ```
+
+  - or set the `JET_HOME` O/S environment variable
 
 If none of above is set, the plugin searches for an Excelsior JET installation along the `PATH`.
 So if you only have one copy of Excelsior JET installed, the plugin should be able to find it on Windows right away,
@@ -189,12 +191,14 @@ The profiles will be used by the Startup Optimizer and the Global Optimizer (see
 
 Your application may require command-line arguments to run. If that is the case,
 set the `runArgs` plugin parameter as follows:
+
 ```xml
 <runArgs>
    <runArg>arg1</runArg>
    <runArg>arg2</runArg>
 </runArgs>
 ```
+
 You may also pass the arguments via the `jet.runArgs` system property as a comma-separated string.
 (Use "`\`" to escape commas within arguments: `-Djet.runArgs="arg1,Hello\, World"` will be passed
 to your application as `arg1 "Hello, World"`.)
@@ -251,7 +255,7 @@ for each dependency, or for groups of dependencies:
 
 ##### Dependencies Configuration
 
-To set these properties for a particular dependency, add the following configuration 
+To set these properties for a particular dependency, add the following configuration
 to the plugin configuration section:
 
 ```xml
@@ -298,7 +302,6 @@ with the `<path>` parameter pointing to the respective directory or jar/zip file
 
 You may also use the `<path>` parameter to identify project dependencies that are described with
 the `<systemPath>` parameter.
-
 
 ##### Code Protection
 
@@ -572,7 +575,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
-    
+
     * `<type>` is either `program-files` (default on Windows, Windows only),
       `system-drive` (Windows only, default for Tomcat web applications on Windows),
       `absolute-path`,  `current-directory` (default on Linux), or `user-home` (Linux only)
@@ -603,7 +606,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
-    
+
     * `<location>` - either `program-folder`, `desktop`, `start-menu`, or `startup`
 
     * `<target>` - location of the shortcut target within the package
@@ -645,7 +648,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
-    
+
     * `<type>` - `run` (default), `open`, or `restart`
     * `<target>` - location of the target within the package (not valid for `restart`)
     * `<workingDirectory>` - pathname of the working directory of the target within the package.
@@ -678,7 +681,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
-    
+
     * `<extension>` - file name extension *without the leading dot*
 
     * `<target>` - location within the package of the executable program being associated with `<extension>`
@@ -796,8 +799,8 @@ other defaults can be changed using the `<windowsVersionInfo>` configuration sec
 that has the following parameters:
 
   * `<version>`*`version-string`*`</version>`
-  
-    Version number (both `FileVersion` and `ProductVersion` strings are set to  this same value)
+
+    Version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
 
     **Notice:** unlike Maven `${project.version}`, this string
     must have format `v1.v2.v3.v4`, where vi is a number.
@@ -806,11 +809,11 @@ that has the following parameters:
     or from `${project.version}` if this configuration is not present.
 
   * `<copyright>`*`legal-copyright`*`</copyright>`
-    
+
     `LegalCopyright` string, with default value derived from other parameters
 
   * `<description>`*`executable-description`*`</description>`
-    
+
     `FileDescription` string, default is `${project.name}`
 
 #### Stack trace support
@@ -1066,6 +1069,7 @@ To include optional JET Runtime components in the package, use the following con
 You may specify `all` as the value of `<component>` to add all components at once or
 `none` to not include any of them.
 
+
 The available optional components are:
 
 `runtime_utilities`, `fonts`, `awt_natives`, `api_classes`, `jce`, `jdk_tools`, `accessibility` (Windows only),
@@ -1234,6 +1238,7 @@ Excelsior JET 11 supports Apache Tomcat 5.0.x (starting from version 5.0.1), 5.5
 and 7.0.x up to version 7.0.62. Excelsior JET 11.3 adds support for Tomcat 8.0 and Tomcat 7.0.63+ versions.
 
 #### Usage
+
 The plugin will treat your Maven project as a Tomcat Web application project if its `<packaging>` type is `war`.
 To enable native compliation of your Tomcat Web application, you need to copy and paste the following configuration into the `<plugins>` section of your `pom.xml` file:
 
@@ -1436,7 +1441,7 @@ of its respective methods, collectively called handler methods. For more details
 To compile your implementation of `WinService` to Java bytecode, you will need to reference
 the Excelsior JET WinService API from your
 Maven project. For that, add the following dependency
-to the `<dependencies>` section of your `pom.xml` file:
+to the `<dependencies>` section  of your `pom.xml` file:
 
 ```xml
 <dependency>
@@ -1451,6 +1456,7 @@ to the `<dependencies>` section of your `pom.xml` file:
 
 To create a Windows Service,
 add the following Excelsior JET Maven plugin configuration:
+
 ```xml
 <plugin>
 	<groupId>com.excelsiorjet</groupId>
@@ -1530,7 +1536,7 @@ It only works for Excelsior JET 11.3 and above.
 **Note:** You may build a multi-app executable runnable as both plain application and Windows service.
 For that, set the `<appType>` parameter to `windows-service` and `<multiApp>` to `true`.
 Please note that in this case `<arguments>` will have the syntax of multi-app executables,
-so to pass arguments to your service and not to the Excelsior JET JVM, 
+so to pass arguments to your service and not to the Excelsior JET JVM,
 add `"-args"` (without the quotes) as the first argument.
 
 #### Test Run of Windows Services
@@ -1615,7 +1621,7 @@ Issue with buildnumber-maven-plugin #49 fixed
 Version 0.9.1 (02-Dec-2016)
 
 * Support for Compact Profiles
-* Not working Test Run for 7+ Tomcat versions fixed (issue #42)
+* Not working Test Run for 7+ Tomcat versions fixed(issue #42)
 
 Version 0.9.0 (23-Nov-2016)
 
