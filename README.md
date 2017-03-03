@@ -22,8 +22,8 @@ separately. The supported platforms are Windows (32- and 64-bit), Linux (32- and
 This plugin will transform your application into an optimized native executable for the platform
 on which you run Maven, and place it into a separate directory together with all required
 Excelsior JET runtime files. In addition, it can either pack that directory into a zip archive
-(all platforms), create an Excelsior Installer setup (Windows and Linux only)
-or an OS X application bundle/installer.
+(all platforms), create an Excelsior Installer setup (Windows and Linux only),
+or create an OS X application bundle/installer.
 
 The current version of the plugin can handle four types of applications:
 
@@ -33,10 +33,10 @@ and have all their dependencies explicitly listed in the JVM classpath at launch
 * **Tomcat Web applications** &mdash; `.war` files that can be deployed to the
   Apache Tomcat application server.
 
-* **Invocation Dynamic Libraries** (e.g. Windows DLLs), callable
+* **Invocation Dynamic Libraries** (e.g. Windows DLLs) callable
   from non-JVM languages via the Invocation API
 
-* **Windows Services** special long-running processes that may be launched
+* **Windows Services**, special long-running processes that may be launched
    during operating system bootstrap and use the
    [Excelsior JET WinService API](https://github.com/excelsior-oss/excelsior-jet-winservice-api)
    (Windows only)
@@ -59,9 +59,10 @@ of plain Java SE applications that yield different executable types: dynamic lib
 The current plugin version supports almost all features accessible through the Excelsior JET GUIs
 (JET Control Panel and JetPackII). The only bits of functionality that are missing are as follows:
 
-* Eclipse RCP support. The problem here is that the [Eclipse Tycho Maven Plugin](https://eclipse.org/tycho/)
+* Eclipse RCP support.
+    The problem here is that the [Eclipse Tycho Maven Plugin](https://eclipse.org/tycho/)
   that enables exporting Eclipse RCP applications from Maven is still in incubation phase.
-  If a standard way to build Eclipse RCP applications from Maven ever appears,
+    If a standard way to build Eclipse RCP applications from Maven ever appears,
   *and* there will be enough demand, we will support it in the Excelsior JET Maven plugin.
 
 * Application update packaging - because we plan to overhaul that feature completely in the mid-term future.
@@ -81,8 +82,9 @@ by creating a feature request [here](https://github.com/excelsior-oss/excelsior-
 
 ### Usage
 
-If your project is a plain Java SE application, you need to copy and paste the following configuration into the `<plugins>`
-section of your `pom.xml` file:
+If your project is a plain Java SE application, you need to copy and paste
+the following configuration into the `<plugins>` section
+of your `pom.xml` file:
 
 ```xml
 <plugin>
@@ -95,14 +97,15 @@ section of your `pom.xml` file:
 </plugin>
 ```
 
-set the `<mainClass>` parameter, and use the following command line to build the application:
+set the `<mainClass>` parameter<sup>\*</sup>, and use the following command line to build the application:
 
 ```
 mvn jet:build
 ```
 
-For a Tomcat Web application, the `<mainClass>` parameter is not needed. Instead, you would need to add
-the `<tomcatHome>` parameter pointing to a *clean* Tomcat installation, a copy of which will be used
+<sup>\*</sup> For a Tomcat Web application, the `<mainClass>` parameter is not needed.
+Instead, you would need to add the `<tomcatHome>` parameter pointing
+to a *clean* Tomcat installation, a copy of which will be used
 for the deployment of your Web application at build time.
 See [Building Tomcat Web Applications](#building-tomcat-web-applications) section below for more details.
 
@@ -115,12 +118,14 @@ of the [Excelsior JET WinService API](https://github.com/excelsior-oss/excelsior
 In order to do its job, the plugin needs to locate an Excelsior JET installation.
 You have three ways to specify the Excelsior JET installation directory explicitly:
 
-- add the `<jetHome>` parameter to the `<configuration>` section of the plugin
-- pass the `jet.home` system property on the Maven command line as follows:
-```
-mvn jet:build -Djet.home=[JET-Home]
-```
-- or set the `JET_HOME` O/S environment variable
+  - add the `<jetHome>` parameter to the `<configuration>` section of the plugin
+  - pass the `jet.home` system property on the Maven command line as follows:
+
+    ```
+    mvn jet:build -Djet.home=[JET-Home]
+    ```
+
+  - or set the `JET_HOME` O/S environment variable
 
 If none of above is set, the plugin searches for an Excelsior JET installation along the `PATH`.
 So if you only have one copy of Excelsior JET installed, the plugin should be able to find it on Windows right away,
@@ -128,7 +133,8 @@ and on Linux and OS X - if you have run the Excelsior JET `setenv` script prior 
 
 ### Build process
 
-The native build is performed in the `jet` subdirectory of the Maven target build directory.
+The native build is performed in the `jet` subdirectory
+of the Maven `target` directory.
 First, the plugin copies the main application jar to the `jet/build` directory,
 and copies all its run time dependencies to `jet/build/lib`.
 Then it invokes the Excelsior JET AOT compiler to compile all those jars into a native executable.
@@ -142,7 +148,8 @@ to `jet/app`, if applicable (see "Customizing Package Content" below.)
 > the Oracle JRE installed, and the executable should work as expected.
 
 Finally, the plugin packs the contents of the `jet/app` directory into
-a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
+a zip archive named `${project.build.finalName}.zip`
+so as to aid single file re-distribution.
 On Windows and Linux, you can also set the `<packaging>excelsior-installer</packaging>`
 configuration parameter to have the plugin create an Excelsior Installer setup instead,
 and on OS X, setting `<packaging>osx-app-bundle</packaging>` will result in the creation
@@ -174,47 +181,53 @@ to re-use them during automatic application builds without performing a Test Run
 
 It is recommended to perform a Test Run at least once before building your application.
 
-Note: 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
-      So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
+**Note:** 64-bit versions of Excelsior JET do not collect `.usg` profiles yet.
+  So it is recommended to perform a Test Run on the 32-bit version of Excelsior JET at least once.
 
 The profiles will be used by the Startup Optimizer and the Global Optimizer (see below).
 
-Note: During a Test Run, the application executes in a special profiling mode,
-      so disregard its modest start-up time and performance.
+**Note:** During a Test Run, the application executes in a special profiling mode,
+  so disregard its modest start-up time and performance.
 
-Your application may require command line arguments to run. If that is the case, set the `runArgs` plugin parameter as follows:
+Your application may require command-line arguments to run. If that is the case,
+set the `runArgs` plugin parameter as follows:
+
 ```xml
 <runArgs>
    <runArg>arg1</runArg>
    <runArg>arg2</runArg>
 </runArgs>
 ```
-You may also pass the arguments via the `jet.runArgs` system property, where arguments are comma separated (use "`\`" to escape commas within arguments, i.e. `-Djet.runArgs="arg1,Hello\, World"` will be passed to your application as `arg1 "Hello, World"`)
+
+You may also pass the arguments via the `jet.runArgs` system property as a comma-separated string.
+(Use "`\`" to escape commas within arguments: `-Djet.runArgs="arg1,Hello\, World"` will be passed
+to your application as `arg1 "Hello, World"`.)
 
 ### Configurations other than `<mainClass>`
 
-For a complete list of parameters, look into the Javadoc of `@Parameter` field declarations
-of the
+For the complete list of parameters, refer to
+the Javadoc of `@Parameter` field declarations of the
 [AbstractJetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/AbstractJetMojo.java)
 and [JetMojo](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/blob/master/src/main/java/com/excelsiorjet/maven/plugin/JetMojo.java)
-classes. Most of them have default values derived from your `pom.xml` project
-such as `<outputName>` parameter specifying resulting executable name.
+classes.
+Most of them have default values derived from your `pom.xml` project,
+such as the `<outputName>` parameter specifying the name of the resulting executable.
 
 #### Application appearance
 If the startup of your client application takes longer than you would have liked,
 the thumb rule is to show a splash screen.
-A splash screen provides visial feedback about the loading process the end user, and
+A splash screen provides visial feedback about the loading process to the end user, and
 gives you an opportunity to display information about your product and company.
-The splash screen functionality appeared in Java API since Java SE 6. For more details, see
+The splash screen functionality appeared in the Java API since Java SE 6. For more details, see
 http://docs.oracle.com/javase/tutorial/uiswing/misc/splashscreen.html
 
-If the splash image has been specified in the manifest of the application's JAR file,
+If the splash image has been specified in the manifest of the application JAR file,
 the respective image will be obtained automatically,
 otherwise, you may assign a splash screen image to the application manually:
 
-`<splash>`*splash-file*`</splash>`
+`<splash>`*`splash-image-file`*`</splash>`
 
-It is recommended to place the splash image in a VCS, and if you place it at
+It is recommended to store the splash image in a VCS, and if you place it at
 `${project.basedir}/src/main/jetresources/splash.png`, you won't need to specify it
 in the configuration explicitly. The plugin uses the location `${project.basedir}/src/main/jetresources`
 for other Excelsior JET-specific resource files (such as the EULA for Excelsior Installer setups).
@@ -223,7 +236,7 @@ There are also two useful Windows-specific configuration parameters:
 
 `<hideConsole>true</hideConsole>` – hide console
 
-`<icon>`*icon-file*`</icon>` – set executable icon (in Windows .ico format)
+`<icon>`*`icon-file`*`</icon>` – set executable icon (in Windows .ico format)
 
 Just as it works for the splash image, if you place the icon file at
 `${project.basedir}/src/main/jetresources/icon.ico`, you won't need to specify it
@@ -242,8 +255,8 @@ for each dependency, or for groups of dependencies:
 
 ##### Dependencies Configuration
 
-To set these properties for a particular dependency, add the following configuration to the plugin configuration
-section:
+To set these properties for a particular dependency, add the following configuration
+to the plugin configuration section:
 
 ```xml
 <dependencies>
@@ -264,10 +277,10 @@ and `<protect>`, `<optimize>`, and `<pack>` are Excelsior JET-specific propertie
 described below.
 
 You may omit `<groupId>` and/or `<version>` from the configuration, if you are sure that there is
-only one dependency with the given `<artifactId>` in the project. The plugin will issue an
+exactly one dependency with the given `<artifactId>` in the project. The plugin will issue an
 ambiguous dependency resolution error if that is not the case.
 
-You may also set only the `<groupId>` parameter to set the same properties for all dependencies
+You may also specify just the `<groupId>` parameter to set the same properties for all dependencies
 sharing the same `groupId` at once.
 
 Finally, if you need some additional dependencies that are not listed in the project explicitly
@@ -287,16 +300,15 @@ with the `<path>` parameter pointing to the respective directory or jar/zip file
 </dependencies>
 ```
 
-You may also use the `<path>` parameter to identify project dependencies that are described
-with the `<systemPath>` parameter.
-
+You may also use the `<path>` parameter to identify project dependencies that are described with
+the `<systemPath>` parameter.
 
 ##### Code Protection
 
 If you need to protect your classes from decompilers,
 make sure that the respective dependencies have the `<protect>` property set to `all`.
 If you do not need to protect classes for a certain dependency (e.g. a third-party library),
-set it to the `not-required` value instead. The latter setting may reduce compilation time and the size of
+set it to the `not-required` value instead. The latter setting may reduce the build time and the size of
 the resulting executable in some cases.
 
 
@@ -313,8 +325,7 @@ uses only a fraction of their implementing classes. However, it is not recommend
 `auto-detect` value for the dependencies containing your own classes, because, in general,
 the Excelsior JET Optimizer cannot determine the exact set of used classes due to possible access
 via the Reflection API at run time. That said, you can help it significantly to detect such
-dynamic class usage by performing a [Test Run](#performing-a-test-run) with 32-bit version of Excelsior JET
-prior to the build.
+dynamic class usage by performing a [Test Run](#performing-a-test-run) prior to the build.
 
 
 ##### Optimization Presets
@@ -331,7 +342,7 @@ so as to reduce the compilation time and executable size.
 You may also let the plugin do that automatically by choosing the `smart` optimization
 preset in the plugin configuration:
 
-`<optimizationPreset>smart<optimizationPreset>`
+`<optimizationPreset>smart</optimizationPreset>`
 
 When the `smart` preset is enabled, the plugin distinguishes between application classes
 and third-party library classes using the following heuristic: it treats all dependencies
@@ -352,10 +363,11 @@ explicitly when you enable the `smart` mode, for instance:
 </dependencies>
 ```
 
-Instead of setting the `<protect>` and `<optimize>` properties, you may provide a semantic hint
-to the future maintainers of the POM file that a particular dependency is a third party library
+Instead of setting the `<protect>` and `<optimize>` properties,
+you may provide a semantic hint to the future maintainers
+of the POM file that a particular dependency is a third party library
 by setting its `<isLibrary>` property to `true`. The plugin will then set `<protect>`
-to `not-required` and `<optimize>` to `auto-detect` when the `smart` mode is enabled.
+to `not-required` and `<optimize>` to `auto-detect` when the `smart` optimization preset is enabled.
 Conversely, if you set `<isLibrary>` to `false`, both those properties will be set to `all`.
 The following configuration is therefore equivalent to the above example:
 
@@ -422,8 +434,9 @@ so there is no need to set it in the respective `<dependency>` configuration.
 
 ##### Ignoring project dependencies
 
-If you build your main artifact as a so called fat jar (using `maven-assembly-plugin`
-with `jar-with-dependencies`, for example), you most likely do not need Excelsior JET
+If you build your main artifact as a so called fat jar (using
+`maven-assembly-plugin` with `jar-with-dependencies`,
+for example), you most likely do not need Excelsior JET
 to compile any of its dependencies, because the main artifact will contain all
 classes and resources of the application.
 In this case, you may set the `<ignoreProjectDependencies>` plugin parameter to `true`
@@ -445,15 +458,15 @@ By default, the final package contains just the resulting executable and the nec
 However, you may want the plugin to add other files to it: README, license, media, help files,
 third-party native libraries, and so on. For that, add the following configuration parameter:
 
-`<packageFilesDir>`*extra-package-files-directory*`</packageFilesDir>`
+`<packageFilesDir>`*`extra-package-files-directory`*`</packageFilesDir>`
 
 referencing a directory with all such extra files that you need added to the package.
 The contents of the directory will be copied recursively to the final package.
 
 By default, the plugin assumes that the extra package files reside
 in the `src/main/jetresources/packagefiles` subdirectory of your project,
-but you may dynamically generate the contents of that directory by means of other Maven plugins
-such as `maven-resources-plugin`.
+but you may dynamically generate the contents of that directory by means
+of other Maven plugins such as `maven-resources-plugin`.
 
 **New in 0.9.5:**
 
@@ -487,12 +500,12 @@ The plugin supports the creation of Excelsior Installer setups -
 conventional installer GUIs for Windows or self-extracting archives with command-line interface
 for Linux.
 
-To create an Excelsior Installer setup, add the following configuration into the plugin
-`<configuration>` section:
+To create an Excelsior Installer setup, add the following configuration
+into the plugin `<configuration>` section:
 
 `<packaging>excelsior-installer</packaging>`
 
-**Note:** if you use the same pom.xml for all three supported platforms (Windows, OS X, and Linux),
+**Note:** if you use the same `pom.xml` for all three supported platforms (Windows, OS X, and Linux),
 it is recommended to use another configuration:
 
 `<packaging>native-bundle</packaging>`
@@ -501,11 +514,11 @@ to create Excelsior Installer setups on Windows and Linux and an application bun
 
 Excelsior Installer setup, in turn, has the following configurations:
 
-* `<product>`*product-name*`</product>` - default is `${project.name}`
+* `<product>`*`product-name`*`</product>` - default is `${project.name}`
 
-* `<vendor>`*vendor-name*`</vendor>` -  default is `${project.organization.name}`
+* `<vendor>`*`vendor-name`*`</vendor>` -  default is `${project.organization.name}`
 
-* `<version>`*product-version*`</version>` - default is `${project.version}`
+* `<version>`*`product-version`*`</version>` - default is `${project.version}`
 
 The above parameters are also used by Windows Version Information and OS X bundle configurations.
 
@@ -518,23 +531,23 @@ To further configure the Excelsior Installer setup, you need to add the followin
 
 that has the following configuration parameters:
 
-* `<eula>`*end-user-license-agreement-file*`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
+* `<eula>`*`end-user-license-agreement-file`*`</eula>` - default is `${project.basedir}/src/main/jetresources/eula.txt`
 
-* `<eulaEncoding>`*eula-file-encoding*`</eulaEncoding>` - default is `autodetect`. Supported encodings are US-ASCII (plain text), UTF16-LE
+* `<eulaEncoding>`*`eula-file-encoding`*`</eulaEncoding>` - default is `autodetect`. Supported encodings are `US-ASCII` (plain text) and `UTF16-LE`
 
-* `<installerSplash>`*installer-splash-screen-image*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
+* `<installerSplash>`*`installer-splash-screen-image`*`</installerSplash>` - default is `${project.basedir}/src/main/jetresources/installerSplash.bmp`
 
 **New in 0.9.5:**
 
 The following parameters are only available for Excelsior JET 11.3 and above:
 
-* `<language>`*setup-language*`</language>` - force the installer to display its messages in a particular language.
-    Available languages: `autodetect` (default), `english`, `french`, `german`,
-    `japanese`, `russian`, `polish`, `spanish`, `italian`, `brazilian`.
+* `<language>`*`setup-language`*`</language>` - force the installer to display its messages in a particular language.
+    Available languages: `autodetect` (default), `english`, `french`, `german`,
+    `japanese`, `russian`, `polish`, `spanish`, `italian`, and `brazilian`.
 
 * `<cleanupAfterUninstall>true</cleanupAfterUninstall>` -  remove all files from the installation folder on uninstall
 
-*  After-install runnable configuration section in the form:
+*  After-install runnable configuration sections of the form:
 
     ```xml
     <afterInstallRunnable>
@@ -549,7 +562,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     where `<target>` is the location of the after-install runnable within the package,
     and `<arguments>` contains its command-line arguments.
 
-* `<compressionLevel>`*setup-compression-level*`</compressionLevel>` - available values: `fast`, `medium`, `high`
+* `<compressionLevel>`*`setup-compression-level`*`</compressionLevel>` - available values: `fast`, `medium`, `high`
 
 * Installation directory configuration section:
 
@@ -562,13 +575,14 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
+
     * `<type>` is either `program-files` (default on Windows, Windows only),
       `system-drive` (Windows only, default for Tomcat web applications on Windows),
       `absolute-path`,  `current-directory` (default on Linux), or `user-home` (Linux only)
     * `<path>` - the default pathname of the installation directory
     * `<fixed>` - if set to `true`, prohibits changes of the `path` value at install time
 
-* `<registryKey>`*registry-key*`</registryKey>` - Windows registry key for installation.
+* `<registryKey>`*`registry-key`*`</registryKey>` - Windows registry key for installation.
 
 * List of Windows shortcuts to create during installation, e.g. in the Start Menu:
 
@@ -592,6 +606,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
+
     * `<location>` - either `program-folder`, `desktop`, `start-menu`, or `startup`
 
     * `<target>` - location of the shortcut target within the package
@@ -633,13 +648,14 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
-    * `<type>` - `run` (default), `open` or `restart`
+
+    * `<type>` - `run` (default), `open`, or `restart`
     * `<target>` - location of the target within the package (not valid for `restart`)
     * `<workingDirectory>` - pathname of the working directory of the target within the package.
-                             If not set, the the directory containing target will be used.
-                             Valid for `run` type only.
+                             If not set, the directory containing the target will be used.
+                             Valid for the `run` type only.
     * `<arguments>` - command-line arguments that shall be passed to the target.
-                      Valid for `run` type only.
+                      Valid for the `run` type only.
     * `<checked>` - whether the checkbox should be checked by default (`true` or `false`)
 
 * List of Windows file associations in the form:
@@ -665,6 +681,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```
 
     where:
+
     * `<extension>` - file name extension *without the leading dot*
 
     * `<target>` - location within the package of the executable program being associated with `<extension>`
@@ -672,7 +689,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     * `<description>` - description of the file type. For example, the description of .mp3 files is "MP3 Format Sound".
 
     * `<targetDescription>` -  string to be used in the prompt displayed by the Excelsior Installer wizard:
-                               "Associate *.extension files with targetDescription".
+                               "Associate *.extension files with `<targetDescription>`".
 
     * `<icon>` - the location of the association icon.  If not set, the default icon will be used
                (e.g. the icon associated with the executable target).
@@ -685,10 +702,10 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 
     * `<arguments>` - command-line arguments that shall be passed to the target
 
-    * `<checked>` - initial state of the respective checkbox "Associate *.extension files with target-desc"
+    * `<checked>` - initial state of the respective checkbox "Associate *.extension files with `<targetDescription>`"
                     in the Excelsior Installer wizard. Default value is `true`.
 
-* `<installCallback>`*dynamic-library*`</installCallback>` - install callback dynamic library.
+* `<installCallback>`*`dynamic-library`*`</installCallback>` - install callback dynamic library.
   Default is `${project.basedir}/src/main/jetresources/install.dll|libinstall.so`
 
 * Uninstall callback dynamic library:
@@ -696,7 +713,7 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     ```xml
     <uninstallCallback>
         <path></path>
-        <packagePath><packagePath>
+        <packagePath></packagePath>
     </uninstallCallback>
     ```
 
@@ -706,15 +723,15 @@ The following parameters are only available for Excelsior JET 11.3 and above:
     the library should be placed (root folder by default). Default value for `<path>` is
     `${project.basedir}/src/main/jetresources/uninstall.dll|libuninstall.so`
 
-* `<welcomeImage>`*welcome-image*`</welcomeImage>` - (Windows) image to display on the first screen of
+* `<welcomeImage>`*`welcome-image`*`</welcomeImage>` - (Windows) image to display on the first screen of
   the installation wizard. Recommended size: 177*314px.
   Default is `${project.basedir}/src/main/jetresources/welcomeImage.bmp`.
 
-* `<installerImage>`*installer-image*`</installerImage>` - (Windows) image to display in the upper-right corner
+* `<installerImage>`*`installer-image`*`</installerImage>` - (Windows) image to display in the upper-right corner
   on subsequent Excelsior Installer screens. Recommended size: 109*59px.
   Default is `${project.basedir}/src/main/jetresources/installerImage.bmp`.
 
-* `<uninstallerImage>`*uninstaller-image*`</uninstallerImage>` - (Windows) Image to display on the first screen
+* `<uninstallerImage>`*`uninstaller-image`*`</uninstallerImage>` - (Windows) Image to display on the first screen
   of the uninstall wizard. Recommended size: 177*314px.
   Default is `${project.basedir}/src/main/jetresources/uninstallerImage.bmp`.
 
@@ -723,12 +740,12 @@ The following parameters are only available for Excelsior JET 11.3 and above:
 
 The plugin supports the creation of OS X application bundles and installers.
 
-To create an OS X application bundle, add the following configuration into the plugin
-`<configuration>` section:
+To create an OS X application bundle, add the following configuration
+into the plugin `<configuration>` section:
 
 `<packaging>osx-app-bundle</packaging>`
 
-**Note:** if you use the same pom.xml for all three supported platforms (Windows, OS X, and Linux), it is recommended to use another configuration:
+**Note:** if you use the same `pom.xml` for all three supported platforms (Windows, OS X, and Linux), it is recommended to use another configuration:
 
 `<packaging>native-bundle</packaging>`
 
@@ -746,16 +763,16 @@ The complete list of the parameters can be obtained
 [here](https://github.com/excelsior-oss/excelsior-jet-api/blob/master/src/main/java/com/excelsiorjet/api/tasks/config/OSXAppBundleConfig.java).
 
 You still need to tell the plugin where the OS X icon (`.icns` file) for your bundle is located.
-Do that using the `<icon>` parameter of `<osxBundleConfiguration>`, or simply place the icon file at
+Do that using the `<icon>` parameter of the `<osxBundle>` section, or simply place the icon file at
 `${project.basedir}/src/main/jetresources/icon.icns` to let the plugin pick it up automatically.
 
 By default, the plugin will create an OS X application bundle only,
 but to distribute your application to your customers you probably need to sign it and package as an
 OS X installer (`.pkg` file).
-The plugin enables you to do that using the following parameters under `<osxBundleConfiguration>` section:
+The plugin enables you to do that using the following parameters within the `<osxBundle>` section:
 
-* `<developerId>`*developer-identity-certificate*`</developerId>` - "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle with `codesign` tool.
-* `<publisherId>`*publisher-identity-certificate*`</publisherId>` - "Developer ID Installer" or "Mac Installer Distribution"
+* `<developerId>`*`developer-identity-certificate`*`</developerId>` - "Developer ID Application" or "Mac App Distribution" certificate name for signing resulting OSX app bundle with `codesign` tool.
+* `<publisherId>`*`publisher-identity-certificate`*`</publisherId>` - "Developer ID Installer" or "Mac Installer Distribution"
 certificate name for signing the resulting OS X Installer Package (`.pkg` file) with the `productbuild` tool.
 
 If you do not want to expose above parameters via `pom.xml`, you may pass them as system properties
@@ -773,29 +790,31 @@ On Windows, the plugin automatically adds a
 to the resulting executable. This can be disabled by specifying the following
 configuration:
 
-    <addWindowsVersionInfo>false</addWindowsVersionInfo>
+`<addWindowsVersionInfo>false</addWindowsVersionInfo>`
 
 By default, the values of version-information resource strings are derived from project settings.
 The values of `<product>` and `<vendor>` configurations are used verbatim as
 `ProductName` and `CompanyName` respectively;
-other defaults can be changed using the following configuration section:
+other defaults can be changed using the `<windowsVersionInfo>` configuration section
+that has the following parameters:
 
-```xml
-<windowsVersionInfo>
-</windowsVersionInfo>
-```
+  * `<version>`*`version-string`*`</version>`
 
-that has the following configuration parameters:
+    Version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
 
-* `<version>`*version-string*`</version>` - version number (both `FileVersion` and `ProductVersion` strings are set to this same value)
+    **Notice:** unlike Maven `${project.version}`, this string
+    must have format `v1.v2.v3.v4`, where vi is a number.
+    The plugin would use heuristics to derive a correct version string from the specified value
+    if the latter does not meet this requirement,
+    or from `${project.version}` if this configuration is not present.
 
-    **Notice:** unlike Maven `${project.version}`, this string must have format `v1.v2.v3.v4`, where vi is a number.
-    The plugin would use heuristics to derive a correct version string from the specified value if the latter
-    does not meet this requirement, or from `${project.version}` if this configuration is not present.
+  * `<copyright>`*`legal-copyright`*`</copyright>`
 
-* `<copyright>`*legal-copyright*`</copyright>` - `LegalCopyright` string, with default value derived from other parameters
+    `LegalCopyright` string, with default value derived from other parameters
 
-* `<description>`*executable-description*`</description>` - `FileDescription` string, default is `${project.name}`
+  * `<description>`*`executable-description`*`</description>`
+
+    `FileDescription` string, default is `${project.name}`
 
 #### Stack trace support
 The Excelsior JET Runtime supports three modes of stack trace printing: `minimal`, `full`, and `none`.
@@ -812,16 +831,16 @@ Note, however, that certain third-party APIs rely on stack trace printing. One e
 
 To set the stack trace support mode, use the `<stackTraceSupport>` configuration parameter:
 
-`<stackTraceSupport>`*stack-trace-mode*`</stackTraceSupport>`
+`<stackTraceSupport>`*`stack-trace-mode`*`</stackTraceSupport>`
 
 #### Method Inlining
 When optimizing a Java program, the compiler often replaces method call statements with bodies of the methods
 that would be called at run time. This optimization, known as method inlining, improves application performance,
 especially when tiny methods, such as get/set accessors, are inlined.
-However, inlining of larger methods increases code size and its impact on performance may be uncertain.
+However, inlining of larger methods increases code size, and its impact on performance may be uncertain.
 To control the aggressiveness of method inlining, use the `<inlineExpansion>` plugin parameter:
 
-`<inlineExpansion>`*inline-expasnion-mode*`</inlineExpansion>`
+`<inlineExpansion>`*`inline-expasnion-mode`*`</inlineExpansion>`
 
 The available modes are:
   `aggressive` (default), `very-aggressive`, `medium`, `low`, and `tiny-methods-only`
@@ -832,7 +851,7 @@ Note that it does not necessarily worsen application performance.
 #### Multi-app Executables
 
 The plugin may compile more than one application into a single executable and
-let you select a particular application at launch time via command line arguments.
+let you select a particular application at launch time via command-line arguments.
 
 The command line syntax of [multi-app executables](http://www.excelsior-usa.com/doc/jet/jetw011.html#0330)
 is an extension of the `java` launcher command
@@ -851,7 +870,7 @@ To enable the multi-app mode add the following configuration parameter:
 #### Defining System Properties and JVM Arguments
 
 Unless you opted for multi-app executable generation, the resulting executable interprets
-all its command line arguments as arguments of the main class you have specified.
+all its command-line arguments as arguments of the main class you have specified.
 In other words, there is no place on the application command line for an argument
 setting a system property or altering JVM defaults, such as `-Dprop=value` or `-Xmx1G` .
 To address this, the plugin enables you to hardwire system properties and JVM arguments
@@ -927,13 +946,14 @@ configuration:
 You may also specify the duration of the profiling session in seconds by specifying the following
 configuration:
 
-`<profileStartupTimeout>`*duration-in-seconds*`</profileStartupTimeout>`
+`<profileStartupTimeout>`*`duration-in-seconds`*`</profileStartupTimeout>`
 
 As soon as the specified period elapses, profiling stops and the application is automatically terminated,
-so ensure that the timeout value is large enough to capture all actions the application nomrally carries out
+so ensure that the timeout value is large enough to capture all actions the application normally carries out
 during startup. (It is safe to close the application manually if the profiling period proves to be excessively long.)
 
-If your application requires command line arguments to run, set the `runArgs` plugin parameter in the same way as for the [Test Run](#performing-a-test-run).
+If your application requires command-line arguments to run, set the `runArgs` plugin parameter
+in the same way as for a [Test Run](#performing-a-test-run).
 
 #### Global Optimizer
 
@@ -1024,6 +1044,7 @@ where you distribute your application can be added to the package with the follo
 
 You may specify `all` as the value of `<locale>` to add all locales and charsets at once or
 `none` to not include any of them.
+
 The available sets of locales and encodings are:
 
 `European`, `Indonesian`, `Malay`, `Hebrew`, `Arabic`, `Chinese`, `Japanese`, `Korean`, `Thai`,
@@ -1048,6 +1069,7 @@ To include optional JET Runtime components in the package, use the following con
 You may specify `all` as the value of `<component>` to add all components at once or
 `none` to not include any of them.
 
+
 The available optional components are:
 
 `runtime_utilities`, `fonts`, `awt_natives`, `api_classes`, `jce`, `jdk_tools`, `accessibility` (Windows only),
@@ -1064,7 +1086,7 @@ classes.
 
 To enable disk footprint reduction, add the following parameter to the `<runtime>` section:
 
-`<diskFootprintReduction>`*disk-footprint-reduction-mode*`</diskFootprintReduction>`
+`<diskFootprintReduction>`*`disk-footprint-reduction-mode`*`</diskFootprintReduction>`
 
 The available modes are:
 
@@ -1114,16 +1136,18 @@ and detaches the respective JET Runtime components from the installation package
 Alternatively, you may enforce detaching of particular components using the following parameter
 under the `<slimDown>` configuration section:
 
-`<detachComponents>`*comma-separated list of APIs*`</detachComponents>`
+`<detachComponents>`*`comma-separated list of APIs`*`</detachComponents>`
 
 Available detachable components: `corba, management, xml, jndi, jdbc, awt/java2d, swing, jsound, rmi, jax-ws`
 
-At the end of the build process, the plugin places the detached package in the `jet` subdirectory
-of the Maven target build directory. You may configure its name with the `<detachedPackage>` parameter
-of the `<slimDown>` section (by default the name is `${project.build.finalName}.pkl`).
+At the end of the build process, the plugin places the detached package
+in the `jet` subdirectory of the Maven target build directory.
+You may configure its name with the `<detachedPackage>` parameter
+of the `<slimDown>` section
+(by default the name is `${project.build.finalName}.pkl`).
 
-Do not forget to upload the detached package to the location specified in `</detachedBaseURL>`
-above before deploying your application to end-users.
+Do not forget to upload the detached package to the location specified
+in `<detachedBaseURL>` above before deploying your application to end-users.
 
 **Note:** Enabling Java Runtime Slim-Down automatically enables the Global Optimizer,
           so performing a Test Run is mandatory for Java Runtime Slim-Down as well.
@@ -1154,7 +1178,7 @@ You can also set a particular, fixed expiration date by using the `<expireDate>`
 instead of `<expireInDays>`. The format of the `<expireDate>` parameter value
 is *ddMMMyyyy*, for example `15Sep2020`.
 
-**Note:** If you choose the `excelsior-installer` `<packaging>` type, the generated setup
+**Note:** If you choose the `<packaging>` type `excelsior-installer`, the generated setup
 package will also expire, displaying the same message to the user.
 
 One common usage scenario of this functionality is setting the hard expiration date further into the future,
@@ -1175,7 +1199,7 @@ the *"Intellectual Property Protection"* chapter of the Excelsior JET User's Gui
 
 #### Additional Compiler Options and Equations
 The commonly used compiler options and equations are mapped to the parameters of the plugin.
-However the compiler has some advanced options and equations that you may find in the
+However the compiler also has some advanced options and equations that you may find in the
 Excelsior JET User's Guide, plus some troubleshooting settings that the Excelsior JET Support
 team may suggest you to use.
 You may enumerate such options using the `<compilerOptions>` configuration, for instance:
@@ -1187,7 +1211,7 @@ You may enumerate such options using the `<compilerOptions>` configuration, for 
 </compilerOptions>
 ```
 
-These options will be appended to Excelsior JET project generated by the plugin.
+These options will be appended to the Excelsior JET project file generated by the plugin.
 
 **Notice:** Care must be taken with using this parameter to avoid conflicts
 with other project parameters.
@@ -1214,9 +1238,9 @@ Excelsior JET 11 supports Apache Tomcat 5.0.x (starting from version 5.0.1), 5.5
 and 7.0.x up to version 7.0.62. Excelsior JET 11.3 adds support for Tomcat 8.0 and Tomcat 7.0.63+ versions.
 
 #### Usage
+
 The plugin will treat your Maven project as a Tomcat Web application project if its `<packaging>` type is `war`.
-To enable native compliation of your Tomcat Web application, you need to copy and paste the following configuration into the `<plugins>`
-section of your `pom.xml` file:
+To enable native compliation of your Tomcat Web application, you need to copy and paste the following configuration into the `<plugins>` section of your `pom.xml` file:
 
 ```xml
 <plugin>
@@ -1231,7 +1255,7 @@ section of your `pom.xml` file:
 </plugin>
 ```
 
-and set the `<tomcatHome>` parameter, which has to point to the *master* Tomcat installation &mdash; basically,
+and then set the `<tomcatHome>` parameter, which has to point to the *master* Tomcat installation &mdash; basically,
 a clean Tomcat instance that was never launched.
 
 You may also set the above parameter by passing the `tomcat.home` system property on the Maven command line as follows:
@@ -1263,13 +1287,14 @@ into the `jet/app` directory and binds the resulting executable to that copy of 
 > `jet/app/bin` folder by default.
 
 Finally, the plugin packs the contents of the `jet/app` directory into
-a zip archive named `${project.build.finalName}.zip` so as to aid single file re-distribution.
+a zip archive named `${project.build.finalName}.zip`
+so as to aid single file re-distribution.
 Other packaging types that are available for plain Java SE applications are supported for Tomcat as well (see above).
 
 #### Tomcat configuration parameters
 Most configuration parameters that are available for plain Java SE applications listed above
 are also available for Tomcat web applications. There are also a few Tomcat-specific configuration parameters that
-you may set within the `<tomcat>` parameters block:
+you may set within the `<tomcat>` section:
 
 * `<warDeployName>` - the name of the war file to be deployed into Tomcat.
    By default, Tomcat uses the name of the war file as the context path of the respective web application.
@@ -1307,10 +1332,10 @@ you may set within the `<tomcat>` parameters block:
   the `<genScripts>` parameter to `false`.
 
 * `<installWindowsService>` - if you opt for `excelsior-installer` packaging for Tomcat on Windows,
-  the installer will registers the Tomcat executable as a Windows service by default.
+  the installer will register the Tomcat executable as a Windows service by default.
   You may set this parameter to `false` to disable that behavior.
   Otherwise, you may configure Windows Service-specific parameters for the Tomcat service by adding
-  a `<windowsServiceConfiguration>` section as described [here](#windows-service-configuration).
+  a `<windowsService>` configuration section as described [here](#windows-service-configuration).
 
     **Note:** This functionality is only available in Excelsior JET 11.3 and above.
 
@@ -1346,17 +1371,20 @@ automatically.
 #### Test Run of a Tomcat Web application
 
 You can launch your Tomcat Web application on Excelsior JET JVM using a JIT compiler
-before pre-compiling it to native code using the `jet:testrun` Mojo the same way as with plain Java SE applications.
+before pre-compiling it to native code using the
+`jet:testrun` Mojo the same way
+as with plain Java SE applications.
 
 However, please note that a running Tomcat instance would not terminate until you run its standard `shutdown` script.
-Technically, you can terminate it using <key>Ctrl-C</key>, but that would terminate the entire Maven build and would not constitute a correct Tomcat termination.
-So it is recommended to use the standard Tomcat `shutdown` script for correct Tomcat termination at the end of a Test Run.
-You may launch it from any standard Tomcat installation.
+Technically, you can terminate it using <key>Ctrl-C</key>, but that would terminate the entire Maven build
+and would not constitute a correct Tomcat termination.
+So it is recommended to use the standard Tomcat `shutdown` script for correct Tomcat termination
+at the end of a Test Run. You may launch it from any standard Tomcat installation.
 
 ### Invocation Dynamic Libraries
 
-To create a dynamic library callable from applications written in a non-JVM language
-instead of a runnable executable, add the following Excelsior JET Maven plugin configuration:
+To create a dynamic library callable from applications written in a non-JVM language instead of a runnable executable,
+add the following Excelsior JET Maven plugin configuration:
 
 ```xml
 <plugin>
@@ -1369,7 +1397,7 @@ instead of a runnable executable, add the following Excelsior JET Maven plugin c
 </plugin>
 ```
 
-Using Invocation DLLs is a bit tricky.
+Using such libraries is a bit tricky.
 Like any other JVM, Excelsior JET executes Java code in a special isolated context
 to correctly support exception handling, garbage collection, and so on.
 That is why Java methods cannot be directly invoked from a foreign environment.
@@ -1380,7 +1408,7 @@ See `samples/Invocation` in your Excelsior JET installation directory for detail
 #### Test Run for Dynamic Libraries
 
 To test an invocation dynamic library, you may set
-a "test" `<main>` class in the plugin configuration. The `main` method of that class
+a "test" `<mainClass>` in the plugin configuration. The `main` method of that class
 should in turn call methods that are subject for usage from a non-JVM language.
 
 ### Windows Services
@@ -1404,14 +1432,15 @@ through the start button in the Windows Control Panel/Services).
 A Windows service program must register a callback routine (so called control handler)
 that is invoked by the system on service initialization, interruption, resume, etc.
 With Excelsior JET, you achieve this functionality by implementing a subclass of
-`com.excelsior.service.WinService` of Excelsior JET WinService API and specifying it
+`com.excelsior.service.WinService` of the Excelsior JET WinService API and specifying it
 as the main class of the plugin configuration.
 The JET Runtime will instantiate that class on startup and translate calls to the callback routine into calls
 of its respective methods, collectively called handler methods. For more details, refer to the
 *"Windows Services"* Chapter of the Excelsior JET User's Guide.
 
-To compile your implementation of `WinService` to Java bytecode you will need to reference
-the Excelsior JET WinService API from your Maven project. For that, add the following dependency
+To compile your implementation of `WinService` to Java bytecode, you will need to reference
+the Excelsior JET WinService API from your
+Maven project. For that, add the following dependency
 to the `<dependencies>` section  of your `pom.xml` file:
 
 ```xml
@@ -1425,7 +1454,8 @@ to the `<dependencies>` section  of your `pom.xml` file:
 
 #### Windows Service Configuration
 
-To create a Windows Service, add the following Excelsior JET Maven plugin configuration:
+To create a Windows Service,
+add the following Excelsior JET Maven plugin configuration:
 
 ```xml
 <plugin>
@@ -1434,7 +1464,7 @@ To create a Windows Service, add the following Excelsior JET Maven plugin config
 	<version>0.9.5</version>
 	<configuration>
         <appType>windows-service</appType>
-        <main>*service-main*</main>
+        <mainClass>*service-main*</mainClass>
         <windowsService>
             <name></name>
             <displayName></displayName>
@@ -1456,21 +1486,22 @@ To create a Windows Service, add the following Excelsior JET Maven plugin config
 
 Where:
 
-* `<main>` - a class extending the `com.excelsior.service.WinService` class of the Excelsior WinService API.
+* `<mainClass>` - a class extending the `com.excelsior.service.WinService` class
+  of the Excelsior JET WinService API.
 
 * `<name>` -  the system name of the service. It is used to install, remove and otherwise manage the service.
   It can also be used to recognize messages from this service in the system event log.
   This name is set during the creation of the service executable.
-  By default, the value of the `<outputName>` parameter is substituted.
+  By default, the value of the `<outputName>` parameter is used as the system name of the service.
 
 * `<displayName>` - the descriptive name of the service.
   It is shown in the Event Viewer system tool and in the Services applet of the Windows Control Panel.
-  By default, the value of the `<name>` paramter of the `<windowsServiceConfiguration>` section is used
-  as the display name.
+  By default, the value of the `<name>` parameter
+  of the `<windowsService>` section is used as the display name.
 
 * `<description>` - the user description of the service. It must not exceed 1000 characters.
 
-* `<arguments>` - command line arguments that shall be passed to the service upon startup.
+* `<arguments>` - command-line arguments that shall be passed to the service upon startup.
 
 * `<logOnType>` - specifies an account to be used by the service.
   Valid values are: `local-system-account` (default), `user-account`.
@@ -1503,10 +1534,10 @@ using Excelsior JET 11.0, as the respective functionality is missing in the `xpa
 It only works for Excelsior JET 11.3 and above.
 
 **Note:** You may build a multi-app executable runnable as both plain application and Windows service.
-For that set `<appType>` parameter to "windows-service" and `<multiApp>` parameter to `true`.
-Please note that in this case, Windows Service arguments will have the syntax of multi-app executables,
-so if you would need to just pass usual arguments to your service and not pass VM arguments, do not forget
-to add "-args" as the first argument of your service `<arguments>` list.
+For that, set the `<appType>` parameter to `windows-service` and `<multiApp>` to `true`.
+Please note that in this case `<arguments>` will have the syntax of multi-app executables,
+so to pass arguments to your service and not to the Excelsior JET JVM,
+add `"-args"` (without the quotes) as the first argument.
 
 #### Test Run of Windows Services
 
@@ -1550,21 +1581,21 @@ Compared with the previous releases, the following functionality was added to th
 
 * `<packageFiles>` parameter introduced to add separate files/folders to the package
 * `<excelsiorInstaller>` configuration section extended with the following parameters:
-  - `<language>` - to set installation wizard language
-  - `<cleanupAfterUninstall>` - to remove all files on uninstall
-  - `<afterInstallRunnable>` - to run an executable after installation
-  - `<compressionLevel>` - to control installation package compression
-  - `<installationDirectory>` - to change installation directory defaults
-  - `<registryKey>` - to customize the registry key used for installation on Windows
-  - `<shortcuts>` - to add shortcuts to the Windows Start menu, Desktop, etc.
-  - `<noDefaultPostInstallActions>` - to not add the default action after installation
-  - `<postInstallCheckboxes>` - to configure post install actions
-  - `<fileAssociations>` - to create file associations
-  - `<installCallback>` - to set install callback dynamic library
-  - `<uninstallCallback>` - to set uninstall callback dynamic library
-  - `<welcomeImage>`, `<installerImage>`, `<uninstallerImage>` - to customize (un)installer appearance
-* `<allowUserToChangeTomcatPort>` parameter added to `<tomcat>` configuration section to allow the user to change
-  the Tomcat port at install time
+    - `<language>` - to set installation wizard language
+    - `<cleanupAfterUninstall>` - to remove all files on uninstall
+    - `<afterInstallRunnable>` - to run an executable after installation
+    - `<compressionLevel>` - to control installation package compression
+    - `<installationDirectory>` - to change installation directory defaults
+    - `<registryKey>` - to customize the registry key used for installation on Windows
+    - `<shortcuts>` - to add shortcuts to the Windows Start menu, desktop, etc.
+    - `<noDefaultPostInstallActions>` - to not add the default post-install actions
+    - `<postInstallCheckboxes>` - to configure post-install actions
+    - `<fileAssociations>` - to create file associations
+    - `<installCallback>` - to set install callback dynamic library
+    - `<uninstallCallback>` - to set uninstall callback dynamic library
+    - `<welcomeImage>`, `<installerImage>`, `<uninstallerImage>` - to customize (un)installer appearance
+* `<allowUserToChangeTomcatPort>` parameter added to the `<tomcat>` configuration section
+  to allow the user to change the Tomcat port at install time
 
 Version 0.9.4 (24-Jan-2017)
 
@@ -1575,7 +1606,7 @@ Version 0.9.3 (19-Jan-2017)
 * `<runtime>` configuration section introduced and related parameters moved to it:
    `<locales>`, `<profile>`, `<optRtFiles>` (renamed to `<components>`), `<javaRuntimeSlimDown>` (renamed to `<slimDown>`).
    Old configuration parameters are now deprecated and will be removed in a future release.
-   New parameters added to `<runtime>` section:
+   New parameters added to the `<runtime>` section:
     - `<flavor>` to select a runtime flavor
     - `<location>` to change runtime location in the resulting package
     - `<diskFootprintReduction>` to reduce application disk footprint
@@ -1590,7 +1621,7 @@ Issue with buildnumber-maven-plugin #49 fixed
 Version 0.9.1 (02-Dec-2016)
 
 * Support for Compact Profiles
-* Not working Test Run for 7+ Tomcat versions fixed (#42 issue)
+* Not working Test Run for 7+ Tomcat versions fixed(issue #42)
 
 Version 0.9.0 (23-Nov-2016)
 
@@ -1607,8 +1638,8 @@ such as code protection, selective optimization, and resource packing.
 
 Version 0.7.2 (19-Aug-2016)
 
-This release adds the capability to pass command-line arguments to the application during startup profiling
-and the test run.
+This release adds the capability to pass command-line arguments to the application
+during startup profiling and the test run.
 
 Version 0.7.1 (10-Aug-2016)
 
