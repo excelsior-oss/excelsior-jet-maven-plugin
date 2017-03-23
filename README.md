@@ -37,49 +37,48 @@ The current version of the plugin supports four types of applications:
 Assuming that a copy of Excelsior JET is accessible via the operating system `PATH`,
 here is what you need to do to use it in your Maven project:
 
-1. Unless you want to create a Windows Service, skip to Step 4.
+### Configuring
 
-2.  Add a dependency on the Excelsior JET WinService API to your Maven project,
-    e.g. by copying and pasting the following snippet to the `<dependencies>`
-    section of your `pom.xml` file:
+First, copy and paste the following configuration into the `<plugins>`
+section of your `pom.xml` file:
 
-        <dependency>
-            <groupId>com.excelsiorjet</groupId>
-            <artifactId>excelsior-jet-winservice-api</artifactId>
-            <version>1.0.0</version>
-            <scope>provided</scope>
-        </dependency>
+    <plugin>
+        <groupId>com.excelsiorjet</groupId>
+        <artifactId>excelsior-jet-maven-plugin</artifactId>
+        <version>0.9.5</version>
+        <configuration>
+        </configuration>
+    </plugin>
 
-3.  Implement a subclass of `com.excelsior.service.WinService` as described in the
-    [Excelsior JET WinService API documentation](https://www.excelsiorjet.com/docs/WinService/javadoc/).
+then proceed depending on the type of your application:
+
+  * [Plain Java SE Application](#plain-java-se-application)
+  * [Tomcat Web Application](#tomcat-web-application)
+  * [Invocation Library](#invocation-library)
+  * [Windows Service](#windows-service)
+
+#### Plain Java SE Application
 
 
-4.  Copy and paste the following configuration into the `<plugins>`
-    section of your `pom.xml` file:
-
-        <plugin>
-            <groupId>com.excelsiorjet</groupId>
-            <artifactId>excelsior-jet-maven-plugin</artifactId>
-            <version>0.9.5</version>
-            <configuration>
-            </configuration>
-        </plugin>
-
-5.  Depending on the type of your application,
-    add the following to the `<configuration>` section:
-
-    **Plain Java SE Application:**
-
+1.  Add the following to the `<configuration>` section:
 
         <configuration>
             <mainClass></mainClass>
         </configuration>
 
-    Set the value of the `<mainClass>` parameter to the
+2.  Set the value of the `<mainClass>` parameter to the
     name of the main class of your application.
 
-    **Tomcat Web Application:**
+3.  Optionally, conduct a Test Run:
 
+        mvn jet:testrun
+
+4.  [Build the project](#building)
+
+#### Tomcat Web Application
+
+
+1.  Add the following to the `<configuration>` section:
 
         <configuration>
             <tomcatConfiguration>
@@ -87,11 +86,20 @@ here is what you need to do to use it in your Maven project:
             </tomcatConfiguration>
         </configuration>
 
-    Set the `<tomcatHome>` parameter to point to the
-    _master_ Tomcat installation — basically, a clean Tomcat instance that was never launched, and
+2.  Set the `<tomcatHome>` parameter to point to the
+    _master_ Tomcat installation — basically, a clean Tomcat instance that was never launched.
 
-    **Invocation Library:**
+3.  Optionally, conduct a Test Run:
 
+        mvn jet:testrun
+
+4.  [Build the project](#building)
+
+
+#### Invocation Library
+
+
+1.  Add the following to the `<configuration>` section:
 
         <configuration>
             <appType>dynamic-library</appType>
@@ -102,12 +110,32 @@ here is what you need to do to use it in your Maven project:
     [section](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Invocation-Dynamic-Libraries)
     of the plugin documentation.
 
-    **Windows Service: **
+2.  [Build the project](#building)
 
+
+#### Windows Service
+
+1.  Implement a class extending `com.excelsior.service.WinService`,
+    as described in the [Excelsior JET WinService API documentation](https://www.excelsiorjet.com/docs/WinService/javadoc/).
+
+2.  Add a dependency on the Excelsior JET WinService API to your Maven project.
+    Copy and paste the following snippet to the `<dependencies>`
+    section of your `pom.xml` file:
+
+
+        <dependency>
+            <groupId>com.excelsiorjet</groupId>
+            <artifactId>excelsior-jet-winservice-api</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+3.  Add the following to the `<configuration>` section:
 
         <configuration>
             <appType>windows-service</appType>
-            <mainClass>service-main</mainClass>
+            <mainClass></mainClass>
             <windowsServiceConfiguration>
                 <name></name>
                 <displayName></displayName>
@@ -125,18 +153,27 @@ here is what you need to do to use it in your Maven project:
             </windowsServiceConfiguration>
         </configuration>
 
-    where `service-main` is the name of the class that you implemented on Step 3.
+4.  Set `<mainClass>` to the name of the class implemented on Step 1.
     For descriptions of all other parameters, refer to
     [plugin documentation](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Windows-Services).
 
-    For more information about Windows services support in Excelsior JET,
-    refer to to the "Windows Services" Chapter of the
+    You may find complete information on Windows services support in Excelsior JET
+    in the "Windows Services" Chapter of the
     [Excelsior JET for Windows User's Guide.](https://www.excelsiorjet.com/docs/jet/jetw)
 
+5.  [Build the project](#building)
 
-6.  Run Maven with the `jet:build` goal:
+### Building
+
+Run Maven with the `jet:build` goal:
 
         mvn jet:build
+
+At the end of a successful build, the plugin will place your natively compiled
+Java application/library and the required pieces of Excelsior JET Runtime:
+
+  * in the `jet/app` subdirectory of your project
+  * in a zip archive named `${project.build.finalName}.zip`.
 
 Refer to [plugin documentation](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki) for further instructions.
 
