@@ -172,7 +172,7 @@ Run Maven with the `jet:build` goal:
 At the end of a successful build, the plugin will place your natively compiled
 Java application/library and the required pieces of Excelsior JET Runtime:
 
-  * in the `jet/app` subdirectory of your project
+  * in the `target/jet/app` subdirectory of your project
   * in a zip archive named `${project.build.finalName}.zip`.
 
 Refer to [plugin documentation](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki) for further instructions.
@@ -185,6 +185,11 @@ See the [Wiki](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki)
   * [Home](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki)
   * [Prerequisites](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Prerequisites)
   * [Getting Started](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Getting-Started)
+  * [Build Process](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process)
+
+      - [Test Run](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#test-run)
+      - [Compilation](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#compilation)
+      - [Packaging](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#packaging)
 
 **Compilation Settings:**
 
@@ -203,7 +208,6 @@ See the [Wiki](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki)
 
 **Application Type Specifics:**
 
-  * [Plain Java SE Applications](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Plain-Java-SE-Applications)
   * [Tomcat Web Applications](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Tomcat-Web-Applications)
   * [Dynamic Libraries](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Invocation-Dynamic-Libraries)
   * [Windows Services](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Windows-Services)
