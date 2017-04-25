@@ -310,8 +310,8 @@ public class JetMojo extends AbstractJetMojo {
      * @see WindowsVersionInfoConfig#copyright
      * @see WindowsVersionInfoConfig#description
      */
-    @Parameter(property = "addWindowsVersionInfo", defaultValue = "true")
-    protected boolean addWindowsVersionInfo;
+    @Parameter(property = "addWindowsVersionInfo")
+    protected Boolean addWindowsVersionInfo;
 
     /**
      * Windows version-information resource description.
