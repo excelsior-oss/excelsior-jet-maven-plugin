@@ -114,10 +114,12 @@ public class JetMojo extends AbstractJetMojo {
     protected String inlineExpansion;
 
     /**
-     * Allocate Java objects on the stack which life-time is proved to be method frame bound.
-     * By default, the parameter is set to {@code true}.
-     * This optimization may however result in higher consumption of stack memory by application's threads.
-     * You may wish to disable the optimization, if you run thousands of threads simultaneously.
+     * Allocate on the stack the Java objects that do not escape the scope
+     * of the allocating method. By default, the parameter is set to {@code true}.
+     *
+     * This optimization may increase the consumption of stack memory 
+     * by application threads, so you may wish to disable it if your application runs 
+     * thousands of threads simultaneously.
      */
     @Parameter(property = "stackAllocation", defaultValue = "true")
     protected boolean stackAllocation;
