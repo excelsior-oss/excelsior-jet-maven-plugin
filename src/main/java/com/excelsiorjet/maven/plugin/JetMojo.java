@@ -78,7 +78,7 @@ public class JetMojo extends AbstractJetMojo {
      * of the application JAR file, that image will be used automatically.
      */
     @Parameter(property = "splash")
-    private File splash;
+    protected File splash;
 
     /**
      * The JET Runtime supports three modes of stack trace printing: {@code minimal}, {@code full}, and {@code none}.
@@ -99,7 +99,7 @@ public class JetMojo extends AbstractJetMojo {
      * </p>
      */
     @Parameter(property = "stackTraceSupport")
-    private String stackTraceSupport;
+    protected String stackTraceSupport;
 
     /**
      * Controls the aggressiveness of method inlining.
@@ -111,7 +111,16 @@ public class JetMojo extends AbstractJetMojo {
      * </p>
      */
     @Parameter(property = "inlineExpansion")
-    private String inlineExpansion;
+    protected String inlineExpansion;
+
+    /**
+     * Allocate Java objects on the stack which life-time is proved to be method frame bound.
+     * By default, the parameter is set to {@code true}.
+     * This optimization may however result in higher consumption of stack memory by application's threads.
+     * You may wish to disable the optimization, if you run thousands of threads simultaneously.
+     */
+    @Parameter(property = "stackAllocation", defaultValue = "true")
+    protected boolean stackAllocation;
 
     /**
      * (Windows) If set to {@code true}, the resulting executable file will not have a console upon startup.
@@ -187,7 +196,7 @@ public class JetMojo extends AbstractJetMojo {
      */
     @Deprecated
     @Parameter(property = "optRtFiles")
-    protected String[] optRtFiles;
+    private String[] optRtFiles;
 
     /**
      * Deprecated. Use {@link RuntimeConfig#locales} of {@link #runtimeConfiguration} parameter instead.
@@ -201,7 +210,7 @@ public class JetMojo extends AbstractJetMojo {
      */
     @Deprecated
     @Parameter(property = "javaRuntimeSlimDown")
-    protected SlimDownConfig javaRuntimeSlimDown;
+    private SlimDownConfig javaRuntimeSlimDown;
 
     /**
      * If set to {@code true}, the multi-app mode is enabled for the resulting executable
@@ -255,7 +264,7 @@ public class JetMojo extends AbstractJetMojo {
      * @see TrialVersionConfig#expireMessage
      */
     @Parameter(property = "trialVersion")
-    TrialVersionConfig trialVersion;
+    protected TrialVersionConfig trialVersion;
 
     /**
      * Application packaging mode. Permitted values are:
@@ -310,8 +319,8 @@ public class JetMojo extends AbstractJetMojo {
      * @see WindowsVersionInfoConfig#copyright
      * @see WindowsVersionInfoConfig#description
      */
-    @Parameter(property = "addWindowsVersionInfo", defaultValue = "true")
-    protected boolean addWindowsVersionInfo;
+    @Parameter(property = "addWindowsVersionInfo")
+    protected Boolean addWindowsVersionInfo;
 
     /**
      * Windows version-information resource description.
@@ -324,21 +333,21 @@ public class JetMojo extends AbstractJetMojo {
      */
     @Deprecated
     @Parameter(property = "winVIVersion")
-    protected String winVIVersion;
+    private String winVIVersion;
 
     /**
      * Deprecated. Use {@link #windowsVersionInfoConfiguration} parameter instead.
      */
     @Deprecated
     @Parameter(property = "winVICopyright")
-    protected String winVICopyright;
+    private String winVICopyright;
 
     /**
      * Deprecated. Use {@link #windowsVersionInfoConfiguration} parameter instead.
      */
     @Deprecated
     @Parameter(property = "winVIDescription")
-    protected String winVIDescription;
+    private String winVIDescription;
 
     /**
      * Excelsior Installer configuration parameters.
@@ -394,7 +403,7 @@ public class JetMojo extends AbstractJetMojo {
      * </p>
      */
     @Parameter(property = "compilerOptions")
-    private String[] compilerOptions;
+    protected String[] compilerOptions;
 
 
     @Override
@@ -424,6 +433,7 @@ public class JetMojo extends AbstractJetMojo {
                     .splash(splash)
                     .stackTraceSupport(stackTraceSupport)
                     .inlineExpansion(inlineExpansion)
+                    .stackAllocation(stackAllocation)
                     .hideConsole(hideConsole)
                     .profileStartupTimeout(profileStartupTimeout)
                     .compilerOptions(compilerOptions);
