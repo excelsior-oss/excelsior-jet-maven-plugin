@@ -17,9 +17,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:https://github.com/${github-repo-owner}/${github-repo}.git</connection>
-    <developerConnection>scm:git:https://github.com/${github-repo-owner}/${github-repo}.git</developerConnection>
-    <url>https://github.com/${github-repo-owner}/${github-repo}</url>
+    <connection>scm:git:git://github.com/${github-repo-owner}/${github-repo}.git</connection>
+    <developerConnection>scm:git:git://github.com/${github-repo-owner}/${github-repo}.git</developerConnection>
+    <url>git://github.com/${github-repo-owner}/${github-repo}</url>
     <tag>HEAD</tag>
   </scm>
 
