@@ -45,7 +45,7 @@ section of your `pom.xml` file:
     <plugin>
         <groupId>com.excelsiorjet</groupId>
         <artifactId>excelsior-jet-maven-plugin</artifactId>
-        <version>0.9.5</version>
+        <version>1.0.0</version>
         <configuration>
         </configuration>
     </plugin>
@@ -197,6 +197,7 @@ See the [Wiki](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki)
   * [Optimizations](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Optimization-Settings)
   * [Target Executable](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Target-Executable-Settings)
   * [Application Apperarance](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Application-Appearance)
+  * [Raw Compiler Options](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Raw-Compiler-Options)
 
 **Packaging Settings:**
 
@@ -248,6 +249,21 @@ or follow [@ExcelsiorJET](https://twitter.com/ExcelsiorJET) on Twitter.
 
 
 ## Release Notes
+
+Version 1.0.0 (??-May-2017)
+
+First non-beta release. Here is what we have done:
+
+  * Reworked plugin documentation and moved it to the Wiki
+  * Tested the plugin against all platforms/editions that Excelsior JET 11.0 and 11.3 support
+  * Fixed a handful of minor bugs reported by users and found during testing
+  * Added the somehow overlooked `<stackAllocation>` parameter
+    that controls allocation of Java objects on the stack
+
+**Backward incompatibile change alert:** Windows version-information resource generation
+is now _off_ by default. To revert to the previous behavior, add
+`<addWindowsVersionInfo>`*`true`*`</addWindowsVersionInfo>` to the plugin configuration.
+
 
 Version 0.9.5 aka 1.0 Release Candidate (15-Feb-2017)
 
