@@ -53,7 +53,6 @@
                         <dependency>
                             <path>${project.basedir}/extDir2</path>
                             <packagePath>extDirCp</packagePath>
-                            <pack>none</pack>
                         </dependency>
                         <dependency>
                             <path>${project.basedir}/lib/google-collections-1.0.jar</path>
