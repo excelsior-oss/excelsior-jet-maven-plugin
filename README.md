@@ -250,7 +250,7 @@ or follow [@ExcelsiorJET](https://twitter.com/ExcelsiorJET) on Twitter.
 
 ## Release Notes
 
-Version 1.0.0 (??-May-2017)
+Version 1.0.0 (04-May-2017)
 
 First non-beta release. Here is what we have done:
 
