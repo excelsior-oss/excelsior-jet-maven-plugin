@@ -1,4 +1,25 @@
 /*
+ * Copyright (c) 2015-2017 Excelsior LLC.
+ *
+ *  This file is part of Excelsior JET Maven Plugin.
+ *
+ *  Excelsior JET Maven Plugin is free software:
+ *  you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Excelsior JET Maven Plugin is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with Excelsior JET Maven Plugin.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ *
+*/
+/*
  * Copyright (c) 2015,2016 Excelsior LLC.
  *
  *  This file is part of Excelsior JET Maven Plugin.
@@ -21,13 +42,10 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.ExcelsiorJet;
-import com.excelsiorjet.api.cmd.CmdLineToolException;
-import com.excelsiorjet.api.JetHomeException;
 import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
-import com.excelsiorjet.api.tasks.config.*;
+import com.excelsiorjet.api.tasks.config.OSXAppBundleConfig;
 import com.excelsiorjet.api.tasks.config.compiler.TrialVersionConfig;
 import com.excelsiorjet.api.tasks.config.compiler.WindowsVersionInfoConfig;
 import com.excelsiorjet.api.tasks.config.dependencies.DependencySettings;
@@ -35,26 +53,20 @@ import com.excelsiorjet.api.tasks.config.excelsiorinstaller.ExcelsiorInstallerCo
 import com.excelsiorjet.api.tasks.config.runtime.RuntimeConfig;
 import com.excelsiorjet.api.tasks.config.runtime.SlimDownConfig;
 import com.excelsiorjet.api.tasks.config.windowsservice.WindowsServiceConfig;
-import com.excelsiorjet.api.util.Txt;
 import com.excelsiorjet.api.util.Utils;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
-import java.io.IOException;
 
 import static com.excelsiorjet.api.log.Log.logger;
-import static com.excelsiorjet.api.util.Txt.*;
+import static com.excelsiorjet.api.util.Txt.s;
 
 /**
- * Main Mojo for building Java (JVM) applications with Excelsior JET.
+ * Parent Mojo that collects parameters for building Java (JVM) applications with Excelsior JET.
  *
  * @author Nikita Lipsky
  */
-@Execute(phase = LifecyclePhase.PACKAGE)
-@Mojo(name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class JetMojo extends AbstractJetMojo {
+public abstract class ParentBuildJetMojo extends ParentJetMojo {
 
     /**
      * Target executable name. If not set, the main class name is used.
@@ -407,49 +419,49 @@ public class JetMojo extends AbstractJetMojo {
     @Parameter(property = "compilerOptions")
     protected String[] compilerOptions;
 
+    /**
+     * Command line arguments that will be passed to the application during startup accelerator or execution profiling
+     * and usual run.
+     * If not specified runArgs are reused for {@code exeRunArgs}.
+     * Please note, the parameter must be in the format of multi-app executables, if {@link #multiApp} is {@code true}.
+     * You may also set the parameter via the {@code jet.exeRunArgs} system property, where arguments
+     * are comma separated (use "\" to escape commas inside arguments,
+     * i.e. {@code -Djet.exeRunArgs="arg1,Hello\, World"} will be passed to your application as {@code arg1 "Hello, World"})
+     */
+    @Parameter(property = "exeRunArgs")
+    protected String[] exeRunArgs;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        try {
-            JetProject jetProject = getJetProject()
-                    .addWindowsVersionInfo(addWindowsVersionInfo)
-                    .excelsiorJetPackaging(packaging)
-                    .vendor(vendor)
-                    .product(product)
-                    .windowsVersionInfoConfiguration(windowsVersionInfoConfiguration)
-                    .inceptionYear(project.getInceptionYear())
-                    .optimizationPreset(optimizationPreset)
-                    .globalOptimizer(globalOptimizer)
-                    .runtimeConfiguration(runtimeConfiguration)
-                    .trialVersion(trialVersion)
-                    .excelsiorInstallerConfiguration(excelsiorInstallerConfiguration)
-                    .windowsServiceConfiguration(windowsServiceConfiguration)
-                    .version(version)
-                    .osxBundleConfiguration(osxBundleConfiguration)
-                    .outputName(outputName)
-                    .multiApp(multiApp)
-                    .profileStartup(profileStartup)
-                    .protectData(protectData)
-                    .cryptSeed(cryptSeed)
-                    .icon(icon)
-                    .splash(splash)
-                    .stackTraceSupport(stackTraceSupport)
-                    .inlineExpansion(inlineExpansion)
-                    .stackAllocation(stackAllocation)
-                    .hideConsole(hideConsole)
-                    .profileStartupTimeout(profileStartupTimeout)
-                    .compilerOptions(compilerOptions);
-
-            checkDeprecated();
-            ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
-            new JetBuildTask(excelsiorJet, jetProject).execute();
-        } catch (JetTaskFailureException | JetHomeException  e) {
-            throw new MojoFailureException(e.getMessage());
-        } catch (CmdLineToolException | IOException e) {
-            logger.debug("JetTask execution error", e);
-            logger.error(e.getMessage());
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
+    protected JetProject getJetProject() throws JetTaskFailureException {
+        checkDeprecated();
+        return super.getJetProject().addWindowsVersionInfo(addWindowsVersionInfo)
+                .excelsiorJetPackaging(packaging)
+                .vendor(vendor)
+                .product(product)
+                .windowsVersionInfoConfiguration(windowsVersionInfoConfiguration)
+                .inceptionYear(project.getInceptionYear())
+                .optimizationPreset(optimizationPreset)
+                .globalOptimizer(globalOptimizer)
+                .runtimeConfiguration(runtimeConfiguration)
+                .trialVersion(trialVersion)
+                .excelsiorInstallerConfiguration(excelsiorInstallerConfiguration)
+                .windowsServiceConfiguration(windowsServiceConfiguration)
+                .version(version)
+                .osxBundleConfiguration(osxBundleConfiguration)
+                .outputName(outputName)
+                .multiApp(multiApp)
+                .profileStartup(profileStartup)
+                .protectData(protectData)
+                .cryptSeed(cryptSeed)
+                .icon(icon)
+                .splash(splash)
+                .stackTraceSupport(stackTraceSupport)
+                .inlineExpansion(inlineExpansion)
+                .stackAllocation(stackAllocation)
+                .hideConsole(hideConsole)
+                .profileStartupTimeout(profileStartupTimeout)
+                .compilerOptions(compilerOptions)
+                .exeRunArgs(exeRunArgs);
     }
 
     private void checkDeprecated() {
@@ -494,6 +506,18 @@ public class JetMojo extends AbstractJetMojo {
             logger.warn(s("JetBuildTask.RTSettingDeprecated.Warning", "profile", "profile"));
             if (runtimeConfiguration.profile == null) {
                 runtimeConfiguration.profile = profile;
+            }
+        }
+        if (execProfilesDir !=null) {
+            logger.warn(s("JetBuildTask.ExecProfilesDeprecated.Warning", "execProfilesDir", "outputDir"));
+            if (execProfilesConfig.outputDir == null) {
+                execProfilesConfig.outputDir = execProfilesDir;
+            }
+        }
+        if (execProfilesName !=null) {
+            logger.warn(s("JetBuildTask.ExecProfilesDeprecated.Warning", "execProfilesName", "outputName"));
+            if (execProfilesConfig.outputName == null) {
+                execProfilesConfig.outputName = execProfilesName;
             }
         }
     }

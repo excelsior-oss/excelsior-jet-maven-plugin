@@ -21,6 +21,7 @@
 */
 package com.excelsiorjet.maven.plugin;
 
+import com.excelsiorjet.api.tasks.config.compiler.ExecProfilesConfig;
 import com.excelsiorjet.api.tasks.config.packagefile.PackageFile;
 import com.excelsiorjet.api.tasks.config.ApplicationType;
 import com.excelsiorjet.api.tasks.JetProject;
@@ -38,14 +39,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.excelsiorjet.api.util.Txt.s;
-import static java.util.Collections.emptyList;
 
 /**
  * Parent of Excelsior JET Maven Plugin mojos.
  *
  * @author Nikita Lipsky
  */
-public abstract class AbstractJetMojo extends AbstractMojo {
+public abstract class ParentJetMojo extends AbstractMojo {
 
     /**
      * The Maven Project Object.
@@ -182,24 +182,25 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "jvmArgs")
     protected String[] jvmArgs;
 
-    /**
-     * The target location for application execution profiles gathered during Test Run.
-     * By default, they are placed into the {@link #jetResourcesDir} directory.
-     * It is recommended to commit the collected profiles (.usg, .startup) to VCS to enable the plugin
-     * to re-use them during subsequent builds without performing a Test Run.
-     *
-     * @see TestRunMojo
-     */
+    @Deprecated
     @Parameter(property = "execProfilesDir")
     protected File execProfilesDir;
 
-    /**
-     * The base file name of execution profiles. By default, ${project.artifactId} is used.
-     *
-     * Default value is ${project.artifactId}
-     */
+    @Deprecated
     @Parameter(property = "execProfilesName")
     protected String execProfilesName;
+
+    /**
+     * Execution profiles configuration parameters.
+     * You can configure where to place execution profiles and whether you can collect the profiles locally.
+     *
+     * @see ExecProfilesConfig#outputDir
+     * @see ExecProfilesConfig#outputName
+     * @see ExecProfilesConfig#profileLocally
+     * @see ExecProfilesConfig#daysToWarnAboutOutdatedProfiles
+     */
+    @Parameter(property = "execProfilesConfiguration", alias = "execProfiles")
+    protected ExecProfilesConfig execProfilesConfig;
 
     /**
      * Command line arguments that will be passed to the application during startup accelerator profiling
@@ -255,8 +256,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .jetOutputDir(jetOutputDir)
                         .packageFilesDir(packageFilesDir)
                         .packageFiles(packageFiles)
-                        .execProfilesDir(execProfilesDir)
-                        .execProfilesName(execProfilesName)
+                        .execProfiles(execProfilesConfig)
                         .jvmArgs(jvmArgs)
                         .runArgs(this.runArgs)
                 .dependencies(Arrays.asList(dependencies));

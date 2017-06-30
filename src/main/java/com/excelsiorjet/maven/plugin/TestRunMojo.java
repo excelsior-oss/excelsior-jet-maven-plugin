@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Excelsior LLC.
+ * Copyright (c) 2015-2017, Excelsior LLC.
  *
  *  This file is part of Excelsior JET Maven Plugin.
  *
@@ -24,8 +24,6 @@ package com.excelsiorjet.maven.plugin;
 import com.excelsiorjet.api.ExcelsiorJet;
 import com.excelsiorjet.api.cmd.CmdLineToolException;
 import com.excelsiorjet.api.JetHomeException;
-import com.excelsiorjet.api.log.Log;
-import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.TestRunTask;
@@ -74,7 +72,7 @@ import java.io.IOException;
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo( name = "testrun", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class TestRunMojo extends AbstractJetMojo {
+public class TestRunMojo extends ParentJetMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
