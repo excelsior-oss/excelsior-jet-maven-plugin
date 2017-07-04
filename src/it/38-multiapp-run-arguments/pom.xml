@@ -24,12 +24,12 @@
                   <packaging>none</packaging>
                   <mainClass>HelloWorld</mainClass>
                   <multiApp>true</multiApp>
-                  <exeRunArgs>
-                      <exeRunArg>-Dno.op</exeRunArg>
-                      <exeRunArg>-args</exeRunArg>
-                      <exeRunArg>arg1</exeRunArg>
-                      <exeRunArg>arg2.1, arg2.2</exeRunArg>
-                  </exeRunArgs>
+                  <multiAppRunArgs>
+                      <runArg>-Dno.op</runArg>
+                      <runArg>-args</runArg>
+                      <runArg>arg1</runArg>
+                      <runArg>arg2.1, arg2.2</runArg>
+                  </multiAppRunArgs>
               </configuration>
           </plugin>
       </plugins>

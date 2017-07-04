@@ -19,27 +19,6 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-/*
- * Copyright (c) 2015,2016 Excelsior LLC.
- *
- *  This file is part of Excelsior JET Maven Plugin.
- *
- *  Excelsior JET Maven Plugin is free software:
- *  you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  Excelsior JET Maven Plugin is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with Excelsior JET Maven Plugin.
- *  If not, see <http://www.gnu.org/licenses/>.
- *
-*/
 package com.excelsiorjet.maven.plugin;
 
 import com.excelsiorjet.api.tasks.JetBuildTask;
@@ -174,7 +153,7 @@ public abstract class ParentBuildJetMojo extends ParentJetMojo {
     protected String optimizationPreset;
 
     /**
-     * (32-bit only) If set to {@code true}, the Global Optimizer is enabled,
+     * If set to {@code true}, the Global Optimizer is enabled,
      * providing higher performance and lower memory usage for the compiled application.
      * Performing a Test Run is mandatory when the Global Optimizer is enabled.
      * The Global Optimizer is enabled automatically when you enable Java Runtime Slim-Down.
@@ -420,16 +399,18 @@ public abstract class ParentBuildJetMojo extends ParentJetMojo {
     protected String[] compilerOptions;
 
     /**
-     * Command line arguments that will be passed to the application during startup accelerator or execution profiling
-     * and usual run.
-     * If not specified runArgs are reused for {@code exeRunArgs}.
-     * Please note, the parameter must be in the format of multi-app executables, if {@link #multiApp} is {@code true}.
-     * You may also set the parameter via the {@code jet.exeRunArgs} system property, where arguments
+     * If you set {@link #multiApp} to {@code true} then command line arguments for resulting executable
+     * are in the format of multi-app executables.
+     *
+     * So if you need to alter a main class and/or VM properties during startup accelerator,
+     * execution profiling or usual run set this parameter that will override {@link #runArgs} parameter.
+     *
+     * You may also set the parameter via the {@code jet.multiAppRunArgs} system property, where arguments
      * are comma separated (use "\" to escape commas inside arguments,
-     * i.e. {@code -Djet.exeRunArgs="arg1,Hello\, World"} will be passed to your application as {@code arg1 "Hello, World"})
+     * i.e. {@code -Djet.multiAppRunArgs="-args,arg1,Hello\, World"} will be passed to your application as {@code -args arg1 "Hello, World"})
      */
-    @Parameter(property = "exeRunArgs")
-    protected String[] exeRunArgs;
+    @Parameter(property = "multiAppRunArgs")
+    protected String[] multiAppRunArgs;
 
     @Override
     protected JetProject getJetProject() throws JetTaskFailureException {
@@ -461,7 +442,7 @@ public abstract class ParentBuildJetMojo extends ParentJetMojo {
                 .hideConsole(hideConsole)
                 .profileStartupTimeout(profileStartupTimeout)
                 .compilerOptions(compilerOptions)
-                .exeRunArgs(exeRunArgs);
+                .multiAppRunArgs(multiAppRunArgs);
     }
 
     private void checkDeprecated() {

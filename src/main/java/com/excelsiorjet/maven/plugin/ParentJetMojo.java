@@ -125,6 +125,23 @@ public abstract class ParentJetMojo extends AbstractMojo {
     protected File jetOutputDir;
 
     /**
+     * Excelsior project build dir.
+     *
+     * The value is set to "build" subdirectory of {@link #jetOutputDir}.
+     */
+    @Parameter(property = "jetBuildDir")
+    protected File jetBuildDir;
+
+    /**
+     * Target directory where the plugin places the executable, the required Excelsior JET Runtime files and
+     * package files you configured with {@link #packageFiles} and {@link #packageFilesDir}.
+     *
+     * The value is set to "app" subdirectory of {@link #jetOutputDir}.
+     */
+    @Parameter(property = "jetAppDir")
+    protected File jetAppDir;
+
+    /**
      * Tomcat web applications specific parameters.
      *
      * @see TomcatConfig#tomcatHome
@@ -192,12 +209,15 @@ public abstract class ParentJetMojo extends AbstractMojo {
 
     /**
      * Execution profiles configuration parameters.
-     * You can configure where to place execution profiles and whether you can collect the profiles locally.
+     * You can configure the filesystem location and base name of all application execution profiles,
+     * whether they can be collected locally, i.e. on the machine where the build takes place,
+     * and the maximum profile age when they are considered outdated.
      *
      * @see ExecProfilesConfig#outputDir
      * @see ExecProfilesConfig#outputName
      * @see ExecProfilesConfig#profileLocally
      * @see ExecProfilesConfig#daysToWarnAboutOutdatedProfiles
+     * @see ExecProfilesConfig#checkExistence
      */
     @Parameter(property = "execProfilesConfiguration", alias = "execProfiles")
     protected ExecProfilesConfig execProfilesConfig;
@@ -254,6 +274,8 @@ public abstract class ParentJetMojo extends AbstractMojo {
                         .projectDependencies(getDependencies())
                         .artifactName(artifactName)
                         .jetOutputDir(jetOutputDir)
+                        .jetBuildDir(jetBuildDir)
+                        .jetAppDir(jetAppDir)
                         .packageFilesDir(packageFilesDir)
                         .packageFiles(packageFiles)
                         .execProfiles(execProfilesConfig)
