@@ -27,24 +27,13 @@ import com.excelsiorjet.api.JetHomeException;
 import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
-import com.excelsiorjet.api.tasks.config.*;
-import com.excelsiorjet.api.tasks.config.compiler.TrialVersionConfig;
-import com.excelsiorjet.api.tasks.config.compiler.WindowsVersionInfoConfig;
-import com.excelsiorjet.api.tasks.config.dependencies.DependencySettings;
-import com.excelsiorjet.api.tasks.config.excelsiorinstaller.ExcelsiorInstallerConfig;
-import com.excelsiorjet.api.tasks.config.runtime.RuntimeConfig;
-import com.excelsiorjet.api.tasks.config.runtime.SlimDownConfig;
-import com.excelsiorjet.api.tasks.config.windowsservice.WindowsServiceConfig;
-import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
-import java.io.File;
 import java.io.IOException;
 
 import static com.excelsiorjet.api.log.Log.logger;
-import static com.excelsiorjet.api.util.Txt.*;
 
 /**
  * Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -53,7 +42,7 @@ import static com.excelsiorjet.api.util.Txt.*;
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo(name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class BuildMojo extends ParentBuildJetMojo {
+public class BuildMojo extends AbstractBuildMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {

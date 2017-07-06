@@ -45,7 +45,7 @@ import static com.excelsiorjet.api.log.Log.logger;
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo(name = "profile", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class ProfileMojo extends ParentBuildJetMojo {
+public class ProfileMojo extends AbstractBuildMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {

@@ -45,7 +45,7 @@ import static com.excelsiorjet.api.util.Txt.s;
  *
  * @author Nikita Lipsky
  */
-public abstract class ParentJetMojo extends AbstractMojo {
+public abstract class AbstractJetMojo extends AbstractMojo {
 
     /**
      * The Maven Project Object.

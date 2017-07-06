@@ -72,7 +72,7 @@ import java.io.IOException;
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo( name = "testrun", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class TestRunMojo extends ParentJetMojo {
+public class TestRunMojo extends AbstractJetMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {

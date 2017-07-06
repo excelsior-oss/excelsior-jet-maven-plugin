@@ -24,7 +24,6 @@ package com.excelsiorjet.maven.plugin;
 import com.excelsiorjet.api.ExcelsiorJet;
 import com.excelsiorjet.api.JetHomeException;
 import com.excelsiorjet.api.cmd.CmdLineToolException;
-import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.RunTask;
@@ -46,7 +45,7 @@ import static com.excelsiorjet.api.log.Log.logger;
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo(name = "run", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class RunMojo extends ParentBuildJetMojo {
+public class RunMojo extends AbstractBuildMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {

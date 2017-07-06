@@ -45,7 +45,7 @@ import static com.excelsiorjet.api.util.Txt.s;
  *
  * @author Nikita Lipsky
  */
-public abstract class ParentBuildJetMojo extends ParentJetMojo {
+public abstract class AbstractBuildMojo extends AbstractJetMojo {
 
     /**
      * Target executable name. If not set, the main class name is used.
