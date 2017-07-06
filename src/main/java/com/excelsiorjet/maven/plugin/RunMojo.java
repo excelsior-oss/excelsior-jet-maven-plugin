@@ -39,7 +39,7 @@ import java.io.IOException;
 import static com.excelsiorjet.api.log.Log.logger;
 
 /**
- * Mojo for running generated executables with Excelsior JET.
+ * Mojo for running executables generated with Excelsior JET.
  *
  * @author Nikita Lipsky
  */

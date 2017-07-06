@@ -125,18 +125,18 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     protected File jetOutputDir;
 
     /**
-     * Excelsior project build dir.
+     * Build directory, where the Excelsior JET compiler and tools store their intermediate files.
      *
-     * The value is set to "build" subdirectory of {@link #jetOutputDir}.
+     * The value is set to the "build" subdirectory of {@link #jetOutputDir}.
      */
     @Parameter(property = "jetBuildDir")
     protected File jetBuildDir;
 
     /**
-     * Target directory where the plugin places the executable, the required Excelsior JET Runtime files and
-     * package files you configured with {@link #packageFiles} and {@link #packageFilesDir}.
+     * Target directory, where the plugin places the executable, the required Excelsior JET Runtime files,
+     * and any package files configured using {@link #packageFiles} and {@link #packageFilesDir}.
      *
-     * The value is set to "app" subdirectory of {@link #jetOutputDir}.
+     * The value is set to the "app" subdirectory of {@link #jetOutputDir}.
      */
     @Parameter(property = "jetAppDir")
     protected File jetAppDir;
