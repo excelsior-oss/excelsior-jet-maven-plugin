@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015,2016 Excelsior LLC.
+ * Copyright (c) 2015-2017 Excelsior LLC.
  *
  *  This file is part of Excelsior JET Maven Plugin.
  *
@@ -21,13 +21,10 @@
 */
 package com.excelsiorjet.maven.plugin;
 
-import com.excelsiorjet.api.ExcelsiorJet;
-import com.excelsiorjet.api.cmd.CmdLineToolException;
-import com.excelsiorjet.api.JetHomeException;
 import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
-import com.excelsiorjet.api.tasks.config.*;
+import com.excelsiorjet.api.tasks.config.OSXAppBundleConfig;
 import com.excelsiorjet.api.tasks.config.compiler.TrialVersionConfig;
 import com.excelsiorjet.api.tasks.config.compiler.WindowsVersionInfoConfig;
 import com.excelsiorjet.api.tasks.config.dependencies.DependencySettings;
@@ -35,26 +32,20 @@ import com.excelsiorjet.api.tasks.config.excelsiorinstaller.ExcelsiorInstallerCo
 import com.excelsiorjet.api.tasks.config.runtime.RuntimeConfig;
 import com.excelsiorjet.api.tasks.config.runtime.SlimDownConfig;
 import com.excelsiorjet.api.tasks.config.windowsservice.WindowsServiceConfig;
-import com.excelsiorjet.api.util.Txt;
 import com.excelsiorjet.api.util.Utils;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
-import java.io.IOException;
 
 import static com.excelsiorjet.api.log.Log.logger;
-import static com.excelsiorjet.api.util.Txt.*;
+import static com.excelsiorjet.api.util.Txt.s;
 
 /**
- * Main Mojo for building Java (JVM) applications with Excelsior JET.
+ * Parent Mojo that collects parameters for building Java (JVM) applications with Excelsior JET.
  *
  * @author Nikita Lipsky
  */
-@Execute(phase = LifecyclePhase.PACKAGE)
-@Mojo(name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class JetMojo extends AbstractJetMojo {
+public abstract class AbstractBuildMojo extends AbstractJetMojo {
 
     /**
      * Target executable name. If not set, the main class name is used.
@@ -162,7 +153,7 @@ public class JetMojo extends AbstractJetMojo {
     protected String optimizationPreset;
 
     /**
-     * (32-bit only) If set to {@code true}, the Global Optimizer is enabled,
+     * If set to {@code true}, the Global Optimizer is enabled,
      * providing higher performance and lower memory usage for the compiled application.
      * Performing a Test Run is mandatory when the Global Optimizer is enabled.
      * The Global Optimizer is enabled automatically when you enable Java Runtime Slim-Down.
@@ -407,49 +398,51 @@ public class JetMojo extends AbstractJetMojo {
     @Parameter(property = "compilerOptions")
     protected String[] compilerOptions;
 
+    /**
+     * If you set {@link #multiApp} to {@code true} then command line arguments for resulting executable
+     * are in the format of multi-app executables.
+     *
+     * So if you need to alter a main class and/or VM properties during startup accelerator,
+     * execution profiling or usual run set this parameter that will override {@link #runArgs} parameter.
+     *
+     * You may also set the parameter via the {@code jet.multiAppRunArgs} system property, where arguments
+     * are comma separated (use "\" to escape commas inside arguments,
+     * i.e. {@code -Djet.multiAppRunArgs="-args,arg1,Hello\, World"} will be passed to your application as {@code -args arg1 "Hello, World"})
+     */
+    @Parameter(property = "multiAppRunArgs")
+    protected String[] multiAppRunArgs;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        try {
-            JetProject jetProject = getJetProject()
-                    .addWindowsVersionInfo(addWindowsVersionInfo)
-                    .excelsiorJetPackaging(packaging)
-                    .vendor(vendor)
-                    .product(product)
-                    .windowsVersionInfoConfiguration(windowsVersionInfoConfiguration)
-                    .inceptionYear(project.getInceptionYear())
-                    .optimizationPreset(optimizationPreset)
-                    .globalOptimizer(globalOptimizer)
-                    .runtimeConfiguration(runtimeConfiguration)
-                    .trialVersion(trialVersion)
-                    .excelsiorInstallerConfiguration(excelsiorInstallerConfiguration)
-                    .windowsServiceConfiguration(windowsServiceConfiguration)
-                    .version(version)
-                    .osxBundleConfiguration(osxBundleConfiguration)
-                    .outputName(outputName)
-                    .multiApp(multiApp)
-                    .profileStartup(profileStartup)
-                    .protectData(protectData)
-                    .cryptSeed(cryptSeed)
-                    .icon(icon)
-                    .splash(splash)
-                    .stackTraceSupport(stackTraceSupport)
-                    .inlineExpansion(inlineExpansion)
-                    .stackAllocation(stackAllocation)
-                    .hideConsole(hideConsole)
-                    .profileStartupTimeout(profileStartupTimeout)
-                    .compilerOptions(compilerOptions);
-
-            checkDeprecated();
-            ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
-            new JetBuildTask(excelsiorJet, jetProject).execute();
-        } catch (JetTaskFailureException | JetHomeException  e) {
-            throw new MojoFailureException(e.getMessage());
-        } catch (CmdLineToolException | IOException e) {
-            logger.debug("JetTask execution error", e);
-            logger.error(e.getMessage());
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
+    protected JetProject getJetProject() throws JetTaskFailureException {
+        checkDeprecated();
+        return super.getJetProject().addWindowsVersionInfo(addWindowsVersionInfo)
+                .excelsiorJetPackaging(packaging)
+                .vendor(vendor)
+                .product(product)
+                .windowsVersionInfoConfiguration(windowsVersionInfoConfiguration)
+                .inceptionYear(project.getInceptionYear())
+                .optimizationPreset(optimizationPreset)
+                .globalOptimizer(globalOptimizer)
+                .runtimeConfiguration(runtimeConfiguration)
+                .trialVersion(trialVersion)
+                .excelsiorInstallerConfiguration(excelsiorInstallerConfiguration)
+                .windowsServiceConfiguration(windowsServiceConfiguration)
+                .version(version)
+                .osxBundleConfiguration(osxBundleConfiguration)
+                .outputName(outputName)
+                .multiApp(multiApp)
+                .profileStartup(profileStartup)
+                .protectData(protectData)
+                .cryptSeed(cryptSeed)
+                .icon(icon)
+                .splash(splash)
+                .stackTraceSupport(stackTraceSupport)
+                .inlineExpansion(inlineExpansion)
+                .stackAllocation(stackAllocation)
+                .hideConsole(hideConsole)
+                .profileStartupTimeout(profileStartupTimeout)
+                .compilerOptions(compilerOptions)
+                .multiAppRunArgs(multiAppRunArgs);
     }
 
     private void checkDeprecated() {
@@ -494,6 +487,18 @@ public class JetMojo extends AbstractJetMojo {
             logger.warn(s("JetBuildTask.RTSettingDeprecated.Warning", "profile", "profile"));
             if (runtimeConfiguration.profile == null) {
                 runtimeConfiguration.profile = profile;
+            }
+        }
+        if (execProfilesDir !=null) {
+            logger.warn(s("JetBuildTask.ExecProfilesDeprecated.Warning", "execProfilesDir", "outputDir"));
+            if (execProfilesConfig.outputDir == null) {
+                execProfilesConfig.outputDir = execProfilesDir;
+            }
+        }
+        if (execProfilesName !=null) {
+            logger.warn(s("JetBuildTask.ExecProfilesDeprecated.Warning", "execProfilesName", "outputName"));
+            if (execProfilesConfig.outputName == null) {
+                execProfilesConfig.outputName = execProfilesName;
             }
         }
     }

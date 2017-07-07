@@ -58,6 +58,10 @@ public class TestUtils {
         return excelsiorJet.isDiskFootprintReductionSupported();
     }
 
+    public static boolean isHighDiskFootprintReductionSupported() {
+        return excelsiorJet.isHighDiskFootprintReductionSupported();
+    }
+
     public static boolean isMultiAppSupported() {
         return excelsiorJet.isMultiAppSupported();
     }
@@ -92,6 +96,10 @@ public class TestUtils {
 
     public static boolean isAdvancedExcelsiorInstallerFeaturesSupported() {
         return excelsiorJet.isAdvancedExcelsiorInstallerFeaturesSupported();
+    }
+
+    public static boolean isPGOSupported() {
+        return excelsiorJet.isPGOSupported();
     }
 
     //replace line separators to Unix as Groovy """ multiline strings produce Unix line separators

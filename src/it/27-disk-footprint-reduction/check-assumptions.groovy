@@ -1,3 +1,3 @@
 import com.excelsiorjet.TestUtils
 
-return TestUtils.diskFootprintReductionSupported
+return TestUtils.highDiskFootprintReductionSupported
