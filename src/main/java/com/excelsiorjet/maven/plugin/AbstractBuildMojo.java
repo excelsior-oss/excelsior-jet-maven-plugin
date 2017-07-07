@@ -399,15 +399,24 @@ public abstract class AbstractBuildMojo extends AbstractJetMojo {
     protected String[] compilerOptions;
 
     /**
-     * If you set {@link #multiApp} to {@code true} then command line arguments for resulting executable
-     * are in the format of multi-app executables.
-     *
-     * So if you need to alter a main class and/or VM properties during startup accelerator,
-     * execution profiling or usual run set this parameter that will override {@link #runArgs} parameter.
-     *
+     * Command-line parameters for multi-app executables. If set, overrides the {@link #runArgs} parameter.
+     * <p>]
+     * If you set {@link #multiApp} to {@code true}, the resulting executable expects its command line
+     * arguments to be in the respective format:
+     * <p>
+     * {@code [VM-options] main-class [arguments]} or<br>
+     * {@code [VM-options] -args [arguments]} (use default main class)
+     * </p>
+     * <p>
+     * So if you need to alter the main class and/or VM properties during startup profiling,
+     * execution profiling, or normal run, set this parameter.
+     * </p>
+     * <p>
      * You may also set the parameter via the {@code jet.multiAppRunArgs} system property, where arguments
      * are comma separated (use "\" to escape commas inside arguments,
-     * i.e. {@code -Djet.multiAppRunArgs="-args,arg1,Hello\, World"} will be passed to your application as {@code -args arg1 "Hello, World"})
+     * i.e. {@code -Djet.multiAppRunArgs="-args,arg1,Hello\, World"} will be passed to your application
+     * as {@code -args arg1 "Hello, World"})
+     * </p>
      */
     @Parameter(property = "multiAppRunArgs")
     protected String[] multiAppRunArgs;
