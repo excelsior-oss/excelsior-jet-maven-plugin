@@ -45,7 +45,7 @@ section of your `pom.xml` file:
     <plugin>
         <groupId>com.excelsiorjet</groupId>
         <artifactId>excelsior-jet-maven-plugin</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
         <configuration>
         </configuration>
     </plugin>
@@ -73,7 +73,11 @@ then proceed depending on the type of your application:
 
         mvn jet:testrun
 
-4.  [Build the project](#building)
+4.  Optionally, collect an execution profile (not available for 32-bit Intel x86 targets yet):
+
+        mvn jet:profile
+
+5.  [Build the project](#building)
 
 #### Tomcat Web Application
 
@@ -93,7 +97,11 @@ then proceed depending on the type of your application:
 
         mvn jet:testrun
 
-4.  [Build the project](#building)
+4.  Optionally, collect an execution profile (not available for 32-bit Intel x86 targets yet):
+
+        mvn jet:profile
+
+5.  [Build the project](#building)
 
 
 #### Invocation Library
@@ -110,7 +118,13 @@ then proceed depending on the type of your application:
     [section](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Invocation-Dynamic-Libraries)
     of the plugin documentation.
 
-2.  [Build the project](#building)
+2.  Optionally, create a profiling image (not available for 32-bit Intel x86 targets yet):
+
+        mvn jet:profile
+
+    and collect an execution profile by running a test application that loads your library from the created image.
+
+3.  [Build the project](#building)
 
 
 #### Windows Service
@@ -161,19 +175,30 @@ then proceed depending on the type of your application:
     in the "Windows Services" Chapter of the
     [Excelsior JET for Windows User's Guide.](https://www.excelsiorjet.com/docs/jet/jetw)
 
-5.  [Build the project](#building)
+5.  Optionally, create a profiling image (not available for 32-bit Intel x86 targets yet):
+
+        mvn jet:profile
+
+    and collect an execution profile by installing and running the service from the created image.
+
+6.  [Build the project](#building)
 
 ### Building
 
 Run Maven with the `jet:build` goal:
 
-        mvn jet:build
+    mvn jet:build
 
 At the end of a successful build, the plugin will place your natively compiled
 Java application/library and the required pieces of Excelsior JET Runtime:
 
   * in the `target/jet/app` subdirectory of your project
   * in a zip archive named `${project.build.finalName}.zip`.
+
+If your project is a plain Java SE application or Tomcat Web application, you can then
+run it:
+
+    mvn jet:run
 
 Refer to [plugin documentation](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki) for further instructions.
 
@@ -188,8 +213,10 @@ See the [Wiki](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki)
   * [Build Process](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process)
 
       - [Test Run](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#test-run)
+      - [Profiling](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#profiling)
       - [Compilation](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#compilation)
       - [Packaging](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#packaging)
+      - [Running](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#running)
 
 **Compilation Settings:**
 
@@ -249,6 +276,22 @@ or follow [@ExcelsiorJET](https://twitter.com/ExcelsiorJET) on Twitter.
 
 
 ## Release Notes
+
+Version 1.1.0 (07-Jul-2017)
+
+Support for new features of Excelsior JET 12 and other enhancements:
+
+  * Global Optimizer is now enabled for all target platforms
+  * **Profile** task introduced to enable the use of Profile-Guided Optimization
+    (not available for 32-bit Intel x86 targets yet):
+
+            mvn jet:profile
+
+  * **Run** task introduced for running the natively compiled application right after the build:
+
+            mvn jet:run
+
+  * Fix for a file copying [issue](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues/57).
 
 Version 1.0.0 (04-May-2017)
 
@@ -429,7 +472,6 @@ and placing it into a separate directory with required Excelsior JET runtime fil
 Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
 So the next few releases will add the following features:
 
-* Excelsior JET 11.3 release features support
 * Multi-component support: building dependencies into separate native libraries
                            to reuse them across multiple Maven project builds
                            so as to reduce overall compilation time
