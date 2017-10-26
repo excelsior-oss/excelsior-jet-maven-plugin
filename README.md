@@ -277,6 +277,11 @@ or follow [@ExcelsiorJET](https://twitter.com/ExcelsiorJET) on Twitter.
 
 ## Release Notes
 
+Version 1.1.2 (26-Oct-2017)
+
+Fix for `NullPointerException` when a shortcut with no icon is used for Excelsior Installer backend (issue #62)
+
+
 Version 1.1.0 (07-Jul-2017)
 
 Support for new features of Excelsior JET 12 and other enhancements:
