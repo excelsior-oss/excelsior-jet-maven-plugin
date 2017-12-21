@@ -45,7 +45,7 @@ section of your `pom.xml` file:
     <plugin>
         <groupId>com.excelsiorjet</groupId>
         <artifactId>excelsior-jet-maven-plugin</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.2</version>
         <configuration>
         </configuration>
     </plugin>
