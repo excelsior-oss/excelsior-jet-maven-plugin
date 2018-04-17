@@ -256,6 +256,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
             return Collections.emptyList();
         } else {
             return project.getArtifacts().stream().
+                    filter(a -> !a.getType().equals("pom")).
                     map(artifact -> new ProjectDependency(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getFile(), false)).
                     collect(Collectors.toList());
         }
