@@ -29,6 +29,7 @@ import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.dependencies.DependencySettings;
 import com.excelsiorjet.api.tasks.config.dependencies.ProjectDependency;
 import com.excelsiorjet.api.tasks.config.TomcatConfig;
+import com.excelsiorjet.api.util.Txt;
 import com.excelsiorjet.api.util.Utils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -256,7 +257,14 @@ public abstract class AbstractJetMojo extends AbstractMojo {
             return Collections.emptyList();
         } else {
             return project.getArtifacts().stream().
-                    filter(a -> !a.getType().equals("pom")).
+                    filter(a -> {
+                                boolean res = a.getType().equals("jar");
+                                if (!res) {
+                                    getLog().warn(Txt.s("JetProject.UnsupportedDependencyType.Warning", a.getType(), a));
+                                }
+                                return res;
+                            }
+                    ).
                     map(artifact -> new ProjectDependency(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getFile(), false)).
                     collect(Collectors.toList());
         }
