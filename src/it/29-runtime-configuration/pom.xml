@@ -27,6 +27,9 @@
                       <flavor>classic</flavor>
                       <location>hidden/runtime</location>
                   </runtime>
+                  <pdb>
+                      <keepInBuildDir>true</keepInBuildDir>
+                  </pdb>
               </configuration>
           </plugin>
       </plugins>

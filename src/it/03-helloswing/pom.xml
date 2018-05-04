@@ -25,6 +25,9 @@
                   <mainClass>HelloSwing</mainClass>
                   <hideConsole>true</hideConsole>
                   <profileStartup>false</profileStartup>
+                  <pdb>
+                      <keepInBuildDir>true</keepInBuildDir>
+                  </pdb>
               </configuration>
           </plugin>
       </plugins>
