@@ -17,7 +17,7 @@ import java.io.IOException;
  * Cleans up Excelsior JET Project database (PDB) directory for the current project.
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
-@Mojo(name = "clean", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "clean", defaultPhase = LifecyclePhase.CLEAN, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class CleanMojo extends AbstractBuildMojo {
 
     @Override
