@@ -45,7 +45,7 @@ section of your `pom.xml` file:
     <plugin>
         <groupId>com.excelsiorjet</groupId>
         <artifactId>excelsior-jet-maven-plugin</artifactId>
-        <version>1.1.2</version>
+        <version>1.2.0</version>
         <configuration>
         </configuration>
     </plugin>
@@ -220,6 +220,7 @@ See the [Wiki](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki)
 
 **Compilation Settings:**
 
+  * [Incremental Compilation](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Incremental-Compilation)
   * [Dependency-Specific Settings](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Dependency-Specific-Settings)
   * [Optimizations](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Optimization-Settings)
   * [Target Executable](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Target-Executable-Settings)
@@ -277,9 +278,23 @@ or follow [@ExcelsiorJET](https://twitter.com/ExcelsiorJET) on Twitter.
 
 ## Release Notes
 
+Version 1.2.0 (08-May-2018)
+
+`<pdb>` configuration section introduced to control the location of the Project Database (PDB).
+PDB is used for incremental compilation: once a full build succeeds, only the changed project dependencies
+are recompiled during the subsequent builds.
+The configuration, as well as the incremental compilation feature, are available only for Excelsior JET 15 and above, and only for targets other than 32-bit x86.
+This release of the plugin places the PDB outside of the build directory by default to enable incremental compilation even for clean builds.
+In addition, this version of the plugin also introduces the `jet:clean`  task for cleaning the PDB.
+
+Version 1.1.3 (20-Apr-2018)
+
+Filter `pom` dependencies (issue #69).
+
+
 Version 1.1.2 (26-Oct-2017)
 
-Fix for `NullPointerException` when a shortcut with no icon is used for Excelsior Installer backend (issue #62)
+Fix for `NullPointerException` when a shortcut with no icon is used for Excelsior Installer backend (issue (#62)[https://github.com/excelsior-oss/excelsior-jet-maven-plugin/issues/62])
 
 
 Version 1.1.0 (07-Jul-2017)
@@ -471,15 +486,3 @@ Version 0.2.0 (14-Dec-2015)
 Version 0.1.0 (08-Dec-2015)
 * Initial release supporting compilation of the Maven Project with all dependencies into native executable
 and placing it into a separate directory with required Excelsior JET runtime files.
-
-## Roadmap
-
-Even though we are going to base the plugin development on your feedback in the future, we have our own short-term plan as well.
-So the next few releases will add the following features:
-
-* Multi-component support: building dependencies into separate native libraries
-                           to reuse them across multiple Maven project builds
-                           so as to reduce overall compilation time
-* Code signing.
-
-Note that the order of appearance of these features is not fixed and can be adjusted based on your feedback.
