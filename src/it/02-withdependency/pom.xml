@@ -36,6 +36,9 @@
               <configuration>
                   <packaging>none</packaging>
                   <mainClass>AppWithDep</mainClass>
+                  <pdb>
+                      <keepInBuildDir>true</keepInBuildDir>
+                  </pdb>
               </configuration>
           </plugin>
       </plugins>

@@ -23,6 +23,9 @@
               <configuration>
                   <mainClass>HelloWorld</mainClass>
                   <protectData>true</protectData>
+                  <pdb>
+                      <keepInBuildDir>true</keepInBuildDir>
+                  </pdb>
               </configuration>
           </plugin>
       </plugins>

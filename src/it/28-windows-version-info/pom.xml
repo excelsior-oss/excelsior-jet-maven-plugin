@@ -29,6 +29,9 @@
                       <copyright>MyCopyright</copyright>
                       <description>My description</description>
                   </windowsVersionInfoConfiguration>
+                  <pdb>
+                      <keepInBuildDir>true</keepInBuildDir>
+                  </pdb>
               </configuration>
           </plugin>
       </plugins>

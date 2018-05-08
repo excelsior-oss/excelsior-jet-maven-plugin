@@ -55,6 +55,9 @@
                       </dependency>
                   </dependencies>
                   <packaging>excelsior-installer</packaging>
+                  <pdb>
+                      <keepInBuildDir>true</keepInBuildDir>
+                  </pdb>
               </configuration>
           </plugin>
       </plugins>

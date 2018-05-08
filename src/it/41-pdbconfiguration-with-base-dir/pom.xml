@@ -22,14 +22,8 @@
               <version>@project.version@</version>
               <configuration>
                   <mainClass>HelloWorld</mainClass>
-                  <profileStartup>false</profileStartup>
-                  <packaging>excelsior-installer</packaging>
-                  <trialVersion>
-                      <expireDate>01Jan2001</expireDate>
-                      <expireMessage>App is expired</expireMessage>
-                  </trialVersion>
                   <pdb>
-                      <keepInBuildDir>true</keepInBuildDir>
+                      <baseDir>${user.home}/.ExcelsiorJET/TestPDBBaseDir</baseDir>
                   </pdb>
               </configuration>
           </plugin>

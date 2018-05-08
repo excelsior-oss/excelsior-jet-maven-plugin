@@ -29,6 +29,9 @@
                       <param>-pack=all</param>
                   </compilerOptions>
                   <profileStartup>false</profileStartup>
+                  <pdb>
+                      <keepInBuildDir>true</keepInBuildDir>
+                  </pdb>
               </configuration>
           </plugin>
       </plugins>

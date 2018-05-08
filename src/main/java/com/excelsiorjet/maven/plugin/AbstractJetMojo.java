@@ -49,6 +49,12 @@ import static com.excelsiorjet.api.util.Txt.s;
 public abstract class AbstractJetMojo extends AbstractMojo {
 
     /**
+     * The plugin name. Must be synchronized with the actual version of the plugin.
+     * TODO: retrieve plugin version from binary meta-data if possible.
+    */
+    static private final String PLUGIN_NAME = "Excelsior JET Maven plugin v1.2.0";
+
+    /**
      * The Maven Project Object.
      */
     @Parameter(defaultValue="${project}", readonly=true, required=true)
@@ -274,7 +280,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
         JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
         validateSettings();
 
-        return new JetProject(project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
+        return new JetProject(PLUGIN_NAME, project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
                 targetDir, jetResourcesDir)
                         .mainJar(mainJar)
                         .mainWar(mainWar)

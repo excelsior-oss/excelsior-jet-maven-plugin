@@ -44,6 +44,9 @@
                       </locales>
                   </runtime>
                   <profileStartup>false</profileStartup>
+                  <pdb>
+                      <keepInBuildDir>true</keepInBuildDir>
+                  </pdb>
               </configuration>
           </plugin>
       </plugins>

@@ -25,6 +25,7 @@ import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.config.OSXAppBundleConfig;
+import com.excelsiorjet.api.tasks.config.PDBConfig;
 import com.excelsiorjet.api.tasks.config.compiler.TrialVersionConfig;
 import com.excelsiorjet.api.tasks.config.compiler.WindowsVersionInfoConfig;
 import com.excelsiorjet.api.tasks.config.dependencies.DependencySettings;
@@ -421,6 +422,14 @@ public abstract class AbstractBuildMojo extends AbstractJetMojo {
     @Parameter(property = "multiAppRunArgs")
     protected String[] multiAppRunArgs;
 
+    /**
+     * Project Database placement configuration.
+     *
+     * @see PDBConfig
+     */
+    @Parameter(property = "pdbConfiguration", alias = "pdb")
+    protected PDBConfig pdbConfiguration;
+
     @Override
     protected JetProject getJetProject() throws JetTaskFailureException {
         checkDeprecated();
@@ -451,7 +460,8 @@ public abstract class AbstractBuildMojo extends AbstractJetMojo {
                 .hideConsole(hideConsole)
                 .profileStartupTimeout(profileStartupTimeout)
                 .compilerOptions(compilerOptions)
-                .multiAppRunArgs(multiAppRunArgs);
+                .multiAppRunArgs(multiAppRunArgs)
+                .pdbConfiguration(pdbConfiguration);
     }
 
     private void checkDeprecated() {
