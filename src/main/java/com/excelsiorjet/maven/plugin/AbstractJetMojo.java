@@ -52,7 +52,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * The plugin name. Must be synchronized with the actual version of the plugin.
      * TODO: retrieve plugin version from binary meta-data if possible.
     */
-    static private final String PLUGIN_NAME = "Excelsior JET Maven plugin v1.2.0";
+    static private final String PLUGIN_NAME = "Excelsior JET Maven plugin v1.2.1";
 
     /**
      * The Maven Project Object.
