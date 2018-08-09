@@ -52,7 +52,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * The plugin name. Must be synchronized with the actual version of the plugin.
      * TODO: retrieve plugin version from binary meta-data if possible.
     */
-    static private final String PLUGIN_NAME = "Excelsior JET Maven plugin v1.2.0";
+    static private final String PLUGIN_NAME = "Excelsior JET Maven plugin v1.2.1";
 
     /**
      * The Maven Project Object.
@@ -77,8 +77,10 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * <dt>windows-service</dt>
      * <dd>Windows service (Windows only)</dd>
      * <dt>tomcat</dt>
-     * <dd>servlet-based Java application, that runs within Tomcat servlet container,
+     * <dd>servlet-based Java application that runs within the Tomcat servlet container,
      * default type for {@code <packaging>war</packaging>} packaging type</dd>
+     * <dt>spring-boot</dt>
+     * <dd>Spring Boot application that runs as an executable jar</dd>
      * </dl>
      */
     @Parameter(property = "appType")
