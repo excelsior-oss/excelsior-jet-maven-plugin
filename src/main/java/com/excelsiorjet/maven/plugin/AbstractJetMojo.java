@@ -80,7 +80,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * <dd>servlet-based Java application that runs within the Tomcat servlet container,
      * default type for {@code <packaging>war</packaging>} packaging type</dd>
      * <dt>spring-boot</dt>
-     * <dd>Spring Boot application that runs as an executable jar</dd>
+     * <dd>Spring Boot application, that runs as an executable jar/war</dd>
      * </dl>
      */
     @Parameter(property = "appType")
@@ -306,8 +306,14 @@ public abstract class AbstractJetMojo extends AbstractMojo {
             return JetProject.checkAndGetAppType(appType);
         }
         switch (project.getPackaging()) {
-            case "jar": return ApplicationType.PLAIN;
-            case "war": return ApplicationType.TOMCAT;
+            case "jar":
+                return ApplicationType.PLAIN;
+            case "war":
+                if (project.getBuildPlugins().stream()
+                        .anyMatch(p -> p.getKey().equals("org.springframework.boot:spring-boot-maven-plugin"))) {
+                    throw new JetTaskFailureException(s("JetApi.NoAppType.Failure"));
+                }
+                return ApplicationType.TOMCAT;
             default:
                 throw new JetTaskFailureException(s("JetApi.BadPackaging.Failure", project.getPackaging()));
         }
