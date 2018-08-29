@@ -80,7 +80,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * <dd>servlet-based Java application that runs within the Tomcat servlet container,
      * default type for {@code <packaging>war</packaging>} packaging type</dd>
      * <dt>spring-boot</dt>
-     * <dd>Spring Boot application, that runs as an executable jar/war</dd>
+     * <dd>Spring Boot application that runs as an executable jar/war</dd>
      * </dl>
      */
     @Parameter(property = "appType")
