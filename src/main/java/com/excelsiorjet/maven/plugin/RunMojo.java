@@ -37,6 +37,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import java.io.IOException;
 
 import static com.excelsiorjet.api.log.Log.logger;
+import static com.excelsiorjet.api.util.Txt.s;
 
 /**
  * Mojo for running executables generated with Excelsior JET.
@@ -49,6 +50,11 @@ public class RunMojo extends AbstractBuildMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        init();
+        if (!isSupportedPackaging()) {
+            logger.warn(s("JetMavenPlugin.UnsupportedPackaging.Mojo.Warning", project.getPackaging(), project.getName()));
+            return;
+        }
         try {
             JetProject jetProject = getJetProject();
             ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);

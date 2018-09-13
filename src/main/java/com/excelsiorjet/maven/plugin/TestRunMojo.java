@@ -27,6 +27,7 @@ import com.excelsiorjet.api.JetHomeException;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
 import com.excelsiorjet.api.tasks.TestRunTask;
+import com.excelsiorjet.api.util.Txt;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
@@ -35,6 +36,9 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 import java.io.IOException;
+
+import static com.excelsiorjet.api.log.Log.logger;
+import static com.excelsiorjet.api.util.Txt.s;
 
 /**
  * Mojo for performing a Test Run before building the application.
@@ -76,6 +80,11 @@ public class TestRunMojo extends AbstractJetMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        init();
+        if (!isSupportedPackaging()) {
+            logger.warn(s("JetMavenPlugin.UnsupportedPackaging.Mojo.Warning", project.getPackaging(), project.getName()));
+            return;
+        }
         try {
             ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
             JetProject jetProject = getJetProject();

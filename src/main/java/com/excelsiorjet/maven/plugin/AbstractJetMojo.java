@@ -279,7 +279,6 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
-        JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
         validateSettings();
 
         return new JetProject(PLUGIN_NAME, project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
@@ -299,6 +298,17 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .jvmArgs(jvmArgs)
                         .runArgs(this.runArgs)
                 .dependencies(Arrays.asList(dependencies));
+    }
+
+    protected boolean isSupportedPackaging() {
+        switch (project.getPackaging()) {
+            case "jar":
+            case "war":
+                return true;
+            default:
+
+                return false;
+        }
     }
 
     private ApplicationType getAppType() throws JetTaskFailureException {
@@ -325,5 +335,9 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                 throw new JetTaskFailureException(s("JetApi.IgnoreProjectDependenciesShouldNotBeSetForTomcatApplications"));
             }
         }
+    }
+
+    protected void init() {
+        JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
     }
 }

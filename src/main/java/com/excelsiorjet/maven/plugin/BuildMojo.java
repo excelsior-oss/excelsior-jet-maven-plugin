@@ -27,6 +27,7 @@ import com.excelsiorjet.api.JetHomeException;
 import com.excelsiorjet.api.tasks.JetBuildTask;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
+import com.excelsiorjet.api.util.Txt;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
@@ -34,6 +35,7 @@ import org.apache.maven.plugins.annotations.*;
 import java.io.IOException;
 
 import static com.excelsiorjet.api.log.Log.logger;
+import static com.excelsiorjet.api.util.Txt.s;
 
 /**
  * Main Mojo for building Java (JVM) applications with Excelsior JET.
@@ -46,6 +48,11 @@ public class BuildMojo extends AbstractBuildMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        init();
+        if (!isSupportedPackaging()) {
+            logger.warn(s("JetMavenPlugin.UnsupportedPackaging.Mojo.Warning", project.getPackaging(), project.getName()));
+            return;
+        }
         try {
             JetProject jetProject = getJetProject();
             ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
