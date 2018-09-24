@@ -260,6 +260,22 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "ignoreProjectDependencies")
     protected boolean ignoreProjectDependencies;
 
+    /**
+     * Termination policy for {@link StopMojo}. Permitted values are:
+     * <dl>
+     * <dt>ctrl-c</dt>
+     * <dd>send Ctrl-C event to a running application</dd>
+     * <dt>halt</dt>
+     * <dd>call java.lang.Shutdown.halt() (System.exit()) within a running application</dd>
+     * </dl>
+     *
+     * Applications may perform some shutdown actions upon termination (e.g. close a database).
+     * Some applications do not terminate well on System.exit() call such as Tomcat and Spring Boot applications.
+     * So by default, we use Ctrl-C termination policy for such applications to terminate properly.
+     */
+    @Parameter(property = "terminationPolicy")
+    protected String terminationPolicy;
+
     public List<ProjectDependency> getDependencies() {
         if (ignoreProjectDependencies) {
             return Collections.emptyList();
@@ -297,7 +313,8 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .execProfiles(execProfilesConfig)
                         .jvmArgs(jvmArgs)
                         .runArgs(this.runArgs)
-                .dependencies(Arrays.asList(dependencies));
+                        .terminationPolicy(this.terminationPolicy)
+                        .dependencies(Arrays.asList(dependencies));
     }
 
     protected boolean isSupportedPackaging() {
