@@ -227,6 +227,8 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * @see ExecProfilesConfig#profileLocally
      * @see ExecProfilesConfig#daysToWarnAboutOutdatedProfiles
      * @see ExecProfilesConfig#checkExistence
+     * @see ExecProfilesConfig#testRunTimeout
+     * @see ExecProfilesConfig#profileRunTimeout
      */
     @Parameter(property = "execProfilesConfiguration", alias = "execProfiles")
     protected ExecProfilesConfig execProfilesConfig;
