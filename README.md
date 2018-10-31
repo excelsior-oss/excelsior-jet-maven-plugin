@@ -20,11 +20,13 @@ and are as difficult to reverse engineer as if they were written in C++.
 
 The current version of the plugin supports four types of applications:
 
-*   _Plain Java SE applications_, defined as applications that (a) can be run
+*   **Plain Java SE applications**, defined as applications that (a) can be run
     with all dependencies explicitly listed on the command-line
     of the conventional `java` launcher:
     `java [-cp` _dependencies-list_ `] `_main-class_
     and (b) load classes mostly from the listed jars,
+
+*   **Spring Boot applications**, packaged into Spring Boot executable jar or war files (since Excelsior JET 15.3),
 
 *   [Tomcat Web applications](https://www.excelsiorjet.com/solutions/protect-java-web-applications)
     — `.war` files that can be deployed to the Apache Tomcat application server,
@@ -45,7 +47,7 @@ section of your `pom.xml` file:
     <plugin>
         <groupId>com.excelsiorjet</groupId>
         <artifactId>excelsior-jet-maven-plugin</artifactId>
-        <version>1.2.0</version>
+        <version>1.3.0</version>
         <configuration>
         </configuration>
     </plugin>
@@ -53,6 +55,7 @@ section of your `pom.xml` file:
 then proceed depending on the type of your application:
 
   * [Plain Java SE Application](#plain-java-se-application)
+  * [Spring Boot Application](#spring-boot-application)
   * [Tomcat Web Application](#tomcat-web-application)
   * [Invocation Library](#invocation-library)
   * [Windows Service](#windows-service)
@@ -78,6 +81,24 @@ then proceed depending on the type of your application:
         mvn jet:profile
 
 5.  [Build the project](#building)
+
+#### Spring Boot Application
+
+1.  Add the following to the `<configuration>` section:
+
+        <configuration>
+            <appType>spring-boot</appType>
+        </configuration>
+
+2.  Optionally, conduct a Test Run:
+
+        mvn jet:testrun
+
+3.  Optionally, collect an execution profile (not available for 32-bit Intel x86 targets yet):
+
+        mvn jet:profile
+
+4.  [Build the project](#building)
 
 #### Tomcat Web Application
 
@@ -237,6 +258,7 @@ See the [Wiki](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki)
 
 **Application Type Specifics:**
 
+  * [Spring Boot Applications](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Spring-Boot-Applications)
   * [Tomcat Web Applications](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Tomcat-Web-Applications)
   * [Dynamic Libraries](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Invocation-Dynamic-Libraries)
   * [Windows Services](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Windows-Services)
@@ -277,6 +299,17 @@ or follow [@ExcelsiorJET](https://twitter.com/ExcelsiorJET) on Twitter.
 
 
 ## Release Notes
+
+Version 1.3.0 (31-Oct-2018)
+
+  * Support for Spring Boot applications introduced in Excelsior JET 15.3 via `<appType>spring-boot</appType>` plugin configuration
+  * **Stop** task introduced for stopping applications that were run via Test Run, Run, Profile plugin tasks:
+
+            mvn jet:stop
+
+  * `<testRunTimeout>`, `<profileRunTimeout>` parameters were added to
+    `<execProfiles>` configuration section to allow automating Test Run and Profile Run tasks for applications
+    that do not terminate by themselves.
 
 Version 1.2.0 (08-May-2018)
 
