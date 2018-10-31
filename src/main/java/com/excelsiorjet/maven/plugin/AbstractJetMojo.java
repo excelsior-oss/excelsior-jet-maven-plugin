@@ -52,7 +52,7 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * The plugin name. Must be synchronized with the actual version of the plugin.
      * TODO: retrieve plugin version from binary meta-data if possible.
     */
-    static private final String PLUGIN_NAME = "Excelsior JET Maven plugin v1.2.0";
+    static private final String PLUGIN_NAME = "Excelsior JET Maven plugin v1.3.0";
 
     /**
      * The Maven Project Object.
@@ -77,8 +77,10 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * <dt>windows-service</dt>
      * <dd>Windows service (Windows only)</dd>
      * <dt>tomcat</dt>
-     * <dd>servlet-based Java application, that runs within Tomcat servlet container,
+     * <dd>servlet-based Java application that runs within the Tomcat servlet container,
      * default type for {@code <packaging>war</packaging>} packaging type</dd>
+     * <dt>spring-boot</dt>
+     * <dd>Spring Boot application that runs as an executable jar/war</dd>
      * </dl>
      */
     @Parameter(property = "appType")
@@ -225,6 +227,8 @@ public abstract class AbstractJetMojo extends AbstractMojo {
      * @see ExecProfilesConfig#profileLocally
      * @see ExecProfilesConfig#daysToWarnAboutOutdatedProfiles
      * @see ExecProfilesConfig#checkExistence
+     * @see ExecProfilesConfig#testRunTimeout
+     * @see ExecProfilesConfig#profileRunTimeout
      */
     @Parameter(property = "execProfilesConfiguration", alias = "execProfiles")
     protected ExecProfilesConfig execProfilesConfig;
@@ -258,6 +262,22 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     @Parameter(property = "ignoreProjectDependencies")
     protected boolean ignoreProjectDependencies;
 
+    /**
+     * Termination policy for {@link StopMojo}. Permitted values are:
+     * <dl>
+     * <dt>ctrl-c</dt>
+     * <dd>send Ctrl-C event to a running application</dd>
+     * <dt>halt</dt>
+     * <dd>call java.lang.Shutdown.halt() (System.exit()) within a running application</dd>
+     * </dl>
+     *
+     * Applications may perform some shutdown actions upon termination (e.g. close a database).
+     * Some applications do not terminate well on System.exit() call such as Tomcat and Spring Boot applications.
+     * So by default, we use Ctrl-C termination policy for such applications to terminate properly.
+     */
+    @Parameter(property = "terminationPolicy")
+    protected String terminationPolicy;
+
     public List<ProjectDependency> getDependencies() {
         if (ignoreProjectDependencies) {
             return Collections.emptyList();
@@ -277,7 +297,6 @@ public abstract class AbstractJetMojo extends AbstractMojo {
     }
 
     protected JetProject getJetProject() throws JetTaskFailureException {
-        JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
         validateSettings();
 
         return new JetProject(PLUGIN_NAME, project.getArtifactId(), project.getGroupId(), project.getVersion(), getAppType(),
@@ -296,7 +315,19 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                         .execProfiles(execProfilesConfig)
                         .jvmArgs(jvmArgs)
                         .runArgs(this.runArgs)
-                .dependencies(Arrays.asList(dependencies));
+                        .terminationPolicy(this.terminationPolicy)
+                        .dependencies(Arrays.asList(dependencies));
+    }
+
+    protected boolean isSupportedPackaging() {
+        switch (project.getPackaging()) {
+            case "jar":
+            case "war":
+                return true;
+            default:
+
+                return false;
+        }
     }
 
     private ApplicationType getAppType() throws JetTaskFailureException {
@@ -304,8 +335,14 @@ public abstract class AbstractJetMojo extends AbstractMojo {
             return JetProject.checkAndGetAppType(appType);
         }
         switch (project.getPackaging()) {
-            case "jar": return ApplicationType.PLAIN;
-            case "war": return ApplicationType.TOMCAT;
+            case "jar":
+                return ApplicationType.PLAIN;
+            case "war":
+                if (project.getBuildPlugins().stream()
+                        .anyMatch(p -> p.getKey().equals("org.springframework.boot:spring-boot-maven-plugin"))) {
+                    throw new JetTaskFailureException(s("JetApi.NoAppType.Failure"));
+                }
+                return ApplicationType.TOMCAT;
             default:
                 throw new JetTaskFailureException(s("JetApi.BadPackaging.Failure", project.getPackaging()));
         }
@@ -317,5 +354,9 @@ public abstract class AbstractJetMojo extends AbstractMojo {
                 throw new JetTaskFailureException(s("JetApi.IgnoreProjectDependenciesShouldNotBeSetForTomcatApplications"));
             }
         }
+    }
+
+    protected void init() {
+        JetProject.configureEnvironment(new MavenLog(getLog()), ResourceBundle.getBundle("MavenStrings", Locale.ENGLISH));
     }
 }

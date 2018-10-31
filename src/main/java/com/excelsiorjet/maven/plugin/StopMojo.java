@@ -26,7 +26,8 @@ import com.excelsiorjet.api.JetHomeException;
 import com.excelsiorjet.api.cmd.CmdLineToolException;
 import com.excelsiorjet.api.tasks.JetProject;
 import com.excelsiorjet.api.tasks.JetTaskFailureException;
-import com.excelsiorjet.api.tasks.RunTask;
+import com.excelsiorjet.api.tasks.StopTask;
+import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Execute;
@@ -34,22 +35,20 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
-import java.io.IOException;
-
 import static com.excelsiorjet.api.log.Log.logger;
 import static com.excelsiorjet.api.util.Txt.s;
 
 /**
- * Mojo for running executables generated with Excelsior JET.
+ * Mojo for stopping applications that were run by {@link TestRunMojo}, {@link RunMojo}, {@link ProfileMojo}.
  *
  * @author Nikita Lipsky
  */
 @Execute(phase = LifecyclePhase.PACKAGE)
-@Mojo(name = "run", defaultPhase = LifecyclePhase.PRE_INTEGRATION_TEST, requiresDependencyResolution = ResolutionScope.RUNTIME)
-public class RunMojo extends AbstractBuildMojo {
+@Mojo(name = "stop", defaultPhase = LifecyclePhase.POST_INTEGRATION_TEST, requiresDependencyResolution = ResolutionScope.RUNTIME)
+public class StopMojo extends AbstractJetMojo {
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() throws MojoFailureException {
         init();
         if (!isSupportedPackaging()) {
             logger.warn(s("JetMavenPlugin.UnsupportedPackaging.Mojo.Warning", project.getPackaging(), project.getName()));
@@ -58,13 +57,9 @@ public class RunMojo extends AbstractBuildMojo {
         try {
             JetProject jetProject = getJetProject();
             ExcelsiorJet excelsiorJet = new ExcelsiorJet(jetHome);
-            new RunTask(excelsiorJet, jetProject).execute();
+            new StopTask(excelsiorJet, jetProject).execute();
         } catch (JetTaskFailureException | JetHomeException  e) {
             throw new MojoFailureException(e.getMessage());
-        } catch (CmdLineToolException | IOException e) {
-            logger.debug("JetTask execution error", e);
-            logger.error(e.getMessage());
-            throw new MojoExecutionException(e.getMessage(), e);
         }
     }
 

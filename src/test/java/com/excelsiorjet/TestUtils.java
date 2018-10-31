@@ -82,6 +82,10 @@ public class TestUtils {
         return excelsiorJet.isTomcatSupported();
     }
 
+    public static boolean isSpringBootSupported() {
+        return excelsiorJet.isSpringBootSupported();
+    }
+
     public static boolean isWindowsVersionInfoSupported() {
         return excelsiorJet.isWindowsVersionInfoSupported();
     }

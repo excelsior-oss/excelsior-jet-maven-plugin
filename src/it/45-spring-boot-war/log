@@ -1,0 +1,9 @@
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Spring Boot War Sample 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ spring-boot-sample-war ---
+[INFO] Deleting C:\work\kit\github\excelsior-jet-maven-plugin\src\it\45-spring-boot-war\target
+Завершить выполнение пакетного файла [Y(да)/N(нет)]? 
