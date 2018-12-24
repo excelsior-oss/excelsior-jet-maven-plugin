@@ -2,6 +2,7 @@ package com.excelsiorjet;
 
 import com.excelsiorjet.api.ExcelsiorJet;
 import com.excelsiorjet.api.JetHomeException;
+import com.excelsiorjet.api.platform.Host;
 
 public class TestUtils {
 
@@ -113,6 +114,10 @@ public class TestUtils {
     //replace line separators to Unix as Groovy """ multiline strings produce Unix line separators
     public static String toUnixLineSeparators(String text) {
         return text.replaceAll("\r\n", "\n");
+    }
+
+    public static boolean isTarGzSupported() {
+        return !excelsiorJet.isCrossCompilation() || !Host.isWindows();
     }
 
 }
