@@ -265,6 +265,8 @@ public abstract class AbstractBuildMojo extends AbstractJetMojo {
      * <dl>
      * <dt>zip</dt>
      * <dd>zip archive with a self-contained application package (default)</dd>
+     * <dt>tar-gx</dt>
+     * <dd>tar.gz archive with a self-contained application package</dd>
      * <dt>excelsior-installer</dt>
      * <dd>self-extracting installer with standard GUI for Windows
      * and command-line interface for Linux</dd>
