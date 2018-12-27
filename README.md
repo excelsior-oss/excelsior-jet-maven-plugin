@@ -47,7 +47,7 @@ section of your `pom.xml` file:
     <plugin>
         <groupId>com.excelsiorjet</groupId>
         <artifactId>excelsior-jet-maven-plugin</artifactId>
-        <version>1.3.0</version>
+        <version>1.3.1</version>
         <configuration>
         </configuration>
     </plugin>
@@ -299,6 +299,11 @@ or follow [@ExcelsiorJET](https://twitter.com/ExcelsiorJET) on Twitter.
 
 
 ## Release Notes
+
+Version 1.3.1 (26-Dec-2018)
+
+* `tar-gz` [packaging](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#packaging) type added for creation `tar.gz` archive
+   as the resulting output artifact (#79 Maven plugin issue).
 
 Version 1.3.0 (31-Oct-2018)
 
