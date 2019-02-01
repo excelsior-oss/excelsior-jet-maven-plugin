@@ -38,12 +38,13 @@ import static com.excelsiorjet.api.log.Log.logger;
 import static com.excelsiorjet.api.util.Txt.s;
 
 /**
- * Main Mojo for building Java (JVM) applications with Excelsior JET.
+ * Mojo for building Java (JVM) applications with Excelsior JET.
+ *
+ * This goal is intended to be used inside Maven {@code <goal>} declarations as it does not fork Maven lifecycle.
  *
  * @author Nikita Lipsky
  */
-@Execute(phase = LifecyclePhase.PACKAGE)
-@Mojo(name = "build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "jet-build", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class BuildMojo extends AbstractBuildMojo {
 
     @Override

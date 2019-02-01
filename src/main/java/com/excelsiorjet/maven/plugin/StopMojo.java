@@ -43,7 +43,6 @@ import static com.excelsiorjet.api.util.Txt.s;
  *
  * @author Nikita Lipsky
  */
-@Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo(name = "stop", defaultPhase = LifecyclePhase.POST_INTEGRATION_TEST, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class StopMojo extends AbstractJetMojo {
 
