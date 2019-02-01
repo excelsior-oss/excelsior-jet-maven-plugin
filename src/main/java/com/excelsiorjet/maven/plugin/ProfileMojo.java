@@ -40,12 +40,12 @@ import static com.excelsiorjet.api.log.Log.logger;
 import static com.excelsiorjet.api.util.Txt.s;
 
 /**
- * Mojo for profiling Java (JVM) applications with Excelsior JET.
+ * Mojo for profiling Java (JVM) applications with Excelsior JET to use inside {@code <goal>} Maven declarations
+ * (does not fork Maven lifecycle).
  *
  * @author Nikita Lipsky
  */
-@Execute(phase = LifecyclePhase.PACKAGE)
-@Mojo(name = "profile", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "jet-profile", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class ProfileMojo extends AbstractBuildMojo {
 
     @Override

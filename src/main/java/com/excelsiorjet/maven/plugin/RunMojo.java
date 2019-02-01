@@ -44,7 +44,6 @@ import static com.excelsiorjet.api.util.Txt.s;
  *
  * @author Nikita Lipsky
  */
-@Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo(name = "run", defaultPhase = LifecyclePhase.PRE_INTEGRATION_TEST, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class RunMojo extends AbstractBuildMojo {
 

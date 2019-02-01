@@ -19,7 +19,6 @@ import static com.excelsiorjet.api.util.Txt.s;
 /**
  * Cleans up Excelsior JET Project database (PDB) directory for the current project.
  */
-@Execute(phase = LifecyclePhase.PACKAGE)
 @Mojo(name = "clean", defaultPhase = LifecyclePhase.CLEAN, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class CleanMojo extends AbstractBuildMojo {
 
