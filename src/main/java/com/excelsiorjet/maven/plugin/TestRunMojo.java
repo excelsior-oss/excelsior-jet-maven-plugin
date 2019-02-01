@@ -41,8 +41,9 @@ import static com.excelsiorjet.api.log.Log.logger;
 import static com.excelsiorjet.api.util.Txt.s;
 
 /**
- * The same as {@link CliTestRunMojo} but does not fork Maven lifecycle.
- * Can be used inside inside {@code <goal>} Maven declarations.
+ * Mojo for performing a Test Run before building the application.
+ * 
+ * This goal is intended to be used inside Maven {@code <goal>} declarations as it does not fork Maven lifecycle.
  *
  * @author Nikita Lipsky
  */

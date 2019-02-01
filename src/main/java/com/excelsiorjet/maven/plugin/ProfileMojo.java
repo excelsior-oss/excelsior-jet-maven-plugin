@@ -40,8 +40,9 @@ import static com.excelsiorjet.api.log.Log.logger;
 import static com.excelsiorjet.api.util.Txt.s;
 
 /**
- * Mojo for profiling Java (JVM) applications with Excelsior JET to use inside {@code <goal>} Maven declarations
- * (does not fork Maven lifecycle).
+ * Mojo for profiling Java (JVM) applications with Excelsior JET.
+ *
+ * This goal is intended to be used inside Maven {@code <goal>} declarations as it does not fork Maven lifecycle.
  *
  * @author Nikita Lipsky
  */
