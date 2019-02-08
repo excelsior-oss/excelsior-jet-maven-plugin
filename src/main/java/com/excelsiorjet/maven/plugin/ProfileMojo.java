@@ -42,7 +42,7 @@ import static com.excelsiorjet.api.util.Txt.s;
 /**
  * Mojo for profiling Java (JVM) applications with Excelsior JET.
  *
- * This goal is intended to be used inside Maven {@code <goal>} declarations as it does not fork Maven lifecycle.
+ * This goal is intended to be used inside Maven {@code <goal>} declarations as it does not fork the Maven lifecycle.
  *
  * @author Nikita Lipsky
  */

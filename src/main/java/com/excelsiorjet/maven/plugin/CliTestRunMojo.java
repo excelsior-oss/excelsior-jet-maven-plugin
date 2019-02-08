@@ -29,9 +29,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 /**
  * Mojo for performing a Test Run before building the application.
  *
- * Forks Maven lifecycle executing Maven `package` goal before calling the mojo itself.
- * It allows to not pass explicit `package` goal on the command line.
- * Use "jet-testrun" goal ({@link TestRunMojo}) for Maven {@code <goal>} declarations.
+ * Forks the Maven lifecycle by executing the `package` goal before calling the mojo itself.
+ * That allows users to omit the (`package`) goal from the command line.
+ * Use the "jet-testrun" goal ({@link TestRunMojo}) for Maven {@code <goal>} declarations.
  *
  * @author Nikita Lipsky
  */

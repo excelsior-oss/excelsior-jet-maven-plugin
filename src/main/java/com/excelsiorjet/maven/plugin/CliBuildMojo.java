@@ -29,9 +29,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 /**
  * Main Mojo for building Java (JVM) applications with Excelsior JET.
  *
- * Forks Maven lifecycle executing Maven `package` goal before calling the mojo itself.
- * It allows to not pass explicit `package` goal on the command line.
- * Use "jet-build" goal ({@link BuildMojo}) for Maven {@code <goal>} declarations.
+ * Forks the Maven lifecycle by executing the `package` goal before calling the mojo itself.
+ * That allows users to omit the (`package`) goal from the Maven command line.
+ * Use the "jet-build" goal ({@link BuildMojo}) for Maven {@code <goal>} declarations.
  *
  * @author Nikita Lipsky
  */
