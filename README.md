@@ -47,7 +47,7 @@ section of your `pom.xml` file:
     <plugin>
         <groupId>com.excelsiorjet</groupId>
         <artifactId>excelsior-jet-maven-plugin</artifactId>
-        <version>1.3.1</version>
+        <version>1.3.2</version>
         <configuration>
         </configuration>
     </plugin>
@@ -238,6 +238,7 @@ See the [Wiki](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki)
       - [Compilation](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#compilation)
       - [Packaging](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#packaging)
       - [Running](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#running)
+      - [Goals Integation into Maven `pom.xml`](https://github.com/excelsior-oss/excelsior-jet-maven-plugin/wiki/Build-Process#goals-integation-into-maven-pomxml)
 
 **Compilation Settings:**
 
@@ -299,6 +300,11 @@ or follow [@ExcelsiorJET](https://twitter.com/ExcelsiorJET) on Twitter.
 
 
 ## Release Notes
+
+Version 1.3.2 (31-Jan-2019)
+
+`jet-build`, `jet-testrun`, `jet-profile` goals introduced that do not fork the Maven lifecycle
+and thus can be used within `<goal>` Maven declarations (issue #82).
 
 Version 1.3.1 (26-Dec-2018)
 
