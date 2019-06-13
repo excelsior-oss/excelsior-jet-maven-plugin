@@ -301,6 +301,10 @@ or follow [@ExcelsiorJET](https://twitter.com/ExcelsiorJET) on Twitter.
 
 ## Release Notes
 
+Version 1.3.3 (13-Jun-2019)
+
+* macOS application bundles creation updated to support Notarization.
+
 Version 1.3.2 (31-Jan-2019)
 
 `jet-build`, `jet-testrun`, `jet-profile` goals introduced that do not fork the Maven lifecycle
